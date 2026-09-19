@@ -1,9 +1,10 @@
 # Morize Execution Master Plan
 
-**Program mode:** FOUNDATION_PLANNING
-**Canonical planning branch:** `plan/morize-memory-os`
-**Planning PR:** #1
+**Program mode:** FOUNDATION_REMEDIATION
+**Canonical planning baseline:** `ba4732d348da245c503ab115c2c41e9a91914dcb`
+**Planning PR #1:** merged at `2026-09-19T12:58:13Z` before independent semantic review closed
 **Current implementation authority:** NONE
+**Review remediation gate:** OPEN
 **Current SpecGrain state:** program-level DRAFT decomposition only
 
 ## 1. Mission
@@ -108,7 +109,11 @@ All current nodes are DRAFT by design.
 
 ## 6. Planning closeout conditions
 
-Foundation planning is ready to merge only when:
+Historical status: PR #1 merged before all of these conditions were satisfied. The required substantive independent semantic review was still open. That merge is preserved as repository truth, but it does **not** retroactively turn the missing review into PASS or grant implementation authority.
+
+The remediation rule is forward-only: complete independent semantic review against the effective canonical planning content, resolve every valid material finding through normal commits and PRs, and requalify the exact resulting head before any implementation Grain is authorized.
+
+Foundation planning is ready to grant implementation authority only when:
 
 - Apache-2.0/NOTICE/DCO/governance are internally consistent;
 - founder-cost meaning is unambiguous;
@@ -125,9 +130,11 @@ Foundation planning is ready to merge only when:
 
 ## 7. First implementation frontier
 
-After the planning package is canonically merged, do not start from the full roadmap.
+Canonical merge is necessary but not sufficient.
 
-Start from the first dependency-eligible program child and refine it.
+Because PR #1 merged before the independent semantic review gate closed, do **not** shape or execute P1 implementation work until the remediation gate in Section 6 is genuinely closed on exact canonical content.
+
+After that remediation gate closes, do not start from the full roadmap. Start from the first dependency-eligible program child and refine it.
 
 The first likely implementation sequence is:
 
