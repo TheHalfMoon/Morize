@@ -1,7 +1,7 @@
 {
   "id": "SG-000001",
   "title": "Deliver Morize v1",
-  "outcome": "Morize v1 is an evidence-backed, Apache-2.0 open-source Memory OS with a founder-zero-burn development path and a commercially viable managed-service boundary.",
+  "outcome": "Morize v1 is an evidence-backed, Apache-2.0 open-source Memory OS with a founder-zero-burn development path and a future managed-service boundary that remains separable from the open-source core.",
   "schema_version": 1,
   "rationale": "Root program specification. It is intentionally too broad to become a Grain and must be refined through its child specifications.",
   "parent_id": null,
