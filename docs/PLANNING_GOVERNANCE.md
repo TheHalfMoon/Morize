@@ -180,6 +180,31 @@ For each Grain, capture:
 
 A successful test command proves only that command. It does not imply unrelated acceptance criteria passed.
 
+## 8A. Alibaba Open Code Review
+
+Morize uses Alibaba Open Code Review (OCR) as a **review-only process tool** when available.
+
+Preferred mode for agent-hosted review is OCR Delegation Mode:
+
+```text
+ocr delegate preview
+ -> deterministic reviewable/excluded file inventory
+ocr delegate rule
+ -> deterministic rule resolution for reviewable files
+host semantic reviewer
+ -> inspect every reviewable file and explicitly account for exclusions
+```
+
+Rules:
+
+- OCR review evidence binds an exact repository base/head.
+- Every OCR-reviewable file must end as reviewed or skipped with a reason.
+- Files excluded by OCR because of unsupported extensions (for example planning Markdown) are **not silently omitted**; they receive separate semantic review when they are part of the change's authority surface.
+- OCR findings are input to the review gate, not automatic truth.
+- OCR does not replace SpecGrain readiness, Diffcipline verification, source/license review, or required independent review for R3 work.
+- OCR is not a runtime dependency of Morize.
+- A third-party status check that did not perform substantive review is not treated as semantic-review evidence.
+
 ## 9. Morize risk-profile mapping
 
 ### R0 — Documentation / non-behavioral
