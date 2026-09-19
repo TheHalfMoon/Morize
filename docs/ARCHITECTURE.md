@@ -93,7 +93,7 @@ Agents, MCP clients, plugins, browsers, web pages, files, repositories, remote A
 
 ### 3.1 Memory Vault
 
-Canonical durable knowledge is represented as human-readable Markdown records in a user-owned vault.
+Canonical durable knowledge uses a versioned, human-inspectable Markdown logical representation in a user-owned vault. A supported encrypted-at-rest profile may encrypt the physical bytes of canonical records, blobs, and operational state without changing MVF semantics; inspection/export then occurs through an explicitly unlocked Morize process.
 
 Conceptual layout:
 
@@ -148,7 +148,7 @@ Evidence records are append-oriented and digest-linked. The local chain supports
 
 ### 3.4 Blobs
 
-Large immutable inputs are content-addressed by digest. A memory points to a blob instead of duplicating it.
+Large immutable inputs are content-addressed by digest. A memory points to a blob instead of duplicating it. In an encrypted-at-rest profile, blob encryption must preserve stable plaintext-content identity semantics without exposing plaintext or raw keys in filenames/metadata beyond the declared leakage model.
 
 ## 4. Memory data model
 
