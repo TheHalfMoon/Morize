@@ -1,0 +1,37 @@
+{
+  "acceptance": [],
+  "change_surface": [],
+  "children": [],
+  "context": {},
+  "dependencies": [],
+  "evidence": {},
+  "id": "SG-000012",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "rollback": "Revert the bounded typed-identifier implementation commits; no persisted Morize data or public stable release format exists yet.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head, identity semantics, and required evidence separately from the implementing agent before acceptance.",
+      "control": "Implementation is limited to typed identifier definitions, strict canonical text parsing/formatting, focused tests, and morize-core re-exports. No ID generation, persistence, serde, randomness, time semantics, or third-party dependency is authorized."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6"
+        }
+      ]
+    }
+  },
+  "method": "controlled",
+  "outcome": "morize-core exposes non-interchangeable typed durable identifiers with one strict canonical textual representation and deterministic validation, without adding identifier generation, persistence, serde, or third-party dependencies.",
+  "parent_id": "SG-000010",
+  "rationale": "MZ-DATA-001 and DATA_MODEL identity rules require stable typed identity before higher-level domain contracts. This Grain fixes only the in-memory typed identifier/value boundary and canonical text form so later serialization, storage, policy, and mutation Grains can build on one deterministic identity contract.",
+  "risk": {},
+  "schema_version": 1,
+  "scope_in": [],
+  "scope_out": [],
+  "state": "DRAFT",
+  "title": "Define typed durable identifier values"
+}
