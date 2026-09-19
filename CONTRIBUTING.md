@@ -43,7 +43,19 @@ A dependency or donor is not admitted merely because it is popular, permissively
 
 ## Development workflow
 
-The implementation is Rust-first. Exact commands will be frozen when P1 creates the workspace. Until then, do not add placeholder runtime dependencies.
+The implementation is Rust-first. The canonical workspace verification commands are:
+
+```text
+cargo fmt --all -- --check
+cargo check --workspace --all-targets --offline
+cargo clippy --workspace --all-targets --offline -- -D warnings
+cargo test --workspace --all-targets --offline
+cargo metadata --no-deps --format-version 1
+```
+
+Diffcipline policy is repository-native in `.diffcipline.toml`. CI validates it with the immutable Diffcipline v1.0.0 source identity `5cb1c77340b75649f6168e0e8f66479ea047ea96` and runs the R2 verification profile on the exact pull-request head.
+
+The bootstrap policy marks manifest and lockfile changes as machine-allowed so the first workspace can produce a clean exact-head proof. That setting is not dependency-admission authority. Any future runtime or build dependency still requires a bounded SpecGrain, R2-or-stronger dependency/source/license/cost review, and exact dependency evidence before acceptance.
 
 Changes should be small enough to review independently and should include:
 

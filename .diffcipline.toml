@@ -1,0 +1,17 @@
+version = 1
+
+[policy]
+max_changed_files = 12
+max_added_lines = 500
+dependency_manifest_changes = "allow"
+lockfile_changes = "allow"
+untracked_files = "fail"
+expected_files = ["Cargo.toml", "Cargo.lock", ".gitignore", ".diffcipline.toml", ".github/workflows/**", "CONTRIBUTING.md", "crates/**", ".specgrain/**", "docs/**", "*.md"]
+forbidden_surfaces = ["secrets/**", ".env"]
+
+[verification]
+commands = ["git diff --check", "cargo fmt --all -- --check", "cargo check --workspace --all-targets --offline", "cargo clippy --workspace --all-targets --offline -- -D warnings", "cargo test --workspace --all-targets --offline"]
+r0_commands = ["git diff --check"]
+r1_commands = ["git diff --check", "cargo fmt --all -- --check", "cargo check --workspace --all-targets --offline", "cargo test --workspace --all-targets --offline"]
+r2_commands = ["git diff --check", "cargo fmt --all -- --check", "cargo check --workspace --all-targets --offline", "cargo clippy --workspace --all-targets --offline -- -D warnings", "cargo test --workspace --all-targets --offline"]
+r3_commands = ["git diff --check", "cargo fmt --all -- --check", "cargo check --workspace --all-targets --offline", "cargo clippy --workspace --all-targets --offline -- -D warnings", "cargo test --workspace --all-targets --offline"]
