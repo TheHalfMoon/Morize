@@ -6,16 +6,18 @@ Outcome: implementation begins with product, cost, source, security, and evaluat
 
 Work:
 - freeze product thesis and non-goals;
-- freeze zero-cost contract;
+- freeze founder-cost and commercial boundary;
 - freeze canonical-vs-derived storage boundary;
 - freeze typed decision vocabulary;
 - pin primary donor/reference states;
 - freeze threat model;
 - freeze benchmark policy;
-- establish open-source governance and third-party provenance.
+- establish Apache-2.0 open-source governance and third-party provenance;
+- freeze comprehensive requirements, risk register, compatibility policy, and gap review.
 
 Gate:
-- no mandatory paid API, cloud service, vector service, graph service, or model;
+- no mandatory recurring founder-paid service in the pre-revenue development path;
+- future commercial managed services remain explicitly allowed;
 - planning documents are internally consistent.
 
 ## P1 — Rust deterministic kernel
@@ -37,7 +39,7 @@ Work:
 - typed decision envelope;
 - versioned configuration;
 - deterministic serialization;
-- stable error taxonomy;
+- stable public error taxonomy and compatibility classes;
 - property and fuzz tests for parsers/invariants.
 
 Gate:
@@ -53,7 +55,7 @@ Outcome: human-readable durable memory with deterministic recovery.
 Work:
 - versioned MVF directory and Markdown record format;
 - safe vault initialization/discovery;
-- SQLite operational schema and migrations;
+- SQLite operational schema and migrations with supported-version compatibility fixtures;
 - content-addressed blob storage;
 - one governed writer per vault;
 - durable idempotency;
@@ -63,6 +65,8 @@ Work:
 - external user-edit detection;
 - backup/restore;
 - corruption detection;
+- unsupported-newer-format/read-only behavior;
+- disk-full/permission/cancellation failure handling;
 - index-loss recovery.
 
 Gate:
@@ -84,7 +88,8 @@ Work:
 - deterministic sensitive-content filters;
 - quarantine/review state;
 - authorization before retrieval disclosure;
-- policy revision binding.
+- policy revision binding;
+- principal/integration revocation and stale-authority invalidation.
 
 Gate:
 - untrusted fixtures cannot promote themselves into trusted policy;
