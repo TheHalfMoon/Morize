@@ -1,6 +1,6 @@
 # ADR-0003 — Local Markdown/SQLite Implementation Behind Provider-Neutral Semantics
 
-**Status:** Accepted for foundation planning  
+**Status:** Accepted for foundation planning
 **Date:** 2026-09-19
 
 ## Context
