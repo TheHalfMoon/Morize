@@ -15,6 +15,7 @@ Use case:
 Properties:
 
 - canonical vault on local filesystem;
+- plaintext developer profile or qualified encrypted-at-rest vault profile, selected explicitly;
 - local SQLite operational state;
 - no network required;
 - caller identity is explicitly configured by the embedding application;
@@ -38,6 +39,7 @@ Properties:
 - one governed writer per vault;
 - CLI/MCP/SDK clients share server contracts;
 - local diagnostics and recovery;
+- qualified encrypted-at-rest vault profile for sensitive local use;
 - optional local model/vector adapters.
 
 This is the primary v1 user experience.
@@ -170,7 +172,7 @@ No local error automatically enables a different remote provider.
 
 ## 11. Secrets
 
-Profiles must use secret handles/configured secret stores appropriate to deployment.
+Profiles must use secret handles/configured secret stores appropriate to deployment. When the encrypted-at-rest vault profile is enabled, encryption keys are stored/derived through a separate key-management path rather than inside the vault they protect.
 
 Rules:
 
