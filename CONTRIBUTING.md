@@ -9,14 +9,14 @@ Read:
 1. `README.md`
 2. `docs/PRODUCT_THESIS.md`
 3. `docs/ARCHITECTURE.md`
-4. `docs/ZERO_COST_CONTRACT.md`
+4. `docs/ZERO_COST_CONTRACT.md` (founder-cost and commercial boundary)
 5. `docs/THREAT_MODEL.md`
 6. `docs/DONOR_AND_PROVENANCE.md`
 7. the applicable roadmap packet.
 
 ## Core contribution rules
 
-- Keep the normal local path free of required paid services.
+- Do not introduce a mandatory recurring founder-paid service without an explicit cost owner, cap, justification, and approved SpecGrain.
 - Do not add hidden network fallbacks.
 - Do not make vector search, model inference, or an external graph database a canonical-memory dependency.
 - Treat model output as untrusted candidate data.
@@ -61,9 +61,26 @@ PR descriptions should state:
 - source provenance if applicable;
 - tests/evidence;
 - security impact;
-- zero-cost/local-first impact;
+- founder-cost, commercial-service, and local/self-hosted impact;
 - known limitations.
 
 ## Community
 
 Be technically direct and respectful. Critique designs and evidence rather than people.
+
+
+## Planning and proof
+
+Implementation contributions must originate from a bounded SpecGrain or an explicitly approved equivalent repository task.
+
+Completion uses Diffcipline proof semantics:
+
+- exact diff and scope;
+- risk profile;
+- dependency/lockfile evidence;
+- actually executed verification;
+- policy provenance.
+
+`NOT RUN` is never represented as `PASS`.
+
+See `docs/PLANNING_GOVERNANCE.md`.
