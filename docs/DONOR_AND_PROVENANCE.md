@@ -49,7 +49,7 @@ selected_reuse_strategy
 Morize_destination_paths
 independent_tests
 security_review
-zero_cost_impact
+founder_cost_and_commercial_impact
 status
 ```
 
@@ -65,7 +65,7 @@ Only `ADMITTED` components may enter the trusted runtime path.
 
 ## License rule
 
-Morize's project license is MIT.
+Morize's project license is Apache License 2.0.
 
 However, code copied from another source keeps any obligations that apply to that code unless Morize has an explicit valid relicensing grant covering the exact material.
 
@@ -114,7 +114,7 @@ Morize should not blindly retain:
 - cloud-provider assumptions;
 - hosted-service coupling;
 - storage/search architecture that weakens Morize canonical-vault rules;
-- any behavior that conflicts with typed governance, zero-cost defaults, or local-first operation.
+- any behavior that conflicts with typed governance, founder-cost constraints, commercial boundaries, or local/self-hosted semantics.
 
 Prefer selective ports behind Morize-owned contracts.
 
