@@ -1,6 +1,6 @@
 # Morize Master Plan Gap Review
 
-**Review date:** 2026-09-19  
+**Review date:** 2026-09-19
 **Purpose:** challenge the current plan before implementation and identify missing category-level obligations.
 
 ## Review standard
