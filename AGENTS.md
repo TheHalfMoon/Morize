@@ -23,6 +23,8 @@ Live repository/GitHub state overrides stale summaries.
 
 Never invent tests, CI, reviews, benchmark results, source revisions, runtime evidence, compatibility, costs, or release readiness.
 
+A historical merge does not retroactively close a missing gate. If required review or evidence was still open when a merge occurred, preserve the merge as repository truth, record forward remediation, and keep implementation authority at NONE until the missing gate closes on the effective canonical content.
+
 ## SpecGrain
 
 Broad roadmap phases are not implementation authority.
