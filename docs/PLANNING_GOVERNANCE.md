@@ -373,13 +373,18 @@ Metrics must not incentivize smaller diffs at the expense of correctness or safe
 
 The current `.specgrain` nodes are program-level **DRAFT** specifications only.
 
-Next canonical planning step before runtime implementation:
+PR #1 was merged through GitHub web-flow at `2026-09-19T12:58:13Z` while the required independent semantic review of its exact planning content remained open. This is a governance breach that must be remediated forward; it is **not** implementation authority.
 
-1. reverify PR/main truth;
-2. close the current master-plan gaps;
-3. accept/merge planning governance;
-4. use SpecGrain tooling against the merged repository;
-5. progressively shape the first P1 child into bounded Grains;
-6. create the real Rust workspace and Diffcipline policy in the first eligible Grain.
+Shared history must not be force-pushed, rebased, rewritten, or otherwise altered to conceal the premature merge.
+
+Current remediation gate before runtime implementation:
+
+1. reverify exact live `main`, PR #1, and SpecGrain truth;
+2. bind the effective canonical planning content to merge commit `ba4732d348da245c503ab115c2c41e9a91914dcb`;
+3. complete substantive independent semantic review against that effective canonical planning content;
+4. resolve every valid material finding through normal forward commits and PRs;
+5. rerun exact structural, source/provenance, Alibaba OCR accounting, and applicable semantic qualification on the resulting exact head;
+6. only after that remediation gate closes, progressively shape SG-000010/P1 from DRAFT -> SHAPED -> REFINING -> GRAIN;
+7. create the real Rust workspace and Diffcipline policy only inside the first dependency-eligible accepted Grain.
 
 No current DRAFT is implementation authority.
