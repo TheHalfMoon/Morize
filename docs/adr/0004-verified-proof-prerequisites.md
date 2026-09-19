@@ -1,6 +1,6 @@
 # ADR-0004 — Verified-Proof Prerequisites Until Post-Grain Writers Exist
 
-**Status:** Accepted for the current SpecGrain frontier  
+**Status:** Accepted for the current SpecGrain frontier
 **Date:** 2026-09-19
 
 ## Context
