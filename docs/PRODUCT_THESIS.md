@@ -49,17 +49,11 @@ Inspired by machine-native typed-decision systems, Morize represents uncertainty
 
 FTS, vector indexes, graph metrics, caches, embeddings, summaries, and reranking state are projections. Delete them and Morize must still retain canonical knowledge.
 
-### P5 — Local-first is architectural
+### P5 — Local/self-hosted remains first-class
 
-The core must remain useful with:
+The open-source core must retain a useful local/self-hosted path. This protects user ownership, testability, portability, and founder-zero-burn development.
 
-- no network;
-- no API key;
-- no cloud account;
-- no vector server;
-- no GPU;
-- no hosted model;
-- no Morize account.
+Future users may still choose or purchase managed Morize services, paid model APIs, hosted databases, or enterprise infrastructure.
 
 ### P6 — Evidence is retained across change
 
@@ -143,7 +137,7 @@ What database is canonical for this project, why was it chosen,
 what did it replace, and which evidence supports that answer?
 ```
 
-Morize returns a compact answer plus inspectable provenance and temporal history, without requiring a paid API.
+Morize returns a compact answer plus inspectable provenance and temporal history. The local profile can do this without a required paid memory service; future managed Morize offerings may be commercial.
 
 ## Non-goals for the first release
 
@@ -159,4 +153,40 @@ Morize returns a compact answer plus inspectable provenance and temporal history
 
 ## Success definition
 
-Morize v1 succeeds when a new user can run it offline, connect at least two agent harnesses, persist governed project/user memories, resolve temporal updates and contradictions, inspect why recall happened, export everything, rebuild every derivative index, and run the full core test suite without paying for any external service.
+Morize v1 succeeds when the open-source core can be developed and dogfooded without mandatory founder-paid infrastructure; a user can run the supported local profile, connect at least two agent harnesses, persist governed project/user memories, resolve temporal updates and contradictions, inspect why recall happened, export supported canonical data, rebuild every derivative index, and run the full core verification suite. Future managed user services may be paid.
+
+
+## Commercial thesis
+
+Morize should monetize **operation, scale, collaboration, governance, and service**, not ambiguity about who owns the memory semantics.
+
+The Apache-2.0 core establishes:
+
+- canonical data meaning;
+- local/self-hosted operation;
+- public protocols and SDK contracts;
+- export/import;
+- security/recovery semantics.
+
+Future commercial value may include:
+
+- Morize Cloud;
+- managed sync and backup;
+- team/enterprise control plane;
+- managed connectors;
+- hosted inference/search;
+- high availability;
+- enterprise identity/governance;
+- observability;
+- support and SLA.
+
+Exact pricing, plan boundaries, and billing systems are intentionally not frozen during foundation planning.
+
+## Delivery thesis
+
+The plan is executed through SpecGrain and Diffcipline:
+
+- SpecGrain progressively refines broad product intent into bounded Grains with explicit outcome, scope, acceptance, risk, context, change surface, and evidence;
+- Diffcipline requires exact-diff and actually executed verification evidence before a Grain is considered complete.
+
+Roadmap phases describe direction. They are not implementation authority by themselves.
