@@ -104,8 +104,8 @@ This revision closes those **category-level planning gaps**. It does not claim i
 | Founder recurring-cost ledger | Missing | Covered | Founder cost boundary |
 | Dependency cost/exit plan | Partial | Covered | Planning governance |
 | Trademark strategy | Missing | Open decision before public brand scale | Gap action G-01 |
-| Contribution legal policy (DCO/CLA) | Missing | Open decision before broad external contributions | Gap action G-02 |
-| Governance succession/maintainers | Missing | Deferred but tracked | Gap action G-03 |
+| Contribution legal policy (DCO/CLA) | Missing | Foundation resolved: DCO 1.1, no CLA | DCO / GOVERNANCE / G-02 |
+| Governance succession/maintainers | Missing | Founder-led foundation resolved; multi-maintainer details deferred until needed | GOVERNANCE / G-03 |
 | Hosted privacy policy/ToS | Not yet applicable | Deferred to hosted launch | Gap action G-04 |
 | Payment processor/tax operations | Not yet applicable | Deferred to monetization spec | Gap action G-05 |
 
@@ -123,27 +123,22 @@ Before meaningful external brand distribution, decide:
 
 This does not block P1 implementation.
 
-### G-02 — Contribution legal mechanism
+### G-02 — Contribution legal mechanism — RESOLVED FOR FOUNDATION
 
-Before accepting substantial external contributions, select:
+Foundation decision:
 
-- DCO only;
-- CLA;
-- or Apache-2.0 inbound=outbound without additional mechanism.
+- Apache-2.0 inbound/outbound licensing;
+- Developer Certificate of Origin 1.1;
+- contributor sign-off via `Signed-off-by`;
+- no CLA required initially.
 
-The project should prefer low-friction governance unless a future commercial/legal requirement justifies more control.
+Revisit only if later financing, corporate structure, or legal/commercial requirements justify a different contribution agreement.
 
-### G-03 — Maintainer governance
+### G-03 — Maintainer governance — FOUNDATION MODEL RESOLVED
 
-Before the project has multiple regular maintainers, define:
+`GOVERNANCE.md` now establishes a founder-led initial model with explicit product, architecture, release, security, branding, and commercial-service authority.
 
-- maintainer admission/removal;
-- security response ownership;
-- release authority;
-- conflict resolution;
-- inactivity/succession.
-
-Premature bureaucracy is avoided, but the decision is tracked.
+Detailed multi-maintainer admission/removal, inactivity, succession, and conflict procedures remain intentionally deferred until a real maintainer community exists.
 
 ### G-04 — Hosted legal/privacy package
 
