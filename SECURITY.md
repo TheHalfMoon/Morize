@@ -13,7 +13,7 @@ Security and privacy are release gates, not optional add-ons. The canonical plan
 - `docs/THREAT_MODEL.md`
 - `docs/ARCHITECTURE.md`
 - `docs/DONOR_AND_PROVENANCE.md`
-- `docs/ZERO_COST_CONTRACT.md`
+- `docs/FOUNDER_COST_AND_COMMERCIAL_BOUNDARY.md`
 
 Public tests use synthetic data. The trusted core must not require cloud credentials for ordinary CI.
 
