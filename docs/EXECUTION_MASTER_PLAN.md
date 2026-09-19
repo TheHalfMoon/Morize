@@ -129,9 +129,12 @@ Foundation planning is ready to merge only when:
 
 ## 7. First implementation frontier
 
-The foundation planning prerequisite was canonically closed by PR #1 merge commit
-`ba4732d348da245c503ab115c2c41e9a91914dcb`. That Git/GitHub event is governance evidence;
-it is not a SpecGrain lifecycle transition for broad program DRAFT `SG-000002`.
+PR #1 was canonically merged as
+`ba4732d348da245c503ab115c2c41e9a91914dcb` before its independent semantic-review gate
+closed. The missing gate was subsequently closed by the documented post-merge independent
+semantic-review PASS against that exact canonical content. Together, the merge record and the
+required review/evidence closure satisfy the foundation planning governance prerequisite; they
+are not a SpecGrain lifecycle transition for broad program DRAFT `SG-000002`.
 
 Do not start from the full roadmap. Refine the P1 program node into bounded implementation
 Grains and execute only dependency-eligible leaves.
@@ -139,7 +142,7 @@ Grains and execute only dependency-eligible leaves.
 The first likely implementation sequence is:
 
 ```text
-planning closeout: PR #1 merged
+planning closeout: PR #1 merge + exact-canonical remediation review
  -> refine SG-000010/P1 into bounded kernel/data-contract Grains
  -> first Rust workspace/tooling Grain
  -> deterministic identity/serialization/config/error-contract Grains

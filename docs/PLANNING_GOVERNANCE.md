@@ -89,7 +89,12 @@ semantics, dependency satisfaction requires `VERIFIED` or `CONTROLLED`.
 
 Therefore:
 
-- a planning review/merge prerequisite is evidenced by the canonical Git/GitHub record;
+- a planning review/merge prerequisite is evidenced by the complete canonical Git/GitHub
+  governance record, including every required review/evidence gate;
+- merge evidence alone does not substitute for a required review or evidence gate;
+- if a merge occurs before a required gate closes, later forward remediation may close the
+  missing governance evidence without rewriting history, but the premature merge is not
+  retroactively reclassified as compliant;
 - a broad program-level `DRAFT` must not be used as an execution dependency merely to record
   that planning happened first;
 - after a planning prerequisite is canonically closed, a bounded implementation Grain may have
