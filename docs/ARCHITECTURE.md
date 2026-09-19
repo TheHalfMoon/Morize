@@ -133,7 +133,7 @@ It does not silently replace the canonical Markdown body.
 
 ### 3.3 Evidence ledger
 
-Evidence records are append-oriented and hash-linked. They bind:
+Evidence records are append-oriented and digest-linked. The local chain supports integrity, ordering, and reconciliation checks under the declared storage/writer threat model; it is **not** described as tamper-proof against an attacker who can rewrite the entire vault and its trust anchors. They bind:
 
 - observation identity;
 - source identity and revision;
@@ -162,37 +162,13 @@ A normalized claim that can be supported, contradicted, or superseded.
 
 ### MemoryRecord
 
-A durable scoped proposition or structured artifact reference.
-
-Required conceptual fields:
-
-```text
-memory_id
-memory_type
-scope
-subject / predicate / object-or-content
-valid_from / valid_to
-observed_at
-committed_at
-status
-sensitivity
-confidence
-authority_class
-provenance_refs[]
-support_refs[]
-contradiction_refs[]
-supersedes[]
-derived_from[]
-created_by
-writer
-policy_revision
-version
-digest
-```
+A stable logical identity for one governed memory lineage. It owns identity, scope ownership, creation metadata, and lifecycle status; it does not hold one mutable branch pointer or silently overwrite historical truth.
 
 ### MemoryVersion
 
-Immutable version of one logical memory.
+An immutable version containing the durable proposition/content, temporal fields, sensitivity, provenance, support/contradiction links, policy/decision references, and content digest for one logical memory.
+
+The canonical field-level contract is defined in `docs/DATA_MODEL.md`.
 
 ### MemoryRelation
 
