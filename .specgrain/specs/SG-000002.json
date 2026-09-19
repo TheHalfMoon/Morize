@@ -1,0 +1,27 @@
+{
+  "id": "SG-000002",
+  "title": "Freeze product, governance, licensing, and commercial contracts",
+  "outcome": "Product scope, Apache-2.0 licensing, founder-cost boundary, donor policy, architecture decisions, requirements, and delivery governance are internally consistent and implementation-ready.",
+  "schema_version": 1,
+  "rationale": "Program-level child specification. It must be progressively refined into smaller executable Grains before implementation.",
+  "parent_id": "SG-000001",
+  "scope_in": [],
+  "scope_out": [],
+  "acceptance": [],
+  "dependencies": [],
+  "risk": {},
+  "context": {},
+  "change_surface": [],
+  "evidence": {},
+  "method": "controlled",
+  "state": "DRAFT",
+  "children": [],
+  "labels": [
+    "p0",
+    "governance",
+    "licensing"
+  ],
+  "metadata": {
+    "planning_revision": "2026-09-19"
+  }
+}
