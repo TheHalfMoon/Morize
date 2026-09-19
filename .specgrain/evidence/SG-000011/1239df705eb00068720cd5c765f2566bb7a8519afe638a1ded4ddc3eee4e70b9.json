@@ -1,0 +1,143 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head and required evidence separately from the implementing agent before acceptance.",
+        "detail": "Exact-head Qwen3-235B-A22B review covered 8/8 paths; focused disposition sha256:6dc15ea6567d285ff37a8d958acb3a7d2ccb12b30150bacb0cbb2c3e9c5d717e resolved the contradictory non-blocking governance note with REQUIRED_CHANGE=NONE.",
+        "evidence_ref": "sha256:08ba5edca449131b8f40ce1278bda1c00d742c4b7276f081785af396360eef19",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions runs the verification contract on Ubuntu, macOS, and Windows and the exact implementation head passes every required matrix job before acceptance.",
+        "detail": "Canonical-main push run completed SUCCESS on Ubuntu, macOS, and Windows; exact PR-head run also passed as github-actions:35458521458@6c8679a55a96c7c69578e1560917a27fa6115207.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "The checked-in .diffcipline.toml is valid against the pinned Diffcipline implementation and references only verification commands that exist in this Grain.",
+        "detail": "Pinned Diffcipline 5cb1c77340b75649f6168e0e8f66479ea047ea96 returned R2 PASS with zero scope violations; the same gate passed in all CI matrix jobs.",
+        "evidence_ref": "sha256:133d9d8083dc5dbc98559d6d1952329334182f8e7c3f88cc976a8afec0ed8133",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation adds no memory-domain behavior and changes no path outside the declared Grain change surface.",
+        "detail": "Independent diff/review observed exactly the eight authorized workspace/tooling paths; morize-core contains only the crate foundation and forbids unsafe code.",
+        "evidence_ref": "git-diff:ca7224639481171baf898be260a1ebf9426fdacd..b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Passed locally and in all three canonical-main CI matrix jobs.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Passed with -D warnings locally and in all three canonical-main CI matrix jobs.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "Passed locally and in all three canonical-main CI matrix jobs.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "cargo metadata --no-deps --format-version 1 identifies only the intended first-party workspace member, and dependency evidence confirms no third-party runtime or build dependency was admitted.",
+        "detail": "Dependency audit observed one workspace member/package, morize-core 0.0.0, and zero dependencies.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Passed locally and in all three canonical-main CI matrix jobs; 0 tests is expected because this Grain introduces no domain behavior.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-CARGO-METADATA",
+        "detail": "cargo metadata --no-deps reported one first-party workspace member and zero dependencies; local rerun matched.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Canonical-main CI run 35459122515 completed SUCCESS for Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "E-DEPENDENCY-AUDIT",
+        "detail": "Canonical-main dependency audit confirmed one Cargo.lock package and no third-party dependencies.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "E-DIFFCIPLINE-POLICY",
+        "detail": "Pinned Diffcipline R2 proof returned PASS, scope PASS, and all verification commands PASS.",
+        "evidence_ref": "sha256:133d9d8083dc5dbc98559d6d1952329334182f8e7c3f88cc976a8afec0ed8133",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "cargo check --workspace --all-targets --offline passed on canonical main across Ubuntu/macOS/Windows.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "cargo clippy --workspace --all-targets --offline -- -D warnings passed on canonical main across Ubuntu/macOS/Windows.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt --all -- --check passed on canonical main across Ubuntu/macOS/Windows.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "cargo test --workspace --all-targets --offline passed on canonical main across Ubuntu/macOS/Windows.",
+        "evidence_ref": "github-actions:35459122515@b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Independent exact-head review PASS; focused disposition sha256:6dc15ea6567d285ff37a8d958acb3a7d2ccb12b30150bacb0cbb2c3e9c5d717e records MATERIAL_SEVERITY=NONE and REQUIRED_CHANGE=NONE.",
+        "evidence_ref": "sha256:08ba5edca449131b8f40ce1278bda1c00d742c4b7276f081785af396360eef19",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "Recovery is a normal forward revert of the bounded workspace/tooling merge; the Grain introduced no user data, persistent format, public API, or runtime state.",
+        "evidence_ref": "git-diff:ca7224639481171baf898be260a1ebf9426fdacd..b54879d7c04ba914997f14034c3c1b262b9629f6",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
+    "issues": [],
+    "observed_changed_paths": [
+      ".diffcipline.toml",
+      ".github/workflows/ci.yml",
+      ".gitignore",
+      "CONTRIBUTING.md",
+      "Cargo.lock",
+      "Cargo.toml",
+      "crates/morize-core/Cargo.toml",
+      "crates/morize-core/src/lib.rs"
+    ],
+    "packet_digest": "sha256:97d30f426df2f0f5e7f37a13614b24640095074e1f6881d24cef8ad047557b8e",
+    "result_digest": "sha256:96f1642478fb75adda2d65fec46d7843a6e042059b23c95c9b096b7b3aba7207",
+    "spec_id": "SG-000011",
+    "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d",
+    "verification_version": 1,
+    "verified": true
+  }
+}
