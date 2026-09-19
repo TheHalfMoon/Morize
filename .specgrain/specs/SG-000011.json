@@ -1,21 +1,79 @@
 {
-  "acceptance": [],
-  "change_surface": [],
+  "acceptance": [
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo metadata --no-deps --format-version 1 identifies only the intended first-party workspace member, and dependency evidence confirms no third-party runtime or build dependency was admitted.",
+    "The checked-in .diffcipline.toml is valid against the pinned Diffcipline implementation and references only verification commands that exist in this Grain.",
+    "GitHub Actions runs the verification contract on Ubuntu, macOS, and Windows and the exact implementation head passes every required matrix job before acceptance.",
+    "The implementation adds no memory-domain behavior and changes no path outside the declared Grain change surface."
+  ],
+  "change_surface": [
+    "Cargo.toml",
+    "Cargo.lock",
+    ".gitignore",
+    "crates/morize-core/Cargo.toml",
+    "crates/morize-core/src/lib.rs",
+    ".diffcipline.toml",
+    ".github/workflows/ci.yml",
+    "CONTRIBUTING.md"
+  ],
   "children": [],
-  "context": {},
+  "context": {
+    "budget_tokens": 12000,
+    "estimated_tokens": 8000
+  },
   "dependencies": [],
-  "evidence": {},
+  "evidence": {
+    "required": [
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CARGO-METADATA",
+      "E-DIFFCIPLINE-POLICY",
+      "E-CROSS-PLATFORM-CI",
+      "E-DEPENDENCY-AUDIT"
+    ]
+  },
   "id": "SG-000011",
   "labels": [],
-  "metadata": {},
+  "metadata": {
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "A minimal native Cargo workspace and first-party crate are the smallest executable foundation. No third-party runtime dependency or donor code is needed for this tooling-only Grain."
+      },
+      "safety": {
+        "requirements": [],
+        "status": "none-identified"
+      },
+      "unresolved_decisions": [],
+      "version": 1
+    }
+  },
   "method": "quick",
   "outcome": "Morize has a dependency-free minimal Rust workspace with one first-party core crate, real local verification commands, a checked-in Diffcipline policy, and cross-platform CI, without implementing memory-domain behavior.",
   "parent_id": "SG-000010",
   "rationale": "This bounded child establishes only the executable repository/tooling foundation required before deterministic domain contracts can be implemented. It intentionally excludes memory types, persistence, policy, retrieval, APIs, models, vectors, graphs, and managed infrastructure.",
-  "risk": {},
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the bounded workspace/tooling commit set; no user data, persistent format, public API, or runtime state exists in this Grain."
+  },
   "schema_version": 1,
-  "scope_in": [],
-  "scope_out": [],
-  "state": "DRAFT",
+  "scope_in": [
+    "Create a root Cargo workspace and one minimal first-party morize-core library crate with no third-party runtime dependencies.",
+    "Establish real offline formatting, static-analysis, build/check, and test commands for the workspace.",
+    "Check in a real .diffcipline.toml bound to commands that exist in the new workspace.",
+    "Add a GitHub Actions matrix for Ubuntu, macOS, and Windows that executes the same verification contract.",
+    "Document the exact developer verification commands in CONTRIBUTING.md."
+  ],
+  "scope_out": [
+    "Stable identities, digests, domain memory types, serialization formats, configuration semantics, and public error taxonomy.",
+    "Vault, persistence, migrations, recovery, policy, privacy, retrieval, APIs, MCP, models, vectors, graph systems, UI, team mode, and managed services.",
+    "Release packaging, publishing, benchmarks, and feature-rich runtime behavior."
+  ],
+  "state": "SHAPED",
   "title": "Establish minimal Rust workspace and verification spine"
 }
