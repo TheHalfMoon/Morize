@@ -1,0 +1,29 @@
+{
+  "id": "SG-000004",
+  "title": "Build identity, policy, privacy, and memory firewall",
+  "outcome": "Morize enforces scoped principals, authorization-before-disclosure, sensitivity/taint rules, secret handling, poisoning defenses, and auditable policy decisions.",
+  "schema_version": 1,
+  "rationale": "Program-level child specification. It must be progressively refined into smaller executable Grains before implementation.",
+  "parent_id": "SG-000001",
+  "scope_in": [],
+  "scope_out": [],
+  "acceptance": [],
+  "dependencies": [
+    "SG-000010"
+  ],
+  "risk": {},
+  "context": {},
+  "change_surface": [],
+  "evidence": {},
+  "method": "controlled",
+  "state": "DRAFT",
+  "children": [],
+  "labels": [
+    "p3",
+    "security",
+    "privacy"
+  ],
+  "metadata": {
+    "planning_revision": "2026-09-19"
+  }
+}

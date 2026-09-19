@@ -1,0 +1,30 @@
+{
+  "id": "SG-000006",
+  "title": "Build deterministic retrieval, context compiler, APIs, and MCP",
+  "outcome": "Morize provides useful no-model retrieval, bounded ContextBundles, explainable recall, stable APIs/CLI, and least-authority MCP over the canonical memory contracts.",
+  "schema_version": 1,
+  "rationale": "Program-level child specification. It must be progressively refined into smaller executable Grains before implementation.",
+  "parent_id": "SG-000001",
+  "scope_in": [],
+  "scope_out": [],
+  "acceptance": [],
+  "dependencies": [
+    "SG-000005"
+  ],
+  "risk": {},
+  "context": {},
+  "change_surface": [],
+  "evidence": {},
+  "method": "controlled",
+  "state": "DRAFT",
+  "children": [],
+  "labels": [
+    "p5-p6",
+    "retrieval",
+    "api",
+    "mcp"
+  ],
+  "metadata": {
+    "planning_revision": "2026-09-19"
+  }
+}
