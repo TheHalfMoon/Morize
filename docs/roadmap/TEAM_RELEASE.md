@@ -10,10 +10,13 @@ Work:
 - role and ACL administration;
 - proposal and review flow;
 - encrypted backups;
-- optional peer/device synchronization;
-- conflict-safe synchronization;
+- optional peer/device synchronization through the dedicated sync contract;
+- typed concurrent-edit/update-vs-forget/update-vs-redact conflict handling;
+- peer revocation, stale-device behavior, and bounded reconciliation;
 - audit and export boundaries;
-- tenant-isolation tests;
+- tenant-isolation and side-channel tests;
+- per-tenant resource quotas;
+- local structured operations/diagnostics;
 - keep single-user local mode independent.
 
 Gate:
@@ -28,14 +31,17 @@ Work:
 - LongMemEval-V2 harness;
 - selected LoCoMo and contradiction/update evaluation;
 - Morize temporal, scope, poisoning, and recovery suites;
-- zero-cost conformance;
+- founder-zero-burn development conformance and local/self-hosted profile conformance;
 - reproducible performance suite;
-- dependency, source, and license audit;
+- dependency, source, Apache-2.0, NOTICE, and third-party license audit;
 - fuzzing and security review;
 - cross-platform packaging;
 - SBOM;
 - checksums and provenance attestations;
-- migration, backup, and restore proof;
+- migration, upgrade, backup, and restore proof;
+- public API/SDK/MCP compatibility matrix;
+- supported-version/platform/security-support statement;
+- founder recurring-cost ledger review;
 - independent semantic review;
 - exact-head release qualification;
 - preserve failed and negative results.
@@ -55,7 +61,7 @@ Morize v1 is complete only when evidence proves:
 9. at least two major client integrations interoperate;
 10. import/export avoids lock-in;
 11. optional local intelligence cannot bypass policy;
-12. zero required service-fee operation is tested;
+12. the pre-revenue development path has no unapproved mandatory founder-paid recurring dependency, and the supported local/self-hosted profile is independently tested;
 13. source, license, and security gates close;
 14. reproducible release artifacts ship.
 
