@@ -1,9 +1,9 @@
 # Morize Execution Master Plan
 
-**Program mode:** FOUNDATION_PLANNING  
-**Canonical planning branch:** `plan/morize-memory-os`  
-**Planning PR:** #1  
-**Current implementation authority:** NONE  
+**Program mode:** FOUNDATION_PLANNING
+**Canonical planning branch:** `plan/morize-memory-os`
+**Planning PR:** #1
+**Current implementation authority:** NONE
 **Current SpecGrain state:** program-level DRAFT decomposition only
 
 ## 1. Mission
