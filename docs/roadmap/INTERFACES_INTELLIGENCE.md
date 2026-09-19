@@ -6,7 +6,8 @@ Outcome: humans and agents use one governed engine.
 
 Work:
 - local daemon lifecycle and health;
-- stable local API schemas;
+- stable local API schemas with explicit version negotiation and compatibility policy;
+- stable error taxonomy, idempotency, pagination, and request bounds;
 - CLI for init, remember, recall, search, timeline, explain, export, import, doctor, and bench;
 - authenticated MCP transport profile;
 - least-authority read/search/explain/timeline tools;
@@ -14,7 +15,8 @@ Work:
 - separate administrative policy/ACL surface;
 - authenticated request principal binding;
 - stale integration-binding tests;
-- `morize doctor --offline`.
+- `morize doctor --offline`;
+- structured local diagnostics/health surfaces that do not require hosted telemetry.
 
 Gate:
 - two independent local clients can share permitted memory without receiving administrative authority.
@@ -52,6 +54,7 @@ Work:
 - deterministic rule engine baseline;
 - optional Ollama adapter;
 - optional llama.cpp or qualified embedded runtime;
+- optional remote/provider adapter only behind explicit data/cost configuration;
 - typed extraction schemas;
 - entity-link candidates;
 - contradiction/supersession classification candidates;
@@ -85,7 +88,8 @@ Work:
 Gate:
 - semantic/vector features remain removable;
 - canonical memory and deterministic retrieval work unchanged without them;
-- no paid embedding/vector service is required.
+- the local/self-hosted baseline does not require a founder-paid embedding/vector service;
+- future managed profiles may use paid providers explicitly when revenue/budget authority exists.
 
 ## Dependency spine
 
