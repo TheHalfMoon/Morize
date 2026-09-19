@@ -1,165 +1,214 @@
-# Zero-Cost Operating Contract
+# Founder Cost and Commercial Boundary
 
-## Goal
+> Historical filename: `ZERO_COST_CONTRACT.md`. The binding meaning is **zero mandatory founder burn**, not a promise of free service to every user.
 
-A normal Morize user must be able to build, run, test, back up, restore, search, retrieve, inspect, import, export, and connect local agents **without paying Morize or any required third-party service**.
+## 1. Intent
 
-This means zero required service fees, not zero physical resource usage. The user still supplies their own computer, storage, electricity, and optional network connection.
+Morize must be buildable, testable, developed, and dogfooded by the founder without creating a mandatory recurring infrastructure bill before the project has revenue or separately approved funding.
 
-## Binding product rules
+This is a **founder operating-cost constraint**.
 
-### ZC-1 — No mandatory paid API
+It is not:
 
-The default product cannot require:
+- a promise that every Morize product or service will always be free;
+- a restriction on charging users;
+- a restriction on commercial hosting;
+- a restriction on enterprise offerings;
+- a restriction on using paid infrastructure once revenue/funding justifies it;
+- a restriction on users choosing paid model or infrastructure providers.
 
-- OpenAI;
-- Anthropic;
-- Google model APIs;
-- Jev / TypeSafe AI;
-- Moorcheh cloud;
-- managed vector databases;
-- hosted graph databases;
-- hosted observability;
-- paid authentication;
-- paid sync;
-- any Morize cloud account.
+## 2. Open-source and commercial model
 
-### ZC-2 — No mandatory model
+The Morize source repository is licensed under Apache License 2.0.
 
-Morize remains useful with every model adapter disabled.
+The open-source license and future commercial strategy are separate concerns.
 
-Without an LLM, users retain:
+Morize may later offer paid products and services such as:
 
-- exact lookup;
-- metadata queries;
-- FTS/BM25;
-- temporal queries;
-- explicit graph traversal;
-- manual and deterministic memory creation;
-- explicit updates/supersession;
-- ACL/policy enforcement;
-- provenance;
-- import/export;
-- history;
-- backup/restore;
-- MCP reads and governed proposals;
-- index rebuild.
+- Morize Cloud;
+- managed synchronization and backup;
+- hosted memory infrastructure;
+- managed embeddings, reranking, or inference;
+- team and organization administration;
+- enterprise identity, governance, compliance, audit, and policy features;
+- premium connectors;
+- managed high-availability deployments;
+- observability and analytics;
+- support, SLA, onboarding, migration, and consulting;
+- usage-based or seat-based plans.
 
-### ZC-3 — Local inference is optional
+Nothing in this founder-cost contract promises that hosted or managed services will be free.
 
-If a user wants AI-assisted extraction, classification, summarization, or reranking, Morize supports user-owned local runtimes first.
+## 3. Founder-zero-burn baseline
 
-Candidate adapters:
+Before revenue or explicit budget authorization, the founder must be able to perform the core engineering loop without paid services:
 
-- Ollama;
-- llama.cpp;
-- embedded/local ONNX or Rust-native runtimes where qualified.
+1. clone and build Morize;
+2. run the deterministic core;
+3. run unit/integration/property/fuzz tests that belong to ordinary development;
+4. initialize local vaults;
+5. exercise local search, temporal memory, evidence graph, import/export, and recovery;
+6. develop and test MCP/local client integrations;
+7. run local benchmarks on bounded fixtures;
+8. inspect and review changes;
+9. package local development builds;
+10. maintain project planning and evidence.
 
-Models are separate artifacts with their own licenses, hashes, resource requirements, and trust records.
+The project should prefer:
 
-### ZC-4 — SQLite-first infrastructure
+- local developer hardware;
+- open-source dependencies;
+- repository-hosted artifacts;
+- free public-repository CI capacity where sufficient;
+- deterministic synthetic fixtures;
+- optional local models;
+- local SQLite/filesystem infrastructure.
 
-The first supported deployment cannot require Redis, Kafka, Neo4j, Postgres, Qdrant, Elasticsearch, Kubernetes, or Docker.
+## 4. No accidental founder bill
 
-Those may become optional adapters or deployment choices later. The single-user local path uses ordinary files plus SQLite.
+Before a paid service is introduced into a required development or release path, the owning SpecGrain must identify:
 
-### ZC-5 — Vector search is optional
+- the service;
+- why the free/local path is insufficient;
+- expected monthly and per-unit cost;
+- cost trigger and upper bound;
+- who pays;
+- whether customer revenue covers it;
+- a local/self-hosted fallback when practical;
+- shutdown/degradation behavior if the service is unavailable or budget is exhausted;
+- data/privacy implications;
+- vendor lock-in and migration plan.
 
-A vector extension or local vector engine may be enabled after benchmarks show value. Exact/FTS/graph/temporal retrieval remains available without it.
+A dependency that can generate an unbounded bill requires an explicit budget guardrail.
 
-### ZC-6 — Network denial remains functional
+## 5. Commercially aware architecture
 
-`morize doctor --offline` must verify that a vault can perform core operations while external network access is unavailable.
-
-Tests for the trusted core should be hermetic and must not silently download models or fixtures.
-
-### ZC-7 — Open source build path
-
-A developer can build Morize from source with public open-source toolchains. Release artifacts are convenience, not a proprietary gate.
-
-### ZC-8 — Export has no paywall
-
-Full user-owned canonical memory and supported evidence metadata can be exported without a subscription.
-
-### ZC-9 — No hosted-only “real product”
-
-Self-host/local operation is the product, not a crippled demo. Optional hosted services may improve convenience in the future but cannot be required to unlock canonical memory correctness.
-
-### ZC-10 — CI independence
-
-Public CI may use free hosted runners when available, but the project cannot depend on a paid CI feature for correctness. Required checks must also be runnable locally.
-
-## Default local profile
+Morize should preserve a clean product boundary:
 
 ```text
-Profile: local-zero-cost
-Network: denied by default
-Canonical memory: Markdown vault
-Operational DB: SQLite
-Full text: SQLite FTS5
-Graph: SQLite relations + bounded traversal
-Vector: disabled
-Model: disabled
-Telemetry: disabled
-Cloud sync: disabled
-Authentication: local OS / local daemon profile
-MCP: loopback/local transport with explicit auth where transport requires it
+Apache-2.0 Open-Source Core
+  |
+  +-- Local/self-hosted product
+  |
+  +-- Public SDKs / MCP / APIs
+  |
+  +-- Optional provider adapters
+  |
+  +-- Optional managed commercial services
+         |
+         +-- Cloud sync
+         +-- Hosted memory
+         +-- Team/enterprise control plane
+         +-- Managed inference/search
+         +-- Premium operations/support
 ```
 
-## Optional enhanced-local profile
+The open-source core must not be deliberately crippled merely to force a hosted subscription. Commercial value should come from convenience, scale, operations, collaboration, governance, service levels, and managed infrastructure.
+
+This principle does not prohibit differentiated managed capabilities whose operation genuinely requires hosted infrastructure.
+
+## 6. User cost is a product decision
+
+Users may choose among profiles:
+
+### Local / self-hosted
+
+Users operate Morize on infrastructure they control. Their costs are their own hardware/infrastructure/model costs.
+
+### Bring-your-own-provider
+
+Users may connect paid model, storage, graph, vector, or cloud providers and pay those providers directly.
+
+### Managed Morize
+
+A future Morize-operated service may charge users under published pricing and usage limits.
+
+### Enterprise
+
+A future enterprise product may use negotiated pricing, support, deployment, compliance, or SLA terms.
+
+The architecture must not hard-code a permanent pricing model.
+
+## 7. Core technical independence
+
+Even with future commercial services, these correctness properties remain owned by Morize contracts rather than by billing status:
+
+- durable record identity/version semantics;
+- provenance representation;
+- temporal truth semantics;
+- conflict/supersession semantics;
+- export format;
+- schema validation;
+- bounded input handling;
+- authorization contracts;
+- deterministic recovery rules.
+
+Paid tiers may provide scale and operations; they must not silently redefine what a Morize memory means.
+
+## 8. Optional paid infrastructure
+
+A paid service may become a supported or recommended production option when justified.
+
+It must remain explicit in:
+
+- configuration;
+- cost ownership;
+- credential handling;
+- data boundary;
+- failure behavior;
+- telemetry;
+- retention;
+- migration/export.
+
+Local failure must not silently cause a chargeable fallback.
+
+## 9. CI and release economics
+
+Public CI may use free hosted capacity while available. If CI scale later exceeds free capacity, the project may:
+
+- optimize test partitioning;
+- move expensive suites to scheduled/manual runs;
+- use self-hosted runners;
+- fund CI from revenue/sponsorship;
+- adopt paid CI through an explicit budget decision.
+
+Correctness must not depend on hiding required checks merely to remain free.
+
+## 10. Founder cost evidence
+
+Each release planning cycle should record material recurring project-operated costs, even when the value is zero.
+
+Suggested ledger:
 
 ```text
-Profile: local-ai
-Everything from local-zero-cost
-+ local model runtime
-+ optional local embeddings
-+ optional local reranker
-+ optional local vector projection
+service
+purpose
+required_or_optional
+current_monthly_cost
+forecast_monthly_cost
+billing_owner
+budget_cap
+revenue_backed
+fallback
+exit_plan
 ```
 
-It still requires no per-request payment.
+## 11. Invariants
 
-## Remote profile
+```text
+FOUNDER_ZERO_BURN != USER_FREE_FOREVER
+OPEN_SOURCE != NO_COMMERCIAL_MODEL
+PAID_SERVICE != ARCHITECTURAL_AUTHORITY
+LOCAL_FAILURE != SILENT_PAID_FALLBACK
+USER_REVENUE_MAY_FUND_INFRASTRUCTURE
+COST_CHANGE_REQUIRES_EXPLICIT_OWNERSHIP
+```
 
-Remote inference, sync, connectors, or hosted deployment are strictly optional and configured explicitly.
+## 12. Current planning constraint
 
-A remote adapter must expose:
+At the current pre-revenue planning stage:
 
-- provider identity;
-- endpoint;
-- model identity;
-- data classes allowed to leave the device;
-- credential binding;
-- cost/usage observability where available;
-- fallback policy.
-
-A local failure must never silently authorize a paid remote fallback.
-
-## Zero-Cost Conformance Gate
-
-Every release candidate must prove:
-
-1. clean install/build from documented open-source tooling;
-2. fresh vault initialization;
-3. create/update/supersede/contradict/query operations;
-4. FTS and graph retrieval;
-5. temporal query;
-6. export/import round trip;
-7. delete and rebuild derived indexes;
-8. restart/crash recovery fixtures;
-9. MCP local smoke test;
-10. at least one agent integration smoke test that uses no paid memory service;
-11. full core test suite with external network denied;
-12. no required environment variable representing a paid service credential.
-
-Release evidence records the exact commands and versions used.
-
-## Cost-budget policy
-
-Optional features may expose resource cost estimates such as CPU time, RAM, disk, tokens, or remote spend. Morize never equates higher spend with higher trust.
-
-If a future contributor proposes a mandatory hosted dependency, the change is architecture-breaking and must be rejected unless this contract is explicitly changed by project governance.
-
-## Founder constraint
-
-The initial project requirement is that maintaining and using Morize should not force the founder to pay for runtime services. Architecture and roadmap decisions must preserve that constraint.
+- no mandatory paid runtime service is authorized for project development;
+- no paid hosted dependency is required by the deterministic implementation spine;
+- future paid product/service design remains explicitly allowed;
+- any material founder-paid recurring dependency requires a separately justified SpecGrain and documented budget authority.
