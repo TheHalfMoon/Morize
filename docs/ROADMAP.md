@@ -7,10 +7,13 @@ Morize is implemented in dependency order. The roadmap is split into bounded pla
 ```text
 P0 Foundation
  -> P1 Deterministic Rust kernel
- -> P2 Vault and reliable writer
- -> P3 Scopes and policy
- -> P4 Temporal truth and evidence graph
- -> P5 Deterministic retrieval
+      |\
+      | +-> P3 Scopes and policy
+      +----> P2 Vault and reliable writer
+               \ /
+                v
+       P4 Temporal truth and evidence graph
+        -> P5 Deterministic retrieval
  -> P6 Interfaces
  -> P7 Portability and integrations
  -> P8 Optional local intelligence
