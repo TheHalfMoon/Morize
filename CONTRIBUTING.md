@@ -9,7 +9,7 @@ Read:
 1. `README.md`
 2. `docs/PRODUCT_THESIS.md`
 3. `docs/ARCHITECTURE.md`
-4. `docs/ZERO_COST_CONTRACT.md` (founder-cost and commercial boundary)
+4. `docs/FOUNDER_COST_AND_COMMERCIAL_BOUNDARY.md` (founder-cost and commercial boundary)
 5. `docs/THREAT_MODEL.md`
 6. `docs/DONOR_AND_PROVENANCE.md`
 7. the applicable roadmap packet.
