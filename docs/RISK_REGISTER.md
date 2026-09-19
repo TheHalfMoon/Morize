@@ -47,11 +47,12 @@ Ratings are qualitative planning signals, not statistical probabilities.
 | R-038 | Telemetry collects sensitive memory content | Low | Critical | opt-in/explicit telemetry, metadata minimization, no memory content by default | P11/P12 |
 | R-039 | Hosted service launches without retention/residency/incident contracts | Medium | Critical | dedicated hosted-launch SpecGrain before customer data | future cloud |
 | R-040 | Maintenance burden exceeds founder capacity | High | High | narrow dependency surface, progressive scope, automation, cost/maintenance review | All |
-| R-041 | Public contribution governance creates legal/release ambiguity | Medium | Medium | DCO/CLA decision before scale, maintainer/release authority policy | pre-community scale |
+| R-041 | Public contribution governance creates legal/release ambiguity | Low | Medium | DCO 1.1 is selected for foundation; founder-led release authority is documented; revisit CLA/maintainer succession only when evidence requires it | pre-community scale |
 | R-042 | Trademark/name confusion grows after downstream forks | Medium | Medium | trademark-policy decision before brand scale | pre-brand scale |
 | R-043 | Release binaries diverge from tested source | Low | Critical | exact-head build, checksums, attestations, reproducible release evidence | P13 |
 | R-044 | Unsupported upgrade paths silently corrupt vaults | Medium | Critical | supported-version matrix, migration fixtures, downgrade/rollback rules | P2/P13 |
 | R-045 | Recovery logic itself guesses ambiguous state | Low | Critical | fail closed, preserve unknown outcome, independent recovery tests | P2/P13 |
+| R-046 | Hash-linked evidence ledger is mistaken for tamper-proof history | Medium | High | document threat boundary, deterministic digest chain verification, checkpoint semantics, no tamper-proof claim without external trust anchor | P1/P2/P13 |
 
 ## Risk ownership rule
 
