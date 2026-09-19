@@ -37,6 +37,8 @@ Work:
 - review queue;
 - branch and diff view;
 - privacy/export/removal controls;
+- health, migration, projection, backup, and connector diagnostics;
+- clear separation between local/open-source features and managed-service status when commercial services exist;
 - keyboard navigation and accessibility.
 
 Gate:
