@@ -53,6 +53,7 @@ Ratings are qualitative planning signals, not statistical probabilities.
 | R-044 | Unsupported upgrade paths silently corrupt vaults | Medium | Critical | supported-version matrix, migration fixtures, downgrade/rollback rules | P2/P13 |
 | R-045 | Recovery logic itself guesses ambiguous state | Low | Critical | fail closed, preserve unknown outcome, independent recovery tests | P2/P13 |
 | R-046 | Hash-linked evidence ledger is mistaken for tamper-proof history | Medium | High | document threat boundary, deterministic digest chain verification, checkpoint semantics, no tamper-proof claim without external trust anchor | P1/P2/P13 |
+| R-047 | Plaintext vault or mishandled encryption keys expose long-lived sensitive memory at rest | Medium | Critical | encrypted-at-rest vault profile, key separation, explicit leakage model, backup/key recovery tests, no overclaim against unlocked-process compromise | P2/P3/P13 |
 
 ## Risk ownership rule
 
