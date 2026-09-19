@@ -84,12 +84,14 @@ No previous completion claim overrides a newer repository fact.
 SG-000001  Deliver Morize v1
  |
  +-- SG-000002  Foundation/governance/license/commercial
- |
- +-- SG-000003  Vault/persistence/migration/recovery
- |      |
- +-- SG-000004  Identity/policy/privacy/firewall
- |      |
- +------+- SG-000005  Temporal truth/provenance/evidence graph
+ |       |
+ |       +-- SG-000010  Deterministic Rust kernel/data contracts
+ |               |
+ |               +-- SG-000003  Vault/persistence/migration/recovery
+ |               |
+ |               +-- SG-000004  Identity/policy/privacy/firewall
+ |                       |
+ +-----------------------+- SG-000005  Temporal truth/provenance/evidence graph
                   |
                   +-- SG-000006  Retrieval/context/APIs/MCP
                          |
@@ -131,13 +133,14 @@ The first likely implementation sequence is:
 
 ```text
 SG-000002 planning closeout
- -> refine SG-000003/P1-P2 foundation into bounded children
- -> first Rust workspace/kernel Grain
- -> concrete persisted type/serialization Grains
- -> vault-format/writer/recovery Grains
+ -> refine SG-000010/P1 into bounded kernel/data-contract Grains
+ -> first Rust workspace/tooling Grain
+ -> deterministic identity/serialization/config/error-contract Grains
+ -> refine SG-000003/P2 vault-format/writer/recovery Grains
+ -> refine SG-000004/P3 policy/privacy Grains when shared contracts are stable
 ```
 
-Identity/policy work under SG-000004 may proceed in dependency-safe parallel only when shared type/storage boundaries are stable enough to avoid speculative duplication.
+SG-000003 and SG-000004 both depend on SG-000010. They may proceed in dependency-safe parallel only after the specific shared kernel/data contracts they need are accepted, avoiding speculative storage-policy coupling.
 
 ## 8. First Rust Grain requirements
 
