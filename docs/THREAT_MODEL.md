@@ -248,9 +248,28 @@ Controls:
 - backup/export retention policy;
 - tombstone/minimal audit semantics without retaining prohibited plaintext.
 
+
+
+### T17 — At-rest disclosure and key compromise
+
+A lost/stolen device, copied vault directory, backup artifact, or improperly handled encryption key exposes long-lived memory.
+
+Controls:
+
+- qualified encrypted-at-rest vault profile for sensitive local use;
+- authenticated encryption with versioned algorithm/profile identity;
+- raw keys separated from encrypted vault content;
+- explicit OS keychain/passphrase/hardware-backed key adapters where qualified;
+- bounded unlock/session behavior;
+- encrypted backup/restore compatibility;
+- key rotation/recovery design before claiming it;
+- clear distinction between Morize encryption and full-disk encryption;
+- no claim that encryption protects an already-compromised unlocked process.
+
 ## Privacy defaults
 
 - local indexes stay local;
+- sensitive local deployments can use the qualified encrypted-at-rest vault profile;
 - telemetry disabled by default;
 - no prompt/file upload for analytics;
 - remote adapters require explicit enablement;
