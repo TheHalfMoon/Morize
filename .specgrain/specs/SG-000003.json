@@ -1,0 +1,29 @@
+{
+  "id": "SG-000003",
+  "title": "Build canonical vault, persistence, migrations, and recovery",
+  "outcome": "Morize has a versioned human-inspectable canonical storage format with safe writes, schema migration, backup/restore, corruption detection, and deterministic crash recovery.",
+  "schema_version": 1,
+  "rationale": "Program-level child specification. It must be progressively refined into smaller executable Grains before implementation.",
+  "parent_id": "SG-000001",
+  "scope_in": [],
+  "scope_out": [],
+  "acceptance": [],
+  "dependencies": [
+    "SG-000002"
+  ],
+  "risk": {},
+  "context": {},
+  "change_surface": [],
+  "evidence": {},
+  "method": "controlled",
+  "state": "DRAFT",
+  "children": [],
+  "labels": [
+    "p1-p2",
+    "storage",
+    "reliability"
+  ],
+  "metadata": {
+    "planning_revision": "2026-09-19"
+  }
+}
