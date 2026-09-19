@@ -1,10 +1,11 @@
 # Morize Execution Master Plan
 
-**Program mode:** FOUNDATION_PLANNING
-**Canonical planning branch:** `plan/morize-memory-os`
-**Planning PR:** #1
-**Current implementation authority:** NONE
-**Current SpecGrain state:** program-level DRAFT decomposition only
+**Program mode:** P1_PROGRESSIVE_EXECUTION
+**Canonical baseline:** `cc78368cd8cf8f63cc55d0b733cf1ae8ed295543`
+**Foundation planning PR:** #1
+**Current implementation authority:** NONE — the next bounded Grain is not yet authorized
+**Completed/proven Grain:** `SG-000011`
+**Current SpecGrain state:** broad program DRAFTs plus canonical SG-000011 GRAIN with verified proof
 
 ## 1. Mission
 
@@ -44,6 +45,17 @@ Current source supports the native preparation lifecycle:
 DRAFT -> SHAPED -> REFINING -> GRAIN
 ```
 
+It also supports independent `VerificationReport` / hash-chained `EvidenceRecord` proof and
+`specgrain prove`, but the pinned source intentionally does not expose a supported writer for:
+
+```text
+GRAIN -> READY -> RUNNING -> VERIFYING -> VERIFIED -> CONTROLLED
+```
+
+Morize must not fabricate those lifecycle states. ADR-0004 defines a temporary, fail-closed
+verified-proof prerequisite bridge for canonically completed work until a qualified SpecGrain
+revision supplies that writer.
+
 The historical published v0.3.0 release does not contain every current-main preparation command. Actual implementation tooling must pin an exact supported SpecGrain source/release rather than assuming floating-main behavior.
 
 ### Diffcipline — finish-line proof
@@ -80,35 +92,37 @@ No previous completion claim overrides a newer repository fact.
 
 ## 5. Current program graph
 
-All ten current nodes are children of the `SG-000001` program root. Their execution dependency
-graph is distinct from that parent/child decomposition:
+The broad program nodes are children of the `SG-000001` program root. `SG-000011` is the
+first bounded child under broad program node `SG-000010`. Refinement parent/child structure,
+native execution dependencies, and ADR-0004 verified-proof prerequisites are distinct contracts:
 
 ```text
 SG-000002  Foundation/governance/license/commercial
            planning contract; no execution dependency
 
-SG-000010  Deterministic Rust kernel/data contracts
+SG-000010  Deterministic Rust kernel/data contracts [program DRAFT]
   |
-  +-- SG-000003  Vault/persistence/migration/recovery
-  |
-  +-- SG-000004  Identity/policy/privacy/firewall
-          |
-          +-- SG-000005  Temporal truth/provenance/evidence graph
-                  |
-                  +-- SG-000006  Retrieval/context/APIs/MCP
-                          |
-                          +-- SG-000007  Portability/integrations/intelligence
-                          |
-                          +-- SG-000008  Experience/UI/team/commercial boundary
+  +-- refinement child SG-000011
+      Minimal Rust workspace/verification spine [GRAIN]
+      canonical implementation: b54879d7c04ba914997f14034c3c1b262b9629f6
+      canonical SpecGrain proof: verified=true
 
-SG-000009  Memory Lab/security/release/sustainability
-           waits on SG-000003 through SG-000008
+SG-000003  Vault/persistence/migration/recovery [program DRAFT]
+SG-000004  Identity/policy/privacy/firewall [program DRAFT]
+SG-000005  Temporal truth/provenance/evidence graph [program DRAFT]
+SG-000006  Retrieval/context/APIs/MCP [program DRAFT]
+SG-000007  Portability/integrations/intelligence [program DRAFT]
+SG-000008  Experience/UI/team/commercial boundary [program DRAFT]
+SG-000009  Memory Lab/security/release/sustainability [program DRAFT]
 ```
 
-The exact JSON dependency graph in `.specgrain/specs/` is canonical. The diagram is explanatory
-and must not be used to infer edges that are absent from the JSON.
+The exact JSON dependency graph in `.specgrain/specs/` is canonical for native dependencies.
+The diagram is explanatory and must not be used to infer edges that are absent from the JSON.
+ADR-0004 proof prerequisites are explicit metadata/governance contracts and are not native
+SpecGrain dependency satisfaction.
 
-All current program-level nodes remain DRAFT by design.
+All current program-level nodes remain DRAFT by design. `SG-000011` is a bounded child Grain,
+not a promoted program-level node.
 
 ## 6. Planning closeout conditions
 
@@ -137,39 +151,58 @@ required review/evidence closure satisfy the foundation planning governance prer
 are not a SpecGrain lifecycle transition for broad program DRAFT `SG-000002`.
 
 Do not start from the full roadmap. Refine the P1 program node into bounded implementation
-Grains and execute only dependency-eligible leaves.
+Grains and execute only leaves whose native dependencies and any ADR-0004 verified-proof
+prerequisites are satisfied on the exact packet baseline.
 
-The first likely implementation sequence is:
+Current proven progression:
 
 ```text
 planning closeout: PR #1 merge + exact-canonical remediation review
- -> refine SG-000010/P1 into bounded kernel/data-contract Grains
- -> first Rust workspace/tooling Grain
- -> deterministic identity/serialization/config/error-contract Grains
- -> refine SG-000003/P2 vault-format/writer/recovery Grains
- -> refine SG-000004/P3 policy/privacy Grains when shared contracts are stable
+ -> SG-000011 minimal Rust workspace/tooling Grain
+ -> implementation b54879d7c04ba914997f14034c3c1b262b9629f6
+ -> canonical evidence record
+    sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9
+ -> specgrain prove SG-000011 = verified=true
+ -> NEXT: shape a bounded deterministic identity/data-contract Grain under SG-000010
 ```
 
-`SG-000010` therefore has no SpecGrain execution dependency. `SG-000003` and `SG-000004`
-both depend on `SG-000010`. They may proceed in dependency-safe parallel only after the
-specific shared kernel/data contracts they need are accepted, avoiding speculative
-storage-policy coupling.
+The next Grain may rely on SG-000011 only through ADR-0004's exact verified-proof prerequisite
+contract while the current SpecGrain pin lacks a supported post-Grain lifecycle writer.
+No packet may be exported until that proof is revalidated against the exact packet baseline.
 
-## 8. First Rust Grain requirements
+Broad program dependencies must not be treated as executable satisfied state. When SG-000003 or
+SG-000004 is refined, their bounded children must depend on the specific accepted kernel/data
+contracts they actually require rather than using a broad DRAFT as a completion proxy.
 
-The first actual implementation Grain should be narrow.
+## 8. Completed first Rust Grain
 
-Expected outcome class:
+`SG-000011` delivered the minimal repository execution spine:
 
-- create the minimal Rust workspace/tooling foundation;
-- no feature-rich memory implementation yet;
-- establish real build/test/static-analysis commands;
-- create the actual repository `.diffcipline.toml`;
-- establish cross-platform CI;
-- add Apache/DCO/source-policy checks where appropriate;
-- prove no unnecessary runtime infrastructure dependency.
+- root Cargo workspace;
+- one first-party `morize-core` crate;
+- zero third-party runtime/build dependencies;
+- real offline format/check/clippy/test commands;
+- checked-in Diffcipline policy;
+- Ubuntu/macOS/Windows CI;
+- exact developer verification commands;
+- no memory-domain behavior.
 
-Its exact scope/change surface is not frozen until SpecGrain shaping against merged main.
+Canonical implementation:
+
+```text
+b54879d7c04ba914997f14034c3c1b262b9629f6
+```
+
+Canonical evidence:
+
+```text
+record =
+sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9
+specgrain prove SG-000011 = verified=true
+```
+
+The next implementation surface is not authorized until its own bounded Grain is shaped,
+reviewed, merged, and packet prerequisites pass.
 
 ## 9. Dependency strategy
 

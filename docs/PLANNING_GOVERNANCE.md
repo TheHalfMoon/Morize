@@ -106,6 +106,37 @@ Do not bypass a waiting dependency by omitting it from a child. Remove or change
 dependency only when the repository contract itself shows that it represented a different kind
 of prerequisite.
 
+### Temporary verified-proof prerequisite bridge
+
+The current pinned SpecGrain source can independently verify execution and persist immutable
+evidence, but it intentionally has no supported writer for post-`GRAIN` lifecycle state.
+Therefore a canonically completed predecessor may remain `GRAIN` even when
+`specgrain prove <SPEC_ID>` is `verified=true`.
+
+ADR-0004 defines the only permitted compatibility bridge for this frontier.
+
+A bounded Grain MAY omit a native dependency edge to an already-completed predecessor only when
+all of these are true:
+
+- the predecessor is canonical and has a valid SpecGrain evidence chain;
+- `specgrain prove` returns `verified=true` with no chain issue on the exact packet baseline;
+- the successor records exact `spec_id`, `spec_revision`, `record_digest`, and
+  `implementation_revision` values under `metadata.morize.proof_prerequisites`;
+- the implementation revision is an ancestor of the packet baseline;
+- the exact evidence record and ADR-0004 are included as WorkPacket context;
+- the prerequisite is revalidated immediately before packet export/execution.
+
+This does **not** mean the predecessor SpecNode is `VERIFIED` or `CONTROLLED`. It is a
+repository-governance prerequisite backed by native SpecGrain proof while the adopted product
+surface cannot write the corresponding lifecycle state.
+
+The bridge fails closed. Missing, stale, mismatched, forked, or failed proof blocks execution.
+It must not be used for unresolved work, broad DRAFTs, or a native dependency that the adopted
+SpecGrain source can already represent and satisfy.
+
+When a qualified SpecGrain revision supplies a supported post-Grain writer, new work returns to
+native dependency edges and this bridge enters migration-only status.
+
 ## 5. Method routing
 
 Use SpecGrain method profiles deliberately.
@@ -398,15 +429,25 @@ Metrics must not incentivize smaller diffs at the expense of correctness or safe
 
 ## 17. Current authority
 
-The current `.specgrain` nodes are program-level **DRAFT** specifications only.
+The broad program specifications remain **DRAFT** and are not implementation authority.
 
-Next canonical planning step before runtime implementation:
+`SG-000011` is the first bounded completed child under `SG-000010`:
 
-1. reverify PR/main truth;
-2. close the current master-plan gaps;
-3. accept/merge planning governance;
-4. use SpecGrain tooling against the merged repository;
-5. progressively shape the first P1 child into bounded Grains;
-6. create the real Rust workspace and Diffcipline policy in the first eligible Grain.
+```text
+SG-000011 state = GRAIN
+canonical implementation = b54879d7c04ba914997f14034c3c1b262b9629f6
+canonical evidence record =
+sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9
+specgrain prove SG-000011 = verified=true
+```
 
-No current DRAFT is implementation authority.
+The evidence record is canonical on `main`. No unsupported lifecycle-state mutation is claimed.
+
+Current implementation authority is **NONE** until the next bounded child is shaped, reviewed,
+canonically merged, and passes the exact pre-packet prerequisite gate.
+
+The next planning action is to refine the next deterministic kernel/data-contract child under
+`SG-000010`. If it relies on `SG-000011`, it must use ADR-0004's exact verified-proof
+prerequisite contract while the current SpecGrain pin lacks a supported post-Grain writer.
+
+No broad DRAFT is implementation authority.
