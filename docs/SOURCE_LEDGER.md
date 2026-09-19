@@ -87,6 +87,8 @@ Morize adds its own cases for stale memory, authoritative-source precedence, tem
 
 ## Tier D — Protocol/runtime/tool references
 
+- `alibaba/open-code-review` at `85cecfe5f935da2b2aae8f91ce4fee8ed343a681` — **PROCESS_REFERENCE / REVIEW_ONLY**; deterministic review file selection/rule resolution and delegation-mode coverage. It is not a Morize runtime dependency and does not replace SpecGrain readiness or Diffcipline proof.
+
 - official Model Context Protocol specification and Rust SDK;
 - Agent Skills format;
 - ripgrep-class bounded local search;
