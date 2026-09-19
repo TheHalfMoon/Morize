@@ -93,6 +93,6 @@
     "Serde or other serialization-framework integration, persisted field schemas, vault formats, migrations, configuration formats, or public API wire schemas.",
     "Content digests, idempotency keys, timestamps, domain memory records, policy, authorization, retrieval, MCP, storage, or model behavior."
   ],
-  "state": "REFINING",
+  "state": "GRAIN",
   "title": "Define typed durable identifier values"
 }
