@@ -246,6 +246,12 @@ Multi-user/team mode shall include explicit tenant-isolation and side-channel te
 
 The project shall maintain a private vulnerability reporting path.
 
+### MZ-SEC-010 — At-rest encryption profile
+
+Morize v1 shall define and qualify an encrypted-at-rest local vault profile for users who require protection of canonical memory, operational state, and blobs on disk. Raw encryption keys shall not be stored alongside encrypted vault data, and key lifecycle/recovery semantics shall be explicit.
+
+The existence of a plaintext developer/local profile shall not be presented as equivalent protection.
+
 ## I. Retrieval and context
 
 ### MZ-RET-001 — Deterministic baseline
