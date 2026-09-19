@@ -10,7 +10,7 @@ It is designed to answer more than “what text looks similar?” Morize tracks 
 
 - **Founder-zero-burn development.** The pre-revenue engineering path must not force the founder into mandatory recurring service fees. This is not a promise that future managed Morize services will be free to users.
 - **Useful without an LLM.** Exact lookup, FTS/BM25, temporal filters, graph traversal, policy, provenance, versioning, import/export, and deterministic retrieval work locally without model inference.
-- **Local-first and offline-capable.** Networking is an explicit optional capability, never a hidden fallback.
+- **Local-first and offline-capable.** For the supported local profile, external networking is optional and never a hidden fallback. Self-hosted and managed networked profiles use explicit, documented network boundaries.
 - **User-owned truth.** Canonical durable memory is inspectable, exportable, versioned, and recoverable without a Morize cloud.
 - **Typed decisions, not free-form authority.** Memory mutations are constrained actions such as STORE, UPDATE, SUPERSEDE, CONTRADICT, MERGE, EXPIRE, FORGET, REDACT, QUARANTINE, IGNORE, and REQUIRE_REVIEW.
 - **Evidence before confidence.** Confidence may guide escalation, but never grants authority.
@@ -40,7 +40,7 @@ Typed Decision Engine
 Governed Memory Writer
     |
     +--> Canonical Memory Vault
-    +--> Immutable Evidence Ledger
+    +--> Append-oriented Evidence Ledger
     |
     v
 Rebuildable Projections
