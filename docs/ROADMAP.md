@@ -54,6 +54,7 @@ Current program decomposition:
 
 - `SG-000001` — Morize v1 root program;
 - `SG-000002` — product/governance/license/commercial contracts;
+- `SG-000010` — deterministic Rust kernel and canonical data contracts;
 - `SG-000003` — vault/persistence/migrations/recovery;
 - `SG-000004` — identity/policy/privacy/firewall;
 - `SG-000005` — temporal truth/provenance/evidence graph;
