@@ -11,7 +11,7 @@ Repository technical content is written in English.
 5. `docs/DATA_MODEL.md`
 6. `docs/THREAT_MODEL.md`
 7. `docs/RISK_REGISTER.md`
-8. `docs/ZERO_COST_CONTRACT.md`
+8. `docs/FOUNDER_COST_AND_COMMERCIAL_BOUNDARY.md`
 9. `docs/DONOR_AND_PROVENANCE.md`
 10. `docs/PLANNING_GOVERNANCE.md`
 11. `docs/ROADMAP.md`
