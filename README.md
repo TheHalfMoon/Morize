@@ -94,7 +94,7 @@ The repository is open source under Apache-2.0. Morize may later charge for mana
 - [Deployment profiles](docs/DEPLOYMENT_PROFILES.md)
 - [Synchronization model](docs/SYNC_MODEL.md)
 - [Operations and observability](docs/OPERATIONS.md)
-- [Founder cost and commercial boundary](docs/ZERO_COST_CONTRACT.md)
+- [Founder cost and commercial boundary](docs/FOUNDER_COST_AND_COMMERCIAL_BOUNDARY.md)
 - [Commercial service architecture](docs/COMMERCIAL_MODEL.md)
 - [Planning governance: SpecGrain + Diffcipline](docs/PLANNING_GOVERNANCE.md)
 - [Execution master plan](docs/EXECUTION_MASTER_PLAN.md)
