@@ -1,6 +1,6 @@
 # Morize Risk Register
 
-**Planning baseline:** 2026-09-19  
+**Planning baseline:** 2026-09-19
 **Status:** living program-level risk register.
 
 Ratings are qualitative planning signals, not statistical probabilities.
