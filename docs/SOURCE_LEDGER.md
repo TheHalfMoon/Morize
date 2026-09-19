@@ -1,6 +1,6 @@
 # Morize Source Ledger
 
-**Research snapshot:** 2026-09-19  
+**Research snapshot:** 2026-09-19
 **Status:** planning evidence; no third-party component is automatically admitted into the trusted core.
 
 ## Admission vocabulary
