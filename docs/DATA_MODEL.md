@@ -196,6 +196,46 @@ transformation_lineage[]
 
 Derived evidence retains lineage to its parents.
 
+
+### EvidenceLedgerEntry
+
+The Evidence Ledger is represented by append-oriented, digest-linked entries rather than by mutable memory content.
+
+Conceptual fields:
+
+```text
+ledger_entry_id
+vault_id
+sequence
+previous_entry_digest?
+event_kind
+subject_refs[]
+evidence_refs[]
+principal_id
+policy_revision_id
+occurred_at
+entry_digest
+```
+
+The local governed writer establishes a deterministic sequence for one vault. Each entry digest covers the canonical entry payload and the previous-entry digest where present.
+
+The chain provides **local integrity and truncation/reordering detection under the assumed writer/storage threat model**. It is not described as tamper-proof against an attacker who can rewrite the entire vault, ledger, and trust anchors.
+
+### EvidenceLedgerCheckpoint
+
+A checkpoint may bind:
+
+```text
+vault_id
+through_sequence
+head_entry_digest
+created_at
+checkpoint_digest
+external_anchor_ref?
+```
+
+External anchoring, signing, transparency logs, or remote notarization are optional future mechanisms and require their own threat model and SpecGrain. Morize must not imply those guarantees merely because entries are hash-linked.
+
 ## 9. Proposition
 
 A `Proposition` is a normalized claim candidate.
@@ -235,11 +275,12 @@ memory_kind
 owner_scope_id
 created_at
 created_by
-active_branch
 status
 ```
 
-Current content is obtained through an active `MemoryVersion` projection.
+Current content is obtained through a branch/snapshot projection over immutable `MemoryVersion` objects.
+
+A `MemoryRecord` does **not** own one mutable `active_branch`. The same logical memory may participate in multiple branches or snapshots simultaneously. Branch membership/frontier state therefore lives in branch/snapshot projection structures, never as a single mutable field on the record itself.
 
 ## 11. MemoryVersion
 
