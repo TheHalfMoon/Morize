@@ -57,6 +57,8 @@ Work:
 - safe vault initialization/discovery;
 - SQLite operational schema and migrations with supported-version compatibility fixtures;
 - content-addressed blob storage;
+- versioned at-rest encryption profile for canonical content, operational state, and blobs where configured;
+- key separation, unlock/recovery semantics, and encrypted-backup compatibility;
 - one governed writer per vault;
 - durable idempotency;
 - expected-version compare-and-swap;
@@ -142,7 +144,11 @@ Gate:
 ## Dependency spine
 
 ```text
-P0 -> P1 -> P2 -> P3 -> P4 -> P5
+P0 -> P1
+      |\
+      | +-> P3
+      +----> P2
+       P2 + P3 -> P4 -> P5
 ```
 
 No UI, hosted service, model integration, vector database, or external graph database precedes this spine.
