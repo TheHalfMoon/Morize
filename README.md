@@ -87,13 +87,23 @@ The repository is open source under Apache-2.0. Morize may later charge for mana
 
 - [Product thesis](docs/PRODUCT_THESIS.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Canonical data model](docs/DATA_MODEL.md)
+- [v1 requirements](docs/REQUIREMENTS.md)
 - [Typed memory decisions](docs/TYPED_DECISION_MODEL.md)
-- [Source ledger](docs/SOURCE_LEDGER.md)
+- [API and compatibility policy](docs/API_COMPATIBILITY.md)
+- [Deployment profiles](docs/DEPLOYMENT_PROFILES.md)
+- [Synchronization model](docs/SYNC_MODEL.md)
+- [Operations and observability](docs/OPERATIONS.md)
 - [Founder cost and commercial boundary](docs/ZERO_COST_CONTRACT.md)
+- [Commercial service architecture](docs/COMMERCIAL_MODEL.md)
+- [Planning governance: SpecGrain + Diffcipline](docs/PLANNING_GOVERNANCE.md)
+- [Risk register](docs/RISK_REGISTER.md)
+- [Master plan gap review](docs/GAP_REVIEW.md)
+- [Source ledger](docs/SOURCE_LEDGER.md)
+- [Donor and provenance policy](docs/DONOR_AND_PROVENANCE.md)
 - [Threat model](docs/THREAT_MODEL.md)
 - [Benchmark plan](docs/BENCHMARK_PLAN.md)
 - [Implementation roadmap](docs/ROADMAP.md)
-- [Donor and provenance policy](docs/DONOR_AND_PROVENANCE.md)
 
 ## Status
 
