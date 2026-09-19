@@ -1,0 +1,30 @@
+{
+  "id": "SG-000007",
+  "title": "Build portability, migrations, integrations, and optional intelligence",
+  "outcome": "Morize interoperates with major agent harnesses, imports/exports open formats, and can add local or remote intelligence/semantic retrieval without making it canonical authority.",
+  "schema_version": 1,
+  "rationale": "Program-level child specification. It must be progressively refined into smaller executable Grains before implementation.",
+  "parent_id": "SG-000001",
+  "scope_in": [],
+  "scope_out": [],
+  "acceptance": [],
+  "dependencies": [
+    "SG-000006"
+  ],
+  "risk": {},
+  "context": {},
+  "change_surface": [],
+  "evidence": {},
+  "method": "controlled",
+  "state": "DRAFT",
+  "children": [],
+  "labels": [
+    "p7-p9",
+    "integrations",
+    "ai",
+    "portability"
+  ],
+  "metadata": {
+    "planning_revision": "2026-09-19"
+  }
+}
