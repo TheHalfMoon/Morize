@@ -27,6 +27,14 @@ Read:
 - Preserve negative/failing evaluation evidence.
 - Do not make comparative superiority claims without reproducible evidence.
 
+## Contribution attestation
+
+Morize uses the Developer Certificate of Origin 1.1 in `DCO`.
+
+Contributors should certify commits with a `Signed-off-by:` trailer using `git commit -s` or an equivalent valid sign-off.
+
+The current project does not require a CLA.
+
 ## Source reuse
 
 If code is copied or adapted from another project, include an exact source record and satisfy `docs/DONOR_AND_PROVENANCE.md`.
