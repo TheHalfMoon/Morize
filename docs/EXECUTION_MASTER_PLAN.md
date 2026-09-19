@@ -80,31 +80,35 @@ No previous completion claim overrides a newer repository fact.
 
 ## 5. Current program graph
 
+All ten current nodes are children of the `SG-000001` program root. Their execution dependency
+graph is distinct from that parent/child decomposition:
+
 ```text
-SG-000001  Deliver Morize v1
- |
- +-- SG-000002  Foundation/governance/license/commercial
- |       |
- |       +-- SG-000010  Deterministic Rust kernel/data contracts
- |               |
- |               +-- SG-000003  Vault/persistence/migration/recovery
- |               |
- |               +-- SG-000004  Identity/policy/privacy/firewall
- |                       |
- +-----------------------+- SG-000005  Temporal truth/provenance/evidence graph
+SG-000002  Foundation/governance/license/commercial
+           planning contract; no execution dependency
+
+SG-000010  Deterministic Rust kernel/data contracts
+  |
+  +-- SG-000003  Vault/persistence/migration/recovery
+  |
+  +-- SG-000004  Identity/policy/privacy/firewall
+          |
+          +-- SG-000005  Temporal truth/provenance/evidence graph
                   |
                   +-- SG-000006  Retrieval/context/APIs/MCP
-                         |
-                         +-- SG-000007  Portability/integrations/intelligence
-                         |
-                         +------------- SG-000008  Experience/UI/team/commercial boundary
-                                          |
-                                          +-- SG-000009  Memory Lab/security/release/sustainability
+                          |
+                          +-- SG-000007  Portability/integrations/intelligence
+                          |
+                          +-- SG-000008  Experience/UI/team/commercial boundary
+
+SG-000009  Memory Lab/security/release/sustainability
+           waits on SG-000003 through SG-000008
 ```
 
-The exact JSON dependency graph in `.specgrain/specs/` is canonical.
+The exact JSON dependency graph in `.specgrain/specs/` is canonical. The diagram is explanatory
+and must not be used to infer edges that are absent from the JSON.
 
-All current nodes are DRAFT by design.
+All current program-level nodes remain DRAFT by design.
 
 ## 6. Planning closeout conditions
 
@@ -125,14 +129,17 @@ Foundation planning is ready to merge only when:
 
 ## 7. First implementation frontier
 
-After the planning package is canonically merged, do not start from the full roadmap.
+The foundation planning prerequisite was canonically closed by PR #1 merge commit
+`ba4732d348da245c503ab115c2c41e9a91914dcb`. That Git/GitHub event is governance evidence;
+it is not a SpecGrain lifecycle transition for broad program DRAFT `SG-000002`.
 
-Start from the first dependency-eligible program child and refine it.
+Do not start from the full roadmap. Refine the P1 program node into bounded implementation
+Grains and execute only dependency-eligible leaves.
 
 The first likely implementation sequence is:
 
 ```text
-SG-000002 planning closeout
+planning closeout: PR #1 merged
  -> refine SG-000010/P1 into bounded kernel/data-contract Grains
  -> first Rust workspace/tooling Grain
  -> deterministic identity/serialization/config/error-contract Grains
@@ -140,7 +147,10 @@ SG-000002 planning closeout
  -> refine SG-000004/P3 policy/privacy Grains when shared contracts are stable
 ```
 
-SG-000003 and SG-000004 both depend on SG-000010. They may proceed in dependency-safe parallel only after the specific shared kernel/data contracts they need are accepted, avoiding speculative storage-policy coupling.
+`SG-000010` therefore has no SpecGrain execution dependency. `SG-000003` and `SG-000004`
+both depend on `SG-000010`. They may proceed in dependency-safe parallel only after the
+specific shared kernel/data contracts they need are accepted, avoiding speculative
+storage-policy coupling.
 
 ## 8. First Rust Grain requirements
 

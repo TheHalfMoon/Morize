@@ -79,6 +79,28 @@ Only a dependency-eligible Grain receives an execution packet.
 
 This prevents the P10-P13 plan from becoming fake precision while P1/P2 realities are still unknown.
 
+### Planning prerequisites vs execution dependencies
+
+Repository-governance prerequisites and SpecGrain execution dependencies are different contracts.
+
+The native SpecGrain `dependencies` field is reserved for work-ordering relationships whose
+upstream node can reach a dependency-satisfied lifecycle state. Under the pinned SpecGrain
+semantics, dependency satisfaction requires `VERIFIED` or `CONTROLLED`.
+
+Therefore:
+
+- a planning review/merge prerequisite is evidenced by the canonical Git/GitHub record;
+- a broad program-level `DRAFT` must not be used as an execution dependency merely to record
+  that planning happened first;
+- after a planning prerequisite is canonically closed, a bounded implementation Grain may have
+  no SpecGrain dependency when no executable predecessor exists;
+- implementation dependencies remain explicit where upstream executable work must actually be
+  verified or controlled first.
+
+Do not bypass a waiting dependency by omitting it from a child. Remove or change an execution
+dependency only when the repository contract itself shows that it represented a different kind
+of prerequisite.
+
 ## 5. Method routing
 
 Use SpecGrain method profiles deliberately.
