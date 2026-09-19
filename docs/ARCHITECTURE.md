@@ -456,5 +456,69 @@ LOCALHOST != AUTHENTICATION
 MCP_CAPABILITY != MORIZE_AUTHORITY
 DELETE_INDEX != DELETE_MEMORY
 REWIND != ERASE_HISTORY
-ZERO_COST_PATH != LOW_QUALITY_PATH
+FOUNDER_ZERO_BURN != USER_FREE_FOREVER
 ```
+
+
+## 18. Deployment abstraction
+
+The semantic architecture is independent from deployment profile.
+
+Supported planning profiles are defined in `docs/DEPLOYMENT_PROFILES.md`:
+
+- embedded local;
+- local daemon;
+- self-hosted single-node;
+- self-hosted team;
+- future managed Morize service;
+- hybrid / bring-your-own-provider.
+
+SQLite/Markdown are initial local implementation choices, not public semantic APIs.
+
+## 19. Compatibility boundary
+
+Persistent formats, APIs, MCP schemas, CLI machine output, and SDK contracts evolve under `docs/API_COMPATIBILITY.md`.
+
+Persistent compatibility is correctness-sensitive. Unsupported newer vault formats fail safely or enter an explicitly supported read-only mode; writers never guess.
+
+## 20. Commercial boundary
+
+Morize's open-source source code is Apache-2.0.
+
+Future managed services may charge for operations such as:
+
+- hosted memory;
+- synchronization;
+- managed backup;
+- team/enterprise administration;
+- managed inference/search;
+- connectors;
+- high availability;
+- support/SLA.
+
+Billing and entitlements operate above canonical memory semantics.
+
+`PAID_PLAN != DIFFERENT_MEMORY_TRUTH`
+
+## 21. Founder-cost boundary
+
+The current pre-revenue engineering path cannot require an unapproved recurring founder-paid service.
+
+This does not constrain future user pricing.
+
+A proposed required paid dependency must state:
+
+- cost owner;
+- budget cap;
+- why local/free options are insufficient;
+- customer-revenue linkage where applicable;
+- degradation/fallback;
+- exit/migration plan.
+
+## 22. Delivery governance
+
+Architecture implementation follows `docs/PLANNING_GOVERNANCE.md`.
+
+SpecGrain controls decomposition/readiness. Diffcipline controls exact-diff/verification proof.
+
+Roadmap prose does not grant implementation authority. Only a dependency-eligible bounded Grain with explicit acceptance/evidence may enter execution.
