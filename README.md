@@ -97,6 +97,7 @@ The repository is open source under Apache-2.0. Morize may later charge for mana
 - [Founder cost and commercial boundary](docs/ZERO_COST_CONTRACT.md)
 - [Commercial service architecture](docs/COMMERCIAL_MODEL.md)
 - [Planning governance: SpecGrain + Diffcipline](docs/PLANNING_GOVERNANCE.md)
+- [Execution master plan](docs/EXECUTION_MASTER_PLAN.md)
 - [Risk register](docs/RISK_REGISTER.md)
 - [Master plan gap review](docs/GAP_REVIEW.md)
 - [Source ledger](docs/SOURCE_LEDGER.md)
@@ -104,6 +105,7 @@ The repository is open source under Apache-2.0. Morize may later charge for mana
 - [Threat model](docs/THREAT_MODEL.md)
 - [Benchmark plan](docs/BENCHMARK_PLAN.md)
 - [Implementation roadmap](docs/ROADMAP.md)
+- [Open-source governance](GOVERNANCE.md)
 
 ## Status
 
