@@ -1,0 +1,27 @@
+{
+  "acceptance": [],
+  "change_surface": [],
+  "children": [],
+  "context": {},
+  "dependencies": [],
+  "evidence": {},
+  "id": "SG-000011",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "rollback": "Revert the bounded workspace/tooling commit set; this Grain introduces no user data, persistent format, public API, or runtime state.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head and its required evidence separately from the implementing agent before acceptance.",
+      "control": "Implementation is limited to the declared change surface, admits no third-party runtime/build dependency, and requires the exact-head cross-platform verification matrix before acceptance."
+    }
+  },
+  "method": "controlled",
+  "outcome": "Morize has a dependency-free minimal Rust workspace with one first-party core crate, real local verification commands, a checked-in Diffcipline policy, and cross-platform CI, without implementing memory-domain behavior.",
+  "parent_id": "SG-000010",
+  "rationale": "This bounded child establishes only the executable repository/tooling foundation required before deterministic domain contracts can be implemented. It intentionally excludes memory types, persistence, policy, retrieval, APIs, models, vectors, graphs, and managed infrastructure.",
+  "risk": {},
+  "schema_version": 1,
+  "scope_in": [],
+  "scope_out": [],
+  "state": "DRAFT",
+  "title": "Establish minimal Rust workspace and verification spine"
+}
