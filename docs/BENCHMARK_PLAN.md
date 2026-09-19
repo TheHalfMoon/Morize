@@ -172,17 +172,18 @@ Measure:
 - context reduction relative to transcript replay;
 - answer quality when an optional answering model is used.
 
-### M14 — Zero-cost offline conformance
+### M14 — Local/self-hosted and founder-cost conformance
 
-Run core benchmark cases with:
+Run the local/self-hosted baseline benchmark cases with:
 
-- external network blocked;
-- no API keys;
-- no hosted vector DB;
-- no model;
-- no Docker requirement.
+- external network blocked where the tested operation does not require a connector;
+- no required paid memory service credential;
+- no hosted vector database requirement;
+- no mandatory model;
+- no Docker requirement for the local core;
+- no unapproved recurring founder-paid dependency in the development path.
 
-This is a release gate, not a demo.
+This proves the supported local profile and founder-zero-burn development boundary. It does not promise that future managed Morize services or user-selected providers are free.
 
 ### M15 — Local-AI enhancement
 
