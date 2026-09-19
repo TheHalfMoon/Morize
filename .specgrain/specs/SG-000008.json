@@ -1,0 +1,31 @@
+{
+  "id": "SG-000008",
+  "title": "Build experience, inspector, team mode, and commercial service boundary",
+  "outcome": "Morize exposes safe long-horizon experience, human inspection, self-hosted collaboration, and a clean boundary for future paid managed services without weakening the open-source core semantics.",
+  "schema_version": 1,
+  "rationale": "Program-level child specification. It must be progressively refined into smaller executable Grains before implementation.",
+  "parent_id": "SG-000001",
+  "scope_in": [],
+  "scope_out": [],
+  "acceptance": [],
+  "dependencies": [
+    "SG-000006",
+    "SG-000007"
+  ],
+  "risk": {},
+  "context": {},
+  "change_surface": [],
+  "evidence": {},
+  "method": "controlled",
+  "state": "DRAFT",
+  "children": [],
+  "labels": [
+    "p10-p12",
+    "ui",
+    "team",
+    "commercial"
+  ],
+  "metadata": {
+    "planning_revision": "2026-09-19"
+  }
+}
