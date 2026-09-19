@@ -13,7 +13,7 @@
 - **PROCESS_REFERENCE** — engineering/governance discipline rather than runtime code.
 - **REJECT_CORE_DEPENDENCY** — may be studied but must not become a required Morize runtime dependency.
 
-Founder permission makes authorized sources eligible for consideration; engineering quality, security, attribution, redistribution rights, dependency closure, and the zero-cost contract remain independent gates.
+Founder permission makes authorized sources eligible for consideration; engineering quality, security, attribution, redistribution rights, dependency closure, and the founder-cost/commercial boundary remain independent gates.
 
 ## Tier A — Direct memory-system references
 
@@ -109,7 +109,7 @@ Useful ideas:
 - compose decisions in code;
 - escalate low-confidence cases.
 
-Morize implements these ideas in its own open, local `DecisionEnvelope` contract. No Jev API call is required, because a mandatory paid decision service would violate the zero-cost contract.
+Morize implements these ideas in its own open, local `DecisionEnvelope` contract. No Jev API call is required, because it must not become a mandatory founder-paid dependency or a semantic authority dependency. A future paid Morize service may still use paid providers explicitly.
 
 ## Source selection rule
 
@@ -129,5 +129,5 @@ The preferred order is:
 1. adopt a protocol/behavioral idea;
 2. implement a small Morize-native mechanism when simpler;
 3. adapt selected code when it materially improves correctness or delivery;
-4. depend on an external package only when it is replaceable and does not violate offline/zero-cost operation;
+4. depend on an external package only when it is replaceable and does not violate the required local/self-hosted contract or founder-cost boundary;
 5. reject broad donor stacks that drag in hosted services or unnecessary authority.
