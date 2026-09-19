@@ -3,14 +3,12 @@
   "title": "Build deterministic Rust kernel and canonical data contracts",
   "outcome": "Morize has a minimal cross-platform Rust workspace with stable typed identities, bounded domain types, deterministic serialization/validation, versioned configuration, error contracts, and real verification commands that downstream vault and policy work can depend on.",
   "schema_version": 1,
-  "rationale": "P1 is a cross-cutting dependency and must not be hidden inside the vault/persistence specification. This node owns the deterministic base contracts shared by storage, policy, retrieval, APIs, and later adapters.",
+  "rationale": "P1 is a cross-cutting dependency and must not be hidden inside the vault/persistence specification. This node owns the deterministic base contracts shared by storage, policy, retrieval, APIs, and later adapters. Foundation planning closeout is a repository-governance prerequisite satisfied by canonical merge plus required review and evidence closure, not a SpecGrain execution-dependency edge.",
   "parent_id": "SG-000001",
   "scope_in": [],
   "scope_out": [],
   "acceptance": [],
-  "dependencies": [
-    "SG-000002"
-  ],
+  "dependencies": [],
   "risk": {},
   "context": {},
   "change_surface": [],
