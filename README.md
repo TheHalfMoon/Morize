@@ -8,7 +8,7 @@ It is designed to answer more than “what text looks similar?” Morize tracks 
 
 ## Product promise
 
-- **Zero required service fees.** The default path runs on user-owned hardware with no mandatory paid API, hosted database, SaaS control plane, or cloud account.
+- **Founder-zero-burn development.** The pre-revenue engineering path must not force the founder into mandatory recurring service fees. This is not a promise that future managed Morize services will be free to users.
 - **Useful without an LLM.** Exact lookup, FTS/BM25, temporal filters, graph traversal, policy, provenance, versioning, import/export, and deterministic retrieval work locally without model inference.
 - **Local-first and offline-capable.** Networking is an explicit optional capability, never a hidden fallback.
 - **User-owned truth.** Canonical durable memory is inspectable, exportable, versioned, and recoverable without a Morize cloud.
@@ -65,7 +65,7 @@ Agent / App / Human
 - **Explainable Recall** — show why each result was selected.
 - **Memory Lab** — reproducible evaluation for recall, temporal accuracy, contradictions, stale-memory resistance, provenance, poisoning, forgetting/redaction, latency, and offline operation.
 
-## Zero-cost default stack
+## Founder-zero-burn development stack
 
 The planned default stack is intentionally portable:
 
@@ -77,7 +77,11 @@ The planned default stack is intentionally portable:
 - optional local inference through Ollama, llama.cpp, or qualified embedded runtimes;
 - optional local vector search only after measured need.
 
-A remote provider may be added through an adapter, but **no remote provider is part of the product's required path**.
+Remote providers remain explicit adapters rather than hidden correctness dependencies. Future Morize-managed cloud, team, enterprise, inference, synchronization, support, and operational services may be commercial and charged to users.
+
+## Commercial boundary
+
+The repository is open source under Apache-2.0. Morize may later charge for managed cloud, hosted memory, synchronization, team/enterprise governance, managed inference/search, premium connectors, support, SLA, migration, and other operated services. The current cost constraint is on founder burn before revenue, not on future user pricing.
 
 ## Planning documents
 
@@ -85,7 +89,7 @@ A remote provider may be added through an adapter, but **no remote provider is p
 - [Architecture](docs/ARCHITECTURE.md)
 - [Typed memory decisions](docs/TYPED_DECISION_MODEL.md)
 - [Source ledger](docs/SOURCE_LEDGER.md)
-- [Zero-cost contract](docs/ZERO_COST_CONTRACT.md)
+- [Founder cost and commercial boundary](docs/ZERO_COST_CONTRACT.md)
 - [Threat model](docs/THREAT_MODEL.md)
 - [Benchmark plan](docs/BENCHMARK_PLAN.md)
 - [Implementation roadmap](docs/ROADMAP.md)
@@ -93,10 +97,10 @@ A remote provider may be added through an adapter, but **no remote provider is p
 
 ## Status
 
-Morize is in **foundation planning**. The repository starts by freezing contracts, evidence rules, source provenance, and zero-cost invariants before implementation.
+Morize is in **foundation planning**. The repository starts by freezing contracts, evidence rules, source provenance, founder-cost constraints, commercial boundaries, and delivery governance before implementation.
 
 No benchmark-superiority claim is accepted without reproducible evidence.
 
 ## License
 
-Morize is released under the [MIT License](LICENSE). Third-party code remains subject to its original obligations and Morize's source-admission process.
+Morize is released under the [Apache License 2.0](LICENSE). The Apache-2.0 source license does not prevent future paid Morize-hosted or managed services. Third-party code remains subject to its original obligations and Morize's source-admission process.
