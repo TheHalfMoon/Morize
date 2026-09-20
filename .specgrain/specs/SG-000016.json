@@ -1,0 +1,37 @@
+{
+  "acceptance": [],
+  "change_surface": [],
+  "children": [],
+  "context": {},
+  "dependencies": [],
+  "evidence": {},
+  "id": "SG-000016",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free non-exhaustive in-memory error-category enum, focused tests, and morize-core re-exports. No concrete error payload, message text, source chaining, retryability flag, transport/status/exit-code mapping, serialization, persistence, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head, baseline-category fidelity, non-exhaustive extensibility, absence of transport/wire semantics, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the baseline error-category implementation commits; no persisted format, migration, transport contract, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
+        }
+      ]
+    }
+  },
+  "method": "controlled",
+  "outcome": "morize-core exposes one dependency-free non-exhaustive ErrorCategory enum covering every baseline public error category already fixed by docs/API_COMPATIBILITY.md, without defining error payloads, messages, transport mappings, retry policy, serialization, persistence, or third-party dependencies.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 requires a stable public error taxonomy, and docs/API_COMPATIBILITY.md already fixes the baseline categories while explicitly saying public APIs should distinguish at least those categories. This Grain adds only the typed in-memory category vocabulary and preserves future extension without deciding concrete error payload or wire behavior.",
+  "risk": {},
+  "schema_version": 1,
+  "scope_in": [],
+  "scope_out": [],
+  "state": "DRAFT",
+  "title": "Add baseline public error categories"
+}
