@@ -1,0 +1,37 @@
+{
+  "acceptance": [],
+  "change_surface": [],
+  "children": [],
+  "context": {},
+  "dependencies": [],
+  "evidence": {},
+  "id": "SG-000015",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free in-memory compatibility-class enum, focused tests, and morize-core re-exports. No serialization, parsing, numeric representation, version negotiation, deprecation window, error taxonomy, persistence, configuration, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head, closed-vocabulary fidelity, absence of invented wire semantics, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the compatibility-class implementation commits; no persisted format, migration, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
+        }
+      ]
+    }
+  },
+  "method": "controlled",
+  "outcome": "morize-core exposes one dependency-free CompatibilityClass enum for the five compatibility states already fixed by the repository policy, without adding serialization, parsing, version negotiation, deprecation timing, error taxonomy, persistence, or third-party dependencies.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 requires compatibility classes, and docs/API_COMPATIBILITY.md already freezes the exact five semantic classes. This Grain implements only that in-memory closed vocabulary so later public APIs and error contracts can reference one typed definition without deciding wire or persistence formats.",
+  "risk": {},
+  "schema_version": 1,
+  "scope_in": [],
+  "scope_out": [],
+  "state": "DRAFT",
+  "title": "Add compatibility class primitive"
+}
