@@ -99,6 +99,6 @@
     "Serde or other serialization-framework integration, persisted schemas, configuration formats, wire contracts, migrations, storage, retrieval, policy, MCP, models, or domain records.",
     "Any third-party runtime, build, or test dependency."
   ],
-  "state": "SHAPED",
+  "state": "REFINING",
   "title": "Add bounded ordered collection primitive"
 }
