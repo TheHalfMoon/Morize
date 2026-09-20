@@ -238,50 +238,50 @@ jobs:
           spec=Path('.specgrain/specs/SG-000019.json').read_text()
           head=os.environ['PLAN_HEAD']; base=os.environ['BASE_MAIN']
           prompt=f"""Independent semantic PLANNING review of Morize SG-000019. Return final structured review only; do not expose chain-of-thought or tool traces.
-
-REVIEW_HEAD={head}
-BASE_MAIN={base}
-SPEC_REVISION={os.environ['SPEC_REVISION']}
-DIFF_SHA256={os.environ['DIFF_SHA256']}
-FILE_LIST_SHA256={os.environ['FILE_LIST_SHA256']}
-DIFFCIPLINE_SHA256={os.environ['DIFFCIPLINE_SHA256']}
-Alibaba accounting only: total=2 reviewable=2 excluded=0 rule-accounted=2/2.
-Exact changed paths: .specgrain/specs/SG-000010.json and .specgrain/specs/SG-000019.json.
-SpecGrain check valid=true issues=[]; SG-000019 eligible=true.
-SG-000011 prerequisite: verified=true, record=sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9, implementation b54879d7c04ba914997f14034c3c1b262b9629f6 is ancestor of BASE_MAIN.
-
-Repository planning authority:
-- docs/DATA_MODEL.md calls these the initial MemoryRelation vocabulary: SUPPORTS, CONTRADICTS, SUPERSEDES, DERIVED_FROM, DEPENDS_ON, CAUSED_BY, LED_TO, MEMBER_OF, ABOUT, RELATED_TO, SOURCE_OF.
-- MZ-PROV-005 says inferred graph relationships must identify their inference/evidence class, but SG-000019 intentionally does NOT define edge class or inferred behavior; those require a separate Grain.
-- P1 requires MemoryRelation.
-- This Grain is vocabulary only.
-
-Review goals:
-1. Exact 11 initial relation types and no extra current type.
-2. non_exhaustive is appropriate because the repository calls the vocabulary initial.
-3. Every current variant fieldless and descriptive only.
-4. No relation endpoints, edge class explicit/inferred, evidence thresholds, graph traversal/mutation, conflict/supersession policy, truth/authority, authorization, serialization, persistence, or wire semantics are invented.
-5. Derives limited to Clone, Copy, Debug, PartialEq, Eq, Hash; no ordering.
-6. Exact two-file planning scope, controlled metadata, rollback, SG-000011 prerequisite, and acceptance/evidence coherence.
-7. No third-party implementation dependency.
-
-SG-000019 Grain:
-{spec}
-
-Return exactly:
-REVIEW_HEAD
-{head}
-REVIEW_KIND
-SG-000019_PLANNING
-CRITICAL = NONE
-HIGH = NONE
-MEDIUM = NONE
-LOW = NONE
-FINDINGS
-- NONE
-FINAL_GATE = PASS
-Replace NONE/PASS only when concise material findings require it. Any different REVIEW_HEAD invalidates the review.
-"""
+          
+          REVIEW_HEAD={head}
+          BASE_MAIN={base}
+          SPEC_REVISION={os.environ['SPEC_REVISION']}
+          DIFF_SHA256={os.environ['DIFF_SHA256']}
+          FILE_LIST_SHA256={os.environ['FILE_LIST_SHA256']}
+          DIFFCIPLINE_SHA256={os.environ['DIFFCIPLINE_SHA256']}
+          Alibaba accounting only: total=2 reviewable=2 excluded=0 rule-accounted=2/2.
+          Exact changed paths: .specgrain/specs/SG-000010.json and .specgrain/specs/SG-000019.json.
+          SpecGrain check valid=true issues=[]; SG-000019 eligible=true.
+          SG-000011 prerequisite: verified=true, record=sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9, implementation b54879d7c04ba914997f14034c3c1b262b9629f6 is ancestor of BASE_MAIN.
+          
+          Repository planning authority:
+          - docs/DATA_MODEL.md calls these the initial MemoryRelation vocabulary: SUPPORTS, CONTRADICTS, SUPERSEDES, DERIVED_FROM, DEPENDS_ON, CAUSED_BY, LED_TO, MEMBER_OF, ABOUT, RELATED_TO, SOURCE_OF.
+          - MZ-PROV-005 says inferred graph relationships must identify their inference/evidence class, but SG-000019 intentionally does NOT define edge class or inferred behavior; those require a separate Grain.
+          - P1 requires MemoryRelation.
+          - This Grain is vocabulary only.
+          
+          Review goals:
+          1. Exact 11 initial relation types and no extra current type.
+          2. non_exhaustive is appropriate because the repository calls the vocabulary initial.
+          3. Every current variant fieldless and descriptive only.
+          4. No relation endpoints, edge class explicit/inferred, evidence thresholds, graph traversal/mutation, conflict/supersession policy, truth/authority, authorization, serialization, persistence, or wire semantics are invented.
+          5. Derives limited to Clone, Copy, Debug, PartialEq, Eq, Hash; no ordering.
+          6. Exact two-file planning scope, controlled metadata, rollback, SG-000011 prerequisite, and acceptance/evidence coherence.
+          7. No third-party implementation dependency.
+          
+          SG-000019 Grain:
+          {spec}
+          
+          Return exactly:
+          REVIEW_HEAD
+          {head}
+          REVIEW_KIND
+          SG-000019_PLANNING
+          CRITICAL = NONE
+          HIGH = NONE
+          MEDIUM = NONE
+          LOW = NONE
+          FINDINGS
+          - NONE
+          FINAL_GATE = PASS
+          Replace NONE/PASS only when concise material findings require it. Any different REVIEW_HEAD invalidates the review.
+          """
           Path('/tmp/sg19-plan-north-prompt.txt').write_text(prompt)
           raw=Client('CohereLabs/North-Mini-Code-1.0',verbose=False).predict(
               prompt,'Rust','[]','{}',api_name='/chat'
