@@ -6,6 +6,7 @@ pub mod bounded_collection;
 pub mod compatibility;
 pub mod error;
 pub mod identity;
+pub mod scope;
 
 pub use bounded::{BoundedUtf8, Utf8BoundsError};
 pub use bounded_collection::{
@@ -19,3 +20,4 @@ pub use identity::{
     PolicyRevisionId, PrincipalId, ProjectionGenerationId, PropositionId, RelationId, ScopeId,
     SnapshotId, SourceId, VaultId,
 };
+pub use scope::ScopeKind;
