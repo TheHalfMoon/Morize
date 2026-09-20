@@ -646,24 +646,26 @@ jobs:
           echo "IMPLEMENTATION_STATUS_PATHS=$actual"
           test "$actual" = "$expected"
 
-          git add .github/workflows/fuzz-smoke.yml fuzz
+          git add fuzz
           git diff --cached --check
-          test "$(git diff --cached --name-only | wc -l)" -eq 10
+          test "$(git diff --cached --name-only | wc -l)" -eq 9
+          test "$(git diff --cached --name-only | grep -c '^fuzz/')" -eq 9
 
-          git commit -s -m "test: add isolated SG-000024 fuzz harness"
+          git commit -s -m "test: add isolated SG-000024 fuzz workspace"
 
-          IMPL_HEAD="$(git rev-parse HEAD)"
-          IMPL_TREE="$(git rev-parse HEAD^{tree})"
-          DIFF_SHA256="$(git diff "$BASE_MAIN...$IMPL_HEAD" | sha256sum | awk '{print $1}')"
-          FILE_LIST_SHA256="$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" | sha256sum | awk '{print $1}')"
+          FUZZ_WORKSPACE_HEAD="$(git rev-parse HEAD)"
+          FUZZ_WORKSPACE_TREE="$(git rev-parse HEAD^{tree})"
+          FUZZ_WORKSPACE_DIFF_SHA256="$(git diff "$BASE_MAIN...$FUZZ_WORKSPACE_HEAD" | sha256sum | awk '{print $1}')"
+          FUZZ_WORKSPACE_FILE_LIST_SHA256="$(git diff --name-only "$BASE_MAIN...$FUZZ_WORKSPACE_HEAD" | sha256sum | awk '{print $1}')"
           LOCK_SHA256="$(sha256sum fuzz/Cargo.lock | awk '{print $1}')"
 
-          test -z "$(git status --porcelain)"
+          test "$(git status --porcelain --untracked-files=all)" = "?? .github/workflows/fuzz-smoke.yml"
           git push origin "HEAD:refs/heads/$IMPL_BRANCH"
 
-          echo "IMPLEMENTATION_HEAD=$IMPL_HEAD"
-          echo "IMPLEMENTATION_TREE=$IMPL_TREE"
-          echo "IMPLEMENTATION_DIFF_SHA256=$DIFF_SHA256"
-          echo "IMPLEMENTATION_FILE_LIST_SHA256=$FILE_LIST_SHA256"
+          echo "FUZZ_WORKSPACE_HEAD=$FUZZ_WORKSPACE_HEAD"
+          echo "FUZZ_WORKSPACE_TREE=$FUZZ_WORKSPACE_TREE"
+          echo "FUZZ_WORKSPACE_DIFF_SHA256=$FUZZ_WORKSPACE_DIFF_SHA256"
+          echo "FUZZ_WORKSPACE_FILE_LIST_SHA256=$FUZZ_WORKSPACE_FILE_LIST_SHA256"
           echo "FUZZ_LOCK_SHA256=$LOCK_SHA256"
+          echo "WORKFLOW_FILE_PENDING_CONNECTOR_COMMIT=.github/workflows/fuzz-smoke.yml"
           cat /tmp/sg24-workpacket.json
