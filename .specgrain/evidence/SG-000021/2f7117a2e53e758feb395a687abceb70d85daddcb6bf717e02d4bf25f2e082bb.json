@@ -1,0 +1,191 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:2f7117a2e53e758feb395a687abceb70d85daddcb6bf717e02d4bf25f2e082bb",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000011 proof prerequisite matched the exact WorkPacket baseline before execution.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=b9259e9ddcde53e0bdfa2c90c534265c51479420",
+        "passed": true
+      },
+      {
+        "check_id": "All four current variants are fieldless, and UnknownOutcome is documented as non-success without implementing reconciliation or dependent-mutation blocking behavior.",
+        "detail": "All four current variants are fieldless.",
+        "evidence_ref": "git:587d74068e4d794a95c42d90b2e4db475eaf9999:crates/morize-core/src/mutation.rs;fieldless;independent-review:sha256:c8f9db3aa960f710ef467eb7ea07a4bf7ce99e6c9469ae4bf4a03f14d438ca2d",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for four-state baseline fidelity, non-exhaustive compatibility choice, UnknownOutcome non-success semantics, absence of transition/reconciliation/persistence behavior, scope containment, and required evidence.",
+        "detail": "Independent North Mini Code review is bound exactly to the implementation head and returned PASS with no findings.",
+        "evidence_ref": "independent-review:sha256:c8f9db3aa960f710ef467eb7ea07a4bf7ce99e6c9469ae4bf4a03f14d438ca2d;head=95a03dad3b9e7a28e2547b3d482e1314c02bf355",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+        "detail": "Cargo manifests and Cargo.lock are unchanged; no runtime, build, or test dependency was added.",
+        "evidence_ref": "git-diff:b9259e9ddcde53e0bdfa2c90c534265c51479420...95a03dad3b9e7a28e2547b3d482e1314c02bf355;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact PR-head and canonical-main CI completed successfully on Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35512000579;main=35512041241;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "MutationTerminalState is marked non_exhaustive because docs/DATA_MODEL.md calls these planned terminal semantics rather than declaring a permanently closed public vocabulary.",
+        "detail": "Source and independent review confirm MutationTerminalState is non-exhaustive, matching the planned baseline vocabulary without falsely closing future compatibility.",
+        "evidence_ref": "git:587d74068e4d794a95c42d90b2e4db475eaf9999:crates/morize-core/src/mutation.rs;non-exhaustive;independent-review:sha256:c8f9db3aa960f710ef467eb7ea07a4bf7ce99e6c9469ae4bf4a03f14d438ca2d",
+        "passed": true
+      },
+      {
+        "check_id": "MutationTerminalState supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests exercise all four current variants and confirm distinct value semantics without defining an ordering contract.",
+        "detail": "UnknownOutcome is documented as ambiguous and not success; the value type does not execute reconciliation or dependent-mutation blocking.",
+        "evidence_ref": "git:587d74068e4d794a95c42d90b2e4db475eaf9999:crates/morize-core/src/mutation.rs;unknown-outcome=non-success;independent-review:sha256:c8f9db3aa960f710ef467eb7ea07a4bf7ce99e6c9469ae4bf4a03f14d438ca2d",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation changes no path outside crates/morize-core/src/mutation.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Independent diff observation contains exactly mutation.rs and lib.rs, both within the authorized change surface.",
+        "evidence_ref": "git-diff:b9259e9ddcde53e0bdfa2c90c534265c51479420...95a03dad3b9e7a28e2547b3d482e1314c02bf355;sha256=c76dc113b009098c50e107c2d8d9fab6b0f79d2291bbb8c27133d7b46f7272ce;paths=mutation.rs,lib.rs",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation defines no mutation record, transition engine, transition legality, retry/idempotency policy, compare-and-swap, reconciliation algorithm, dependent-mutation blocking execution, Display, FromStr, parser, serde integration, numeric repr/discriminants, or wire/persistence format.",
+        "detail": "Source and independent review confirm Clone, Copy, Debug, Eq, Hash, and PartialEq value semantics with no ordering and no mutation record, transition, retry/idempotency, reconciliation, parser, serialization, numeric, wire, persistence, or transport behavior.",
+        "evidence_ref": "git:587d74068e4d794a95c42d90b2e4db475eaf9999:crates/morize-core/src/mutation.rs;independent-review:sha256:c8f9db3aa960f710ef467eb7ea07a4bf7ce99e6c9469ae4bf4a03f14d438ca2d",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passed on the exact PR head and canonical main.",
+        "evidence_ref": "github-actions:pr=35512000579;main=35512041241;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passed on the exact PR head and canonical main.",
+        "evidence_ref": "github-actions:pr=35512000579;main=35512041241;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "Formatting passed on the exact PR head and canonical main.",
+        "evidence_ref": "github-actions:pr=35512000579;main=35512041241;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and includes focused tests for all four current mutation terminal states and required value semantics.",
+        "detail": "Offline workspace tests passed with 25/25 tests and include focused terminal-state value tests.",
+        "evidence_ref": "github-actions:pr=35512000579;main=35512041241;local-tests=25/25",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core exports MutationTerminalState with current baseline variants Committed, Rejected, Failed, and UnknownOutcome and no additional current variant.",
+        "detail": "Canonical merge exports the four current MutationTerminalState baseline variants: Committed, Rejected, Failed, and UnknownOutcome, with no additional current variant.",
+        "evidence_ref": "git:587d74068e4d794a95c42d90b2e4db475eaf9999:crates/morize-core/src/mutation.rs;review-head=95a03dad3b9e7a28e2547b3d482e1314c02bf355",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and canonical-main CI both passed Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35512000579;main=35512041241;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-MUTATION-TERMINAL-BASELINE",
+        "detail": "Exactly the current baseline variants Committed, Rejected, Failed, and UnknownOutcome are implemented.",
+        "evidence_ref": "git:587d74068e4d794a95c42d90b2e4db475eaf9999:crates/morize-core/src/mutation.rs;github-actions:pr=35512000579;main=35512041241",
+        "passed": true
+      },
+      {
+        "check_id": "E-MUTATION-TERMINAL-FIELDLESS",
+        "detail": "All four current terminal-state variants are fieldless.",
+        "evidence_ref": "git:587d74068e4d794a95c42d90b2e4db475eaf9999:crates/morize-core/src/mutation.rs;fieldless",
+        "passed": true
+      },
+      {
+        "check_id": "E-MUTATION-TERMINAL-NO-DEPENDENCIES",
+        "detail": "No Cargo manifest or lockfile change; no runtime, build, or test dependency was added.",
+        "evidence_ref": "git-diff:b9259e9ddcde53e0bdfa2c90c534265c51479420...95a03dad3b9e7a28e2547b3d482e1314c02bf355;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-MUTATION-TERMINAL-NONEXHAUSTIVE",
+        "detail": "MutationTerminalState is marked non-exhaustive.",
+        "evidence_ref": "git:587d74068e4d794a95c42d90b2e4db475eaf9999:crates/morize-core/src/mutation.rs;non-exhaustive",
+        "passed": true
+      },
+      {
+        "check_id": "E-MUTATION-TERMINAL-VALUE-SEMANTICS",
+        "detail": "Focused tests prove distinct equality/hash values and Copy behavior without ordering semantics.",
+        "evidence_ref": "github-actions:pr=35512000579;main=35512041241;local-tests=25/25",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000011",
+        "detail": "Canonical SG-000011 verified proof and ancestry revalidated at the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=b9259e9ddcde53e0bdfa2c90c534265c51479420",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35512000579;main=35512041241;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with -D warnings passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35512000579;main=35512041241;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt --all -- --check passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35512000579;main=35512041241;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline workspace tests passed with 25/25 tests and cross-platform.",
+        "evidence_ref": "github-actions:pr=35512000579;main=35512041241;local-tests=25/25",
+        "passed": true
+      },
+      {
+        "check_id": "E-UNKNOWN-OUTCOME-NON-SUCCESS",
+        "detail": "UnknownOutcome is documented as ambiguous non-success and introduces no reconciliation or dependent-mutation blocking execution.",
+        "evidence_ref": "git:587d74068e4d794a95c42d90b2e4db475eaf9999:crates/morize-core/src/mutation.rs;independent-review:sha256:c8f9db3aa960f710ef467eb7ea07a4bf7ce99e6c9469ae4bf4a03f14d438ca2d",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Exact-head independent semantic implementation review returned PASS with C/H/M/L NONE.",
+        "evidence_ref": "independent-review:sha256:c8f9db3aa960f710ef467eb7ea07a4bf7ce99e6c9469ae4bf4a03f14d438ca2d;head=95a03dad3b9e7a28e2547b3d482e1314c02bf355",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "A normal forward revert removes the primitive; no persisted mutation record, transition state, retry state, reconciliation state, transport contract, or user data depends on it.",
+        "evidence_ref": "git-history:base=b9259e9ddcde53e0bdfa2c90c534265c51479420;merge=587d74068e4d794a95c42d90b2e4db475eaf9999;no-persisted-mutation-state-or-user-data",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "587d74068e4d794a95c42d90b2e4db475eaf9999",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/lib.rs",
+      "crates/morize-core/src/mutation.rs"
+    ],
+    "packet_digest": "sha256:f8b3899a48c2d542d0cbe9993c04fba92b3cf91feeeafcf394f11fa9b5b1ea0f",
+    "result_digest": "sha256:fd7075908d7d273974c276803ee9bf71d6037d767442ab42fed10ac542bcb43d",
+    "spec_id": "SG-000021",
+    "spec_revision": "sha256:9cd458e45be54fa361e1ac8654161ee8b5cf4a88a975b66e33d677de1f1501ad",
+    "verification_version": 1,
+    "verified": true
+  }
+}
