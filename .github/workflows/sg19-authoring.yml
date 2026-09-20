@@ -198,7 +198,8 @@ jobs:
           DIFFCIPLINE_SHA256="$(sha256sum /tmp/sg19-plan-diffcipline.json | awk '{print $1}')"
           python - <<'PY'
           import json
-          x=json.load(open('/tmp/sg19-plan-diffcipline.json'))
+          lines=[line for line in open('/tmp/sg19-plan-diffcipline.json') if line.strip()]
+          x=json.loads(lines[-1])
           assert x['verdict']=='PASS'
           assert x['changed_files']==2
           assert x['scope_violations']==[]
