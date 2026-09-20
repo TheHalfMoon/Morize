@@ -113,6 +113,6 @@
     "Any runtime, build, dev, or test dependency; Cargo.toml files and Cargo.lock must remain unchanged.",
     "Any claim that this deterministic property matrix completes the separate P1 fuzz-testing requirement."
   ],
-  "state": "DRAFT",
+  "state": "SHAPED",
   "title": "Add deterministic core property matrices"
 }
