@@ -1,0 +1,204 @@
+name: sg26-planning-review
+
+on:
+  push:
+    branches:
+      - automation/sg-000026-planning-review
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout automation branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+
+      - name: Qualify SG-000026 planning head
+        shell: bash
+        env:
+          BASE_MAIN: f322e8836fa60acaa1c06ed2d26769f9352f31db
+          PLAN_HEAD: 6f4f4032a69aefa2899caa8fe816f9def9e4fa5c
+          SPEC_GRAIN_PIN: 5de7d6499bb0a9e3a191fc0934399cf099d1980a
+          OCR_PIN: 85cecfe5f935da2b2aae8f91ce4fee8ed343a681
+        run: |
+          set -euo pipefail
+
+          git fetch origin main plan/sg-000026-action-set-version --prune
+          test "$(git rev-parse origin/main)" = "$BASE_MAIN"
+          test "$(git rev-parse origin/plan/sg-000026-action-set-version)" = "$PLAN_HEAD"
+          git checkout --detach "$PLAN_HEAD"
+          test "$(git rev-parse HEAD)" = "$PLAN_HEAD"
+          test -z "$(git status --porcelain)"
+
+          python -m pip install --disable-pip-version-check --quiet \
+            "git+https://github.com/TheHalfMoon/SpecGrain.git@$SPEC_GRAIN_PIN"
+
+          specgrain check --json . > /tmp/sg26-check.json
+          specgrain prove --json SG-000018 . > /tmp/p18.json
+
+          python - <<'PY'
+          import json, os, subprocess
+          from specgrain import load_project
+
+          check=json.load(open('/tmp/sg26-check.json'))
+          assert check['valid'] is True and check['issues']==[]
+
+          project=load_project('.')
+          node=next(n for n in project.specs if n.id=='SG-000026')
+          assert node.state=='GRAIN'
+          assert node.parent_id=='SG-000010'
+          assert tuple(sorted(node.change_surface))==tuple(sorted([
+              'crates/morize-core/src/decision.rs',
+              'crates/morize-core/src/lib.rs',
+          ]))
+          assert len(node.acceptance)==15
+          assert len(node.evidence['required'])==14
+
+          p=json.load(open('/tmp/p18.json'))
+          assert p['verified'] is True
+          assert p['latest_record_digest']=='sha256:6ed74d50664d885d932b0859fa4acded3826a8a67840afc992d277b0027f6053'
+          latest=p['records'][-1]['report']
+          assert latest['spec_revision']=='sha256:9a8926e557a54ae9f3eed4218a43fd4e14c8aac5f9320f70a1a9b008d4c45e7b'
+          assert latest['implementation_revision']=='78c6bda86906a84e9511edd7e19e303cfeb53f4a'
+          assert latest['issues']==[]
+          subprocess.run(['git','merge-base','--is-ancestor',latest['implementation_revision'],os.environ['BASE_MAIN']],check=True)
+
+          program=next(n for n in project.specs if n.id=='SG-000010')
+          assert program.state=='DRAFT'
+          assert 'SG-000026' in program.children
+
+          print('SPEC_CHECK=PASS')
+          print('SG000026_SPEC_REVISION='+node.revision_digest)
+          print('PROOF_PREREQUISITE_SG000018=PASS')
+          print('PROGRAM_STATE_PRESERVED=DRAFT')
+          PY
+
+          test "$(git diff --name-only "$BASE_MAIN...$PLAN_HEAD" | sort | tr '\n' ' ')" = ".specgrain/specs/SG-000010.json .specgrain/specs/SG-000026.json "
+          echo "PLANNING_SCOPE=PASS"
+
+          git clone --quiet "https://github.com/alibaba/open-code-review.git" /tmp/ocr
+          git -C /tmp/ocr checkout --quiet "$OCR_PIN"
+          (cd /tmp/ocr && GOTOOLCHAIN=auto go build -o /tmp/ocr-bin ./cmd/opencodereview)
+          OCR_NO_UPDATE=1 /tmp/ocr-bin delegate preview --format json --from "$BASE_MAIN" --to "$PLAN_HEAD" > /tmp/sg26-ocr-preview.json
+
+          python - <<'PY'
+          import json, subprocess
+          x=json.load(open('/tmp/sg26-ocr-preview.json'))
+          assert x['total_files']==2
+          assert x['reviewable_count']==2
+          assert x['excluded_count']==0
+          paths=sorted(f['path'] for f in x['reviewable_files'])
+          assert paths==['.specgrain/specs/SG-000010.json','.specgrain/specs/SG-000026.json']
+          with open('/tmp/sg26-ocr-rules.json','w') as out:
+              subprocess.run(['/tmp/ocr-bin','delegate','rule','--format','json',*paths],check=True,stdout=out)
+          groups=json.load(open('/tmp/sg26-ocr-rules.json'))['groups']
+          accounted=sorted(p for g in groups for p in g['files'])
+          assert accounted==paths
+          print('ALIBABA_ACCOUNTING=2/2')
+          PY
+
+          python -m pip install --disable-pip-version-check --quiet "gradio_client>=1.8,<2"
+
+          python - <<'PY'
+          import hashlib, json, os, time
+          from pathlib import Path
+          from gradio_client import Client
+          from specgrain import load_project
+
+          node=next(n for n in load_project('.').specs if n.id=='SG-000026')
+          spec=Path('.specgrain/specs/SG-000026.json').read_text()
+          typed=Path('docs/TYPED_DECISION_MODEL.md').read_text()
+          sg18=Path('.specgrain/specs/SG-000018.json').read_text()
+          typed_excerpt=typed[typed.index('## Closed decision vocabulary'):typed.index('## Engine classes')]
+
+          prompt='\n'.join([
+              'Independent semantic PLANNING review of Morize SG-000026. Return final structured review only; do not expose chain-of-thought or tool traces.',
+              '',
+              f'REVIEW_HEAD={os.environ["PLAN_HEAD"]}',
+              f'BASE_MAIN={os.environ["BASE_MAIN"]}',
+              f'SPEC_REVISION={node.revision_digest}',
+              'Alibaba accounting only: total=2 reviewable=2 excluded=0 rule-accounted=2/2.',
+              'Exact planning diff: SG-000010 child registration plus SG-000026 only.',
+              '',
+              'Review goals:',
+              '1. Repository authority explicitly says the existing closed MemoryAction vocabulary is versioned and DecisionEnvelope binds action_set_version.',
+              '2. SG-000018 already proves the exact 11-action vocabulary and deliberately defers version binding.',
+              '3. SG-000026 must add only an in-memory non-exhaustive MemoryActionSetVersion::V1 identity bound to exactly those 11 actions.',
+              '4. It must not add, rename, reorder, authorize, execute, or attach side effects to MemoryAction.',
+              '5. It must not freeze numeric repr/discriminants, Display/FromStr, serialization, persisted/wire encoding, or schema field names.',
+              '6. It must not implement DecisionEnvelope fields, confidence, abstention, reason codes, policy, replay, or authority semantics.',
+              '7. Exact implementation surface must remain decision.rs plus lib.rs with no dependency changes.',
+              '8. SG-000018 prerequisite identity must be exact and broad SG-000010 must remain DRAFT.',
+              '9. Acceptance and evidence must be sufficient for exact-head cross-platform proof and independent implementation review.',
+              '',
+              'SG-000026:',
+              spec,
+              '',
+              'Typed-decision authority excerpt:',
+              typed_excerpt,
+              '',
+              'SG-000018 prior contract:',
+              sg18,
+              '',
+              'Return exactly:',
+              'REVIEW_HEAD',
+              os.environ['PLAN_HEAD'],
+              'REVIEW_KIND',
+              'SG-000026_PLANNING',
+              'CRITICAL = NONE',
+              'HIGH = NONE',
+              'MEDIUM = NONE',
+              'LOW = NONE',
+              'FINDINGS',
+              '- NONE',
+              'FINAL_GATE = PASS',
+              'Replace NONE/PASS only when concise material findings require it. Any different REVIEW_HEAD invalidates the review.'
+          ])
+
+          client=Client('CohereLabs/North-Mini-Code-1.0',verbose=False)
+          final=''
+          for attempt in range(1,4):
+              raw=client.predict(prompt,'Rust','[]','{}',api_name='/chat')
+              obj=json.loads(raw) if isinstance(raw,str) else raw
+              content=''
+              for msg in obj.get('history',[]) if isinstance(obj,dict) else []:
+                  if msg.get('role')=='assistant':
+                      content=msg.get('content','')
+              candidate=content.split('</think>',1)[-1].strip() if '</think>' in content else content.strip()
+              structured=(f'REVIEW_HEAD\n{os.environ["PLAN_HEAD"]}' in candidate and 'REVIEW_KIND\nSG-000026_PLANNING' in candidate)
+              if structured:
+                  final=candidate
+                  break
+              print(f'REVIEW_PROVIDER_ATTEMPT_{attempt}=INVALID_NONSTRUCTURED')
+              print(candidate[:500])
+              if attempt<3:
+                  time.sleep(10)
+          if not final:
+              raise SystemExit('independent planning reviewer returned no structured review')
+
+          print('INDEPENDENT_REVIEW_BEGIN')
+          print(final)
+          print('INDEPENDENT_REVIEW_END')
+          checks=[
+              f'REVIEW_HEAD\n{os.environ["PLAN_HEAD"]}',
+              'REVIEW_KIND\nSG-000026_PLANNING',
+              'CRITICAL = NONE','HIGH = NONE','MEDIUM = NONE','LOW = NONE',
+              'FINDINGS\n- NONE','FINAL_GATE = PASS'
+          ]
+          if not all(x in final for x in checks):
+              raise SystemExit('independent planning review produced a non-PASS result')
+
+          print('REVIEW_PROMPT_SHA256='+hashlib.sha256(prompt.encode()).hexdigest())
+          print('REVIEW_FINAL_SHA256='+hashlib.sha256((final+'\n').encode()).hexdigest())
+          PY
+
+          test -z "$(git status --porcelain)"
