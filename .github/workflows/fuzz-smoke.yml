@@ -70,7 +70,7 @@ jobs:
           test "$(grep -c '^\[\[package\]\]$' Cargo.lock)" -eq 1
           grep -q '^name = "morize-core"$' Cargo.lock
           grep -q '^version = "0.4.13"$' fuzz/Cargo.lock
-          grep -q 'cargo-fuzz: MIT OR Apache-2.0' fuzz/THIRD_PARTY.md
+          grep -q -- '- License: MIT OR Apache-2.0' fuzz/THIRD_PARTY.md
           grep -q 'Combined crate expression: (MIT OR Apache-2.0) AND NCSA' fuzz/THIRD_PARTY.md
           grep -q 'Bundled libFuzzer source license: NCSA' fuzz/THIRD_PARTY.md
 
