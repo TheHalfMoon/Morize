@@ -1,0 +1,37 @@
+{
+  "acceptance": [],
+  "change_surface": [],
+  "children": [],
+  "context": {},
+  "dependencies": [],
+  "evidence": {},
+  "id": "SG-000018",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free closed in-memory MemoryAction enum, focused tests, and morize-core re-exports. No action-set version identifier, DecisionEnvelope, parser, mutation execution, authorization, threshold, serialization, persistence, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head, exact 11-action fidelity, closed-vocabulary correctness, absence of mutation authority/version/wire semantics, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the memory-action implementation commits; no persisted format, action-set version binding, authorization rule, mutation side effect, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
+        }
+      ]
+    }
+  },
+  "method": "controlled",
+  "outcome": "morize-core exposes one dependency-free closed MemoryAction enum for the 11 initial durable-memory actions already fixed by docs/TYPED_DECISION_MODEL.md and docs/DATA_MODEL.md, without defining action-set version identifiers, decision envelopes, mutation authority, authorization, serialization, persistence, or side effects.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 requires a typed decision envelope, and the repository already fixes a closed initial durable-memory action vocabulary. This Grain adds only the typed in-memory action vocabulary so later versioned action-set and DecisionEnvelope contracts can reuse one bounded definition without inventing authority or wire semantics.",
+  "risk": {},
+  "schema_version": 1,
+  "scope_in": [],
+  "scope_out": [],
+  "state": "DRAFT",
+  "title": "Add closed durable memory action vocabulary"
+}
