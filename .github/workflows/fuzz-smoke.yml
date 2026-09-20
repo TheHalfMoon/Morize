@@ -1,0 +1,109 @@
+name: fuzz-smoke
+
+on:
+  pull_request:
+    paths:
+      - "fuzz/**"
+      - ".github/workflows/fuzz-smoke.yml"
+  push:
+    branches: [main]
+    paths:
+      - "fuzz/**"
+      - ".github/workflows/fuzz-smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+
+      - name: Install pinned nightly
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install nightly-2026-09-18 --profile minimal
+          rustup component add rust-src --toolchain nightly-2026-09-18
+          rustc +nightly-2026-09-18 --version --verbose | tee /tmp/rustc-version.txt
+          grep -q "release: 1.100.0-nightly" /tmp/rustc-version.txt
+          grep -q "commit-hash: 330d317121e16b5db8e5adc63595910528ff2ee7" /tmp/rustc-version.txt
+
+      - name: Install pinned cargo-fuzz executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error             "https://github.com/rust-fuzz/cargo-fuzz/releases/download/0.13.2/cargo-fuzz-0.13.2-x86_64-unknown-linux-musl.tar.gz"             --output /tmp/cargo-fuzz.tar.gz
+          echo "b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c  /tmp/cargo-fuzz.tar.gz" | sha256sum --check
+          tar -xzf /tmp/cargo-fuzz.tar.gz -C /tmp
+          install -m 0755 /tmp/cargo-fuzz "$HOME/.cargo/bin/cargo-fuzz"
+          cargo fuzz --version | tee /tmp/cargo-fuzz-version.txt
+          grep -q "cargo-fuzz 0.13.2" /tmp/cargo-fuzz-version.txt
+
+      - name: Verify fuzz workspace isolation and lock closure
+        shell: bash
+        env:
+          RUSTUP_TOOLCHAIN: nightly-2026-09-18
+        run: |
+          set -euo pipefail
+          cargo metadata --manifest-path fuzz/Cargo.toml --locked --format-version 1 > /tmp/fuzz-metadata.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/fuzz-metadata.json'))
+          root=x['workspace_root']
+          assert root.endswith('/fuzz'), root
+          packages={p['name']:p for p in x['packages']}
+          assert packages['morize-fuzz']['publish'] == []
+          lib=[p for p in x['packages'] if p['name']=='libfuzzer-sys']
+          assert len(lib)==1 and lib[0]['version']=='0.4.13'
+          core=[p for p in x['packages'] if p['name']=='morize-core']
+          assert len(core)==1
+          PY
+          test "$(grep -c '^\[\[package\]\]$' Cargo.lock)" -eq 1
+          grep -q '^name = "morize-core"$' Cargo.lock
+          grep -q '^version = "0.4.13"$' fuzz/Cargo.lock
+          grep -q -- '- License: MIT OR Apache-2.0' fuzz/THIRD_PARTY.md
+          grep -q 'Combined crate expression: (MIT OR Apache-2.0) AND NCSA' fuzz/THIRD_PARTY.md
+          grep -q 'Bundled libFuzzer source license: NCSA' fuzz/THIRD_PARTY.md
+
+      - name: Build fuzz targets
+        shell: bash
+        env:
+          RUSTUP_TOOLCHAIN: nightly-2026-09-18
+        run: |
+          set -euo pipefail
+          cargo fuzz build --fuzz-dir fuzz --target x86_64-unknown-linux-gnu durable_id
+          cargo fuzz build --fuzz-dir fuzz --target x86_64-unknown-linux-gnu bounded_utf8
+          cargo fuzz build --fuzz-dir fuzz --target x86_64-unknown-linux-gnu bounded_vec
+
+      - name: Run bounded libFuzzer smoke
+        shell: bash
+        env:
+          RUSTUP_TOOLCHAIN: nightly-2026-09-18
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/morize-fuzz-corpus
+          mkdir -p /tmp/morize-fuzz-corpus/durable_id /tmp/morize-fuzz-corpus/bounded_utf8 /tmp/morize-fuzz-corpus/bounded_vec
+          printf '%032d' 0 > /tmp/morize-fuzz-corpus/durable_id/zero
+          printf 'memory' > /tmp/morize-fuzz-corpus/bounded_utf8/ascii
+          printf '\x00\x01\x02\x03' > /tmp/morize-fuzz-corpus/bounded_vec/bytes
+
+          cargo fuzz run --fuzz-dir fuzz --target x86_64-unknown-linux-gnu durable_id /tmp/morize-fuzz-corpus/durable_id --             -runs=5000 -seed=424242 -timeout=5 -rss_limit_mb=2048 -max_len=512
+          cargo fuzz run --fuzz-dir fuzz --target x86_64-unknown-linux-gnu bounded_utf8 /tmp/morize-fuzz-corpus/bounded_utf8 --             -runs=5000 -seed=424243 -timeout=5 -rss_limit_mb=2048 -max_len=512
+          cargo fuzz run --fuzz-dir fuzz --target x86_64-unknown-linux-gnu bounded_vec /tmp/morize-fuzz-corpus/bounded_vec --             -runs=5000 -seed=424244 -timeout=5 -rss_limit_mb=2048 -max_len=512
+
+      - name: Upload fuzz failure artifacts
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: fuzz-crash-artifacts-${{ github.event.pull_request.head.sha || github.sha }}
+          path: fuzz/artifacts/
+          if-no-files-found: ignore
