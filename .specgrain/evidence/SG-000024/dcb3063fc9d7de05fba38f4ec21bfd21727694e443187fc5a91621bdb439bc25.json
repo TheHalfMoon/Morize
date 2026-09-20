@@ -1,0 +1,313 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:dcb3063fc9d7de05fba38f4ec21bfd21727694e443187fc5a91621bdb439bc25",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "A dedicated fuzz-smoke workflow runs only on Ubuntu/Linux, leaves the existing Ubuntu/macOS/Windows product CI unchanged, and never makes Windows support depend on libFuzzer.",
+        "detail": "The dedicated fuzz workflow is Linux-only while the unchanged standard CI remains Ubuntu/macOS/Windows and Windows product support does not depend on libFuzzer.",
+        "evidence_ref": "github-actions:pr-ci=35527207231;pr-fuzz=35527207234;main-ci=35527588193;main-fuzz=35527588182;standard-ci-unchanged=true;fuzz-smoke-linux-only=true",
+        "passed": true
+      },
+      {
+        "check_id": "ADR-0004 proof prerequisites SG-000012, SG-000013, SG-000014, and SG-000023 revalidate against the exact WorkPacket baseline before execution.",
+        "detail": "ADR-0004 proof prerequisites SG-000012, SG-000013, SG-000014, and SG-000023 match exact canonical record/spec/implementation identities and ancestry.",
+        "evidence_ref": "specgrain:SG-000012:sha256:13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079;SG-000013:sha256:ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c;SG-000014:sha256:95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977;SG-000023:sha256:14dc204de67286a282a2b4e1d8d65fc8d9837b140ced660aa230745ddb82f68c;packet-baseline=687d5681d616dce0d84809992c9d36e791f77eb9",
+        "passed": true
+      },
+      {
+        "check_id": "All fuzz targets are pure invariant harnesses: they perform no network, filesystem fixture, environment-variable, wall-clock, model, persistence, serialization, or mutation-authority operation and introduce no unsafe block in Morize-authored target code.",
+        "detail": "Morize-authored fuzz targets are pure invariant harnesses with no authored unsafe blocks or external side-effect inputs.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/fuzz_targets;pure-invariants=true;unsafe-authored=false",
+        "passed": true
+      },
+      {
+        "check_id": "Before WorkPacket export, the canonical repository Diffcipline policy admits exactly the new `fuzz/**` expected-file surface required by this Grain, while preserving the existing forbidden surfaces, verification commands, dependency-manifest policy, lockfile policy, and untracked-file policy unchanged.",
+        "detail": "The exact WorkPacket baseline admits only fuzz/** to Diffcipline expected_files while preserving all specified policy fields.",
+        "evidence_ref": "git:687d5681d616dce0d84809992c9d36e791f77eb9:.diffcipline.toml;fuzz-scope-admission=exact",
+        "passed": true
+      },
+      {
+        "check_id": "Diffcipline verifies the exact implementation head with no scope violation; Alibaba Open Code Review accounts for every changed file; an independent semantic reviewer separately reviews isolation, target invariants, toolchain/tool identity, bounded campaign semantics, license closure, failure-artifact behavior, and non-claims.",
+        "detail": "Exact-head Diffcipline R3, Alibaba changed-file accounting, and independent semantic implementation review all passed.",
+        "evidence_ref": "diffcipline:r3=pass;alibaba=10/10-accounted;independent-review:sha256:5bbaccd99fbc1f0c76f34f901ec08d427d9814dd1579486b6b52f04e4d9b676e;head=b98ba14aebf450c29e48c0264476a0c6d101d4ef",
+        "passed": true
+      },
+      {
+        "check_id": "On fuzz failure, the workflow uploads fuzz crash/artifact output using a commit-pinned artifact action; absence of a crash artifact on success is not treated as missing evidence.",
+        "detail": "Failure artifacts are uploaded only through a commit-pinned artifact action and success does not require a crash artifact.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:.github/workflows/fuzz-smoke.yml;failure-artifact-action=pinned",
+        "passed": true
+      },
+      {
+        "check_id": "The dedicated fuzz workspace builds all three fuzz targets with the pinned nightly/tool/dependency graph and completes the bounded fuzz-smoke campaign on Linux.",
+        "detail": "The isolated fuzz workspace builds all three pinned targets and bounded Linux campaigns pass.",
+        "evidence_ref": "github-actions:pr-fuzz=35527207234;main-fuzz=35527588182;fresh-evidence-runs=1000-per-target",
+        "passed": true
+      },
+      {
+        "check_id": "The exact implementation changes only fuzz/Cargo.toml, fuzz/Cargo.lock, fuzz/rust-toolchain.toml, fuzz/README.md, fuzz/THIRD_PARTY.md, fuzz/.gitignore, fuzz/fuzz_targets/durable_id.rs, fuzz/fuzz_targets/bounded_utf8.rs, fuzz/fuzz_targets/bounded_vec.rs, and .github/workflows/fuzz-smoke.yml.",
+        "detail": "The implementation diff contains exactly the ten SG-000024 authorized fuzz/workflow files.",
+        "evidence_ref": "git-diff:687d5681d616dce0d84809992c9d36e791f77eb9...b98ba14aebf450c29e48c0264476a0c6d101d4ef;sha256=2210b50aa5742fb20e52495712f32fd2e9754743a814878d49d9527d93443f67;paths=10-authorized",
+        "passed": true
+      },
+      {
+        "check_id": "The fuzz workflow downloads cargo-fuzz exactly at version 0.13.2, verifies the pinned Linux x86_64 musl release asset SHA-256 b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c, treats that musl artifact only as the cargo-fuzz executable, and explicitly builds/runs fuzz targets for x86_64-unknown-linux-gnu so AddressSanitizer is not combined with statically linked musl libc.",
+        "detail": "cargo-fuzz 0.13.2 is checksum-pinned and fuzz targets are explicitly built and run for x86_64-unknown-linux-gnu.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:.github/workflows/fuzz-smoke.yml;cargo-fuzz=0.13.2;asset-sha256=b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c;target=x86_64-unknown-linux-gnu",
+        "passed": true
+      },
+      {
+        "check_id": "The fuzz workspace and smoke workflow do not claim exhaustive fuzzing, bug absence, coverage completeness, or security proof; bounded smoke evidence is explicitly scoped to the executed run budget.",
+        "detail": "Documentation explicitly limits claims to the executed bounded campaign and disclaims exhaustive fuzzing, bug absence, coverage completeness, and security proof.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/README.md;bounded-smoke-nonclaims=true",
+        "passed": true
+      },
+      {
+        "check_id": "The fuzz-smoke workflow explicitly uses target triple x86_64-unknown-linux-gnu and bounds each target with fixed run count, input-size limit, timeout, RSS ceiling, and explicit seed while still executing coverage-guided libFuzzer rather than deterministic property loops.",
+        "detail": "The fuzz workflow fixes target triple, run count, seed, timeout, RSS ceiling, and input-size limit while using coverage-guided libFuzzer.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:.github/workflows/fuzz-smoke.yml;runs=5000;seeds=fixed;timeout=5;rss=2048;max-len=512;target=x86_64-unknown-linux-gnu",
+        "passed": true
+      },
+      {
+        "check_id": "The fuzz-smoke workflow runs all three targets and fails on any crash, sanitizer finding, timeout/crash artifact, assertion failure, build failure, lock drift, toolchain/version mismatch, or dependency/license-isolation violation.",
+        "detail": "All three targets pass exact-head and post-merge bounded campaigns; the evidence run also reruns each target for 1000 bounded executions.",
+        "evidence_ref": "github-actions:pr-fuzz=35527207234;main-fuzz=35527588182;fresh-evidence-runs=1000-per-target;all-three-targets=success",
+        "passed": true
+      },
+      {
+        "check_id": "The root Cargo.toml, root Cargo.lock, every crates/morize-core production source file, public API, and the existing .github/workflows/ci.yml remain byte-for-byte unchanged.",
+        "detail": "Root Cargo manifests/lockfile, morize-core production tree, public API surface, and standard CI file are unchanged from the WorkPacket baseline.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf;root-cargo-lock-core-ci-unchanged=true",
+        "passed": true
+      },
+      {
+        "check_id": "The standard GitHub Actions matrix continues to pass Ubuntu, macOS, and Windows on the exact implementation head, and the dedicated Linux fuzz-smoke workflow passes on that same implementation head.",
+        "detail": "Standard cross-platform exact-head and post-merge CI plus dedicated exact-head and post-merge fuzz-smoke all pass for the same implementation tree.",
+        "evidence_ref": "github-actions:pr-ci=35527207231;pr-fuzz=35527207234;main-ci=35527588193;main-fuzz=35527588182;same-implementation-tree=true",
+        "passed": true
+      },
+      {
+        "check_id": "bounded_utf8 fuzz target consumes arbitrary raw bytes, considers only valid UTF-8, exercises multiple fixed const byte limits, and asserts acceptance iff encoded length is within the limit, exact byte preservation on success, and exact TooLong metadata on rejection.",
+        "detail": "The BoundedUtf8 raw-byte target exercises multiple const byte limits and verifies exact acceptance, preservation, and TooLong metadata.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/fuzz_targets/bounded_utf8.rs;github-actions:pr-fuzz=35527207234;main-fuzz=35527588182;fresh-evidence-runs=1000-per-target",
+        "passed": true
+      },
+      {
+        "check_id": "bounded_vec fuzz target consumes arbitrary raw bytes, exercises multiple fixed const item limits, and asserts exact construction/push acceptance, preserved order/values, lossless rejected-value recovery, and no mutation after rejected push.",
+        "detail": "The BoundedVec raw-byte target exercises multiple const item limits and verifies construction/push bounds, order, lossless rejection, and no mutation after failed push.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/fuzz_targets/bounded_vec.rs;github-actions:pr-fuzz=35527207234;main-fuzz=35527588182;fresh-evidence-runs=1000-per-target",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check, cargo check --workspace --all-targets --offline, cargo clippy --workspace --all-targets --offline -- -D warnings, and cargo test --workspace --all-targets --offline continue to pass for the root workspace.",
+        "detail": "Root fmt/check/clippy/tests pass on the canonical merge, with 33/33 root tests.",
+        "evidence_ref": "github-actions:pr-ci=35527207231;pr-fuzz=35527207234;main-ci=35527588193;main-fuzz=35527588182;root-tests=33/33",
+        "passed": true
+      },
+      {
+        "check_id": "durable_id fuzz target consumes arbitrary raw bytes without unsafe code; whenever an input is valid UTF-8 and a durable-ID parser succeeds, the result must round-trip through canonical lowercase text and exact bytes for every durable identifier type without panic.",
+        "detail": "The durable-ID raw-byte target exercises successful valid-UTF8 parses across every durable ID type and enforces canonical lowercase text and exact-byte round trips.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/fuzz_targets/durable_id.rs;github-actions:pr-fuzz=35527207234;main-fuzz=35527588182;fresh-evidence-runs=1000-per-target",
+        "passed": true
+      },
+      {
+        "check_id": "fuzz/Cargo.lock is committed and cargo metadata --manifest-path fuzz/Cargo.toml --locked succeeds; the root Cargo.lock remains unchanged.",
+        "detail": "The committed fuzz lockfile resolves with --locked while the root Cargo.lock remains unchanged.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/Cargo.lock;locked-metadata=pass;root-lock-unchanged=true",
+        "passed": true
+      },
+      {
+        "check_id": "fuzz/Cargo.toml is an independent nested workspace, publish=false, depends on morize-core only by local path, pins libfuzzer-sys exactly to 0.4.13, and adds no dependency to the root workspace graph.",
+        "detail": "The fuzz manifest is an independent non-publishable nested workspace using only local morize-core plus exactly pinned libfuzzer-sys 0.4.13.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/Cargo.toml;isolated-workspace=true;libfuzzer-sys=0.4.13",
+        "passed": true
+      },
+      {
+        "check_id": "fuzz/THIRD_PARTY.md records cargo-fuzz as MIT OR Apache-2.0 and libfuzzer-sys 0.4.13 as (MIT OR Apache-2.0) AND NCSA, states that bundled libFuzzer sources carry NCSA, and confines all such code/dependencies to fuzz-only verification.",
+        "detail": "Fuzz-only provenance records cargo-fuzz and libfuzzer-sys/libFuzzer license boundaries without linking them into runtime artifacts.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/THIRD_PARTY.md;license-closure=verified",
+        "passed": true
+      },
+      {
+        "check_id": "fuzz/rust-toolchain.toml pins nightly-2026-09-18 with a minimal profile, and the fuzz workflow verifies the resolved rustc toolchain before running targets.",
+        "detail": "The fuzz toolchain is pinned to nightly-2026-09-18 and the resolved rustc release/commit identity was reverified.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/rust-toolchain.toml;nightly=nightly-2026-09-18;rustc-identity=pass",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-CARGO-FUZZ-PIN",
+        "detail": "The published cargo-fuzz executable matches the pinned version and SHA-256.",
+        "evidence_ref": "cargo-fuzz=0.13.2;asset-sha256=b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c;verified=true",
+        "passed": true
+      },
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and post-merge standard CI matrices pass Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr-ci=35527207231;pr-fuzz=35527207234;main-ci=35527588193;main-fuzz=35527588182;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-DIFFCIPLINE-FUZZ-SCOPE-ADMISSION",
+        "detail": "Corrected canonical planning baseline admits exactly fuzz/** without weakening forbidden surfaces, manifest/lock policy, untracked-file handling, or verification commands.",
+        "evidence_ref": "git:687d5681d616dce0d84809992c9d36e791f77eb9:.diffcipline.toml;expected-files-fuzz=1;preserved-fields=true",
+        "passed": true
+      },
+      {
+        "check_id": "E-FUZZ-BOUNDED-CAMPAIGN",
+        "detail": "Exact-head and post-merge dedicated workflows completed the bounded 5000-run campaign for every target; fresh evidence rerun completed 1000 per target.",
+        "evidence_ref": "github-actions:pr-fuzz=35527207234;main-fuzz=35527588182;fresh-evidence-runs=1000-per-target;configured-pr-main-runs=5000-per-target",
+        "passed": true
+      },
+      {
+        "check_id": "E-FUZZ-BOUNDED-UTF8",
+        "detail": "BoundedUtf8 libFuzzer target builds and bounded campaigns pass.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/fuzz_targets/bounded_utf8.rs;github-actions:pr-fuzz=35527207234;main-fuzz=35527588182;fresh-evidence-runs=1000-per-target",
+        "passed": true
+      },
+      {
+        "check_id": "E-FUZZ-BOUNDED-VEC",
+        "detail": "BoundedVec libFuzzer target builds and bounded campaigns pass.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/fuzz_targets/bounded_vec.rs;github-actions:pr-fuzz=35527207234;main-fuzz=35527588182;fresh-evidence-runs=1000-per-target",
+        "passed": true
+      },
+      {
+        "check_id": "E-FUZZ-DURABLE-ID",
+        "detail": "Durable-ID libFuzzer target builds and bounded campaigns pass.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/fuzz_targets/durable_id.rs;github-actions:pr-fuzz=35527207234;main-fuzz=35527588182;fresh-evidence-runs=1000-per-target",
+        "passed": true
+      },
+      {
+        "check_id": "E-FUZZ-FAILURE-ARTIFACTS",
+        "detail": "Failure artifact upload behavior is defined with a commit-pinned action; successful campaigns need no crash artifact.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:.github/workflows/fuzz-smoke.yml;upload-artifact=043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+        "passed": true
+      },
+      {
+        "check_id": "E-FUZZ-LICENSE-CLOSURE",
+        "detail": "Fuzz-only third-party licensing and bundled libFuzzer NCSA boundary are recorded and revalidated.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/THIRD_PARTY.md;license-boundary=verified",
+        "passed": true
+      },
+      {
+        "check_id": "E-FUZZ-LOCK-CLOSURE",
+        "detail": "The committed fuzz lockfile closes the fuzz-only dependency graph and resolves successfully with --locked.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/Cargo.lock;sha256=60143f398fee9ef9ac23fffd773828b11bd7710eb4817dab115f865611d69c48;cargo-metadata-locked=pass",
+        "passed": true
+      },
+      {
+        "check_id": "E-FUZZ-NONCLAIMS",
+        "detail": "Documentation does not claim exhaustive fuzzing, bug absence, coverage completeness, or security proof.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/README.md;nonclaims=bounded-only",
+        "passed": true
+      },
+      {
+        "check_id": "E-FUZZ-TARGET-TRIPLE",
+        "detail": "Fuzz targets are explicitly compiled and run for GNU libc, separating target identity from the musl-linked cargo-fuzz executable.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:.github/workflows/fuzz-smoke.yml;target=x86_64-unknown-linux-gnu",
+        "passed": true
+      },
+      {
+        "check_id": "E-FUZZ-TOOLCHAIN-PIN",
+        "detail": "Pinned nightly identity was verified by release and commit hash.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/rust-toolchain.toml;nightly=nightly-2026-09-18;rustc-identity=pass",
+        "passed": true
+      },
+      {
+        "check_id": "E-FUZZ-WORKSPACE-ISOLATION",
+        "detail": "Fuzz tooling remains isolated in its own nested Cargo workspace and does not alter the root/runtime dependency graph.",
+        "evidence_ref": "git:8cf97145d081f256c18232f2737fbfe1db161baf:fuzz/Cargo.toml;workspace-root=fuzz;root-graph-unchanged=true",
+        "passed": true
+      },
+      {
+        "check_id": "E-LINUX-FUZZ-SMOKE",
+        "detail": "Dedicated Linux fuzz-smoke passes on exact implementation head and canonical merge.",
+        "evidence_ref": "github-actions:pr-fuzz=35527207234;main-fuzz=35527588182;fresh-evidence-runs=1000-per-target;linux=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000012",
+        "detail": "Canonical SG-000012 proof identity and ancestry revalidated.",
+        "evidence_ref": "specgrain:SG-000012:sha256:13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079;packet-baseline=687d5681d616dce0d84809992c9d36e791f77eb9",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000013",
+        "detail": "Canonical SG-000013 proof identity and ancestry revalidated.",
+        "evidence_ref": "specgrain:SG-000013:sha256:ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c;packet-baseline=687d5681d616dce0d84809992c9d36e791f77eb9",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000014",
+        "detail": "Canonical SG-000014 proof identity and ancestry revalidated.",
+        "evidence_ref": "specgrain:SG-000014:sha256:95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977;packet-baseline=687d5681d616dce0d84809992c9d36e791f77eb9",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000023",
+        "detail": "Canonical SG-000023 proof identity and ancestry revalidated.",
+        "evidence_ref": "specgrain:SG-000023:sha256:14dc204de67286a282a2b4e1d8d65fc8d9837b140ced660aa230745ddb82f68c;packet-baseline=687d5681d616dce0d84809992c9d36e791f77eb9",
+        "passed": true
+      },
+      {
+        "check_id": "E-ROOT-RUST-CHECK-OFFLINE",
+        "detail": "Root offline cargo check passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr-ci=35527207231;pr-fuzz=35527207234;main-ci=35527588193;main-fuzz=35527588182;root-tests=33/33;check=cargo-check-offline",
+        "passed": true
+      },
+      {
+        "check_id": "E-ROOT-RUST-CLIPPY-OFFLINE",
+        "detail": "Root offline clippy with -D warnings passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr-ci=35527207231;pr-fuzz=35527207234;main-ci=35527588193;main-fuzz=35527588182;root-tests=33/33;check=clippy-offline",
+        "passed": true
+      },
+      {
+        "check_id": "E-ROOT-RUST-FMT",
+        "detail": "Root cargo fmt passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr-ci=35527207231;pr-fuzz=35527207234;main-ci=35527588193;main-fuzz=35527588182;root-tests=33/33;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "E-ROOT-RUST-TEST-OFFLINE",
+        "detail": "Root offline workspace tests pass with 33/33 tests.",
+        "evidence_ref": "github-actions:pr-ci=35527207231;pr-fuzz=35527207234;main-ci=35527588193;main-fuzz=35527588182;root-tests=33/33;tests=33/33",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Exact-head independent semantic implementation review returned PASS with C/H/M/L NONE and no findings.",
+        "evidence_ref": "independent-review:sha256:5bbaccd99fbc1f0c76f34f901ec08d427d9814dd1579486b6b52f04e4d9b676e;head=b98ba14aebf450c29e48c0264476a0c6d101d4ef",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "A normal forward revert removes only the isolated fuzz workspace/workflow; runtime code, persisted data, public API, and root lockfile are unaffected.",
+        "evidence_ref": "git-history:base=687d5681d616dce0d84809992c9d36e791f77eb9;merge=8cf97145d081f256c18232f2737fbfe1db161baf;fuzz-only-revert-safe=true",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "8cf97145d081f256c18232f2737fbfe1db161baf",
+    "issues": [],
+    "observed_changed_paths": [
+      ".github/workflows/fuzz-smoke.yml",
+      "fuzz/.gitignore",
+      "fuzz/Cargo.lock",
+      "fuzz/Cargo.toml",
+      "fuzz/README.md",
+      "fuzz/THIRD_PARTY.md",
+      "fuzz/fuzz_targets/bounded_utf8.rs",
+      "fuzz/fuzz_targets/bounded_vec.rs",
+      "fuzz/fuzz_targets/durable_id.rs",
+      "fuzz/rust-toolchain.toml"
+    ],
+    "packet_digest": "sha256:f30e31c88fa088c6051c2e962777eb25e7fb60beaebcf451da2f0c176cec2c5b",
+    "result_digest": "sha256:470e07d88acc2d22b88506dd2ca6e23753c8fb31b1206461a8d29fa74059534c",
+    "spec_id": "SG-000024",
+    "spec_revision": "sha256:71afd4f7e9a9d16438fdda6181a0a6774c731e87737711f5f6d8e38e350b7e96",
+    "verification_version": 1,
+    "verified": true
+  }
+}
