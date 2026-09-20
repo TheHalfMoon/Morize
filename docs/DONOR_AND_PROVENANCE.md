@@ -8,7 +8,7 @@ Every copied or adapted component must remain traceable to an exact source state
 
 ## Founder authorization recorded by planning
 
-The founder has stated that Morize may use source code from repositories accessible in the founder's GitHub account, including public and private repositories, and has separately stated permission to copy/use the Memanto source for Morize.
+The founder has stated that Morize may use source code from repositories accessible in the founder's GitHub account, including public and private repositories, and has separately stated permission to copy/use the Memanto source for Morize. The founder has also stated permission to evaluate and copy source associated with Laya and TinyFish/Monid for Morize.
 
 This planning record treats that statement as **eligibility to evaluate and transfer**, not as a reason to erase upstream notices or skip component-level review.
 
@@ -117,6 +117,36 @@ Morize should not blindly retain:
 - any behavior that conflicts with typed governance, founder-cost constraints, commercial boundaries, or local/self-hosted semantics.
 
 Prefer selective ports behind Morize-owned contracts.
+
+## Laya-specific rule
+
+Laya is a P8 optional-intelligence candidate, not a core authority dependency.
+
+Before any model artifact, runtime code, or adapter is admitted:
+
+- bind the exact model artifact digest and runtime/configuration identity;
+- verify Apache-2.0 obligations and any component-specific notices;
+- benchmark calibration, selective accuracy, abstention, latency, memory use, and failure behavior on Morize-relevant typed decisions;
+- preserve deterministic Morize policy as the only authority for durable side effects;
+- make model removal non-destructive to canonical memory;
+- keep the adapter optional and replaceable.
+
+Permission to copy does not authorize copying model weights or code into the repository without a component-level source record and size/distribution decision.
+
+## TinyFish/Monid-specific rule
+
+TinyFish/Monid is a candidate remote web-acquisition integration, not a required retrieval or memory dependency.
+
+Before code transfer or runtime use:
+
+- pin the exact source repository, revision, and selected paths;
+- preserve MIT notices for copied Monid/TinyFish sample or connector code where applicable;
+- document every remote endpoint, credential, request/response data boundary, rate limit, cost rule, and failure mode;
+- treat current free Search/Fetch availability as provider state, not a permanent contract;
+- route acquired web material through normal source trust, taint, provenance, bounds, and Memory Firewall controls before durable promotion;
+- keep local/offline Morize correctness fully functional when the provider is unavailable or disabled;
+- require a separate Grain before browser automation receives any side-effecting capability.
+
 
 ## Internal-source priority
 

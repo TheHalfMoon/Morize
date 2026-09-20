@@ -40,6 +40,8 @@ Work:
 - Hermes integration;
 - generic MCP and Agent Skills path;
 - stable project identity derived from repository identity instead of transient working directory.
+- optional remote web/source acquisition adapter research, including TinyFish/Monid search and clean fetch, behind explicit network, credential, provenance, rate, data-boundary, and cost controls;
+- browser automation remains a separately qualified escalation path and is never required for local memory correctness.
 
 Gate:
 - at least two major agent harnesses share the same permitted project memory;
@@ -55,6 +57,7 @@ Work:
 - optional Ollama adapter;
 - optional llama.cpp or qualified embedded runtime;
 - optional remote/provider adapter only behind explicit data/cost configuration;
+- evaluate Laya as an optional local typed-decision adapter candidate after the deterministic rule-engine baseline, with exact artifact/runtime identity, calibration, abstention, resource, and license qualification;
 - typed extraction schemas;
 - entity-link candidates;
 - contradiction/supersession classification candidates;
