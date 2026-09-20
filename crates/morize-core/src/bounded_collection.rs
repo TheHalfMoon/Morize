@@ -346,4 +346,60 @@ mod tests {
         assert!(!push_debug.contains("existing-secret"));
         assert!(!push_display.contains("rejected-secret"));
     }
+
+    fn assert_collection_property_matrix<const MAX_ITEMS: usize>() {
+        for len in 0..=(MAX_ITEMS + 2) {
+            let values: Vec<usize> = (0..len).collect();
+
+            match BoundedVec::<usize, MAX_ITEMS>::try_from(values.clone()) {
+                Ok(bounded) => {
+                    assert!(len <= MAX_ITEMS);
+                    assert_eq!(bounded.len(), len);
+                    assert_eq!(bounded.as_slice(), values.as_slice());
+                    assert_eq!(bounded.into_vec(), values);
+                }
+                Err(error) => {
+                    assert!(len > MAX_ITEMS);
+                    assert_eq!(
+                        error.bounds(),
+                        CollectionBoundsError::TooManyItems {
+                            max_items: MAX_ITEMS,
+                            actual_items: len,
+                        }
+                    );
+                    assert_eq!(error.into_values(), values);
+                }
+            }
+        }
+
+        let expected: Vec<usize> = (0..MAX_ITEMS).collect();
+        let mut bounded = BoundedVec::<usize, MAX_ITEMS>::new();
+        for value in expected.iter().copied() {
+            bounded
+                .try_push(value)
+                .expect("matrix push below capacity must succeed");
+        }
+
+        let rejected = usize::MAX;
+        let error = bounded
+            .try_push(rejected)
+            .expect_err("matrix push at capacity must fail");
+        assert_eq!(bounded.as_slice(), expected.as_slice());
+        assert_eq!(
+            error.bounds(),
+            CollectionBoundsError::AtCapacity {
+                max_items: MAX_ITEMS,
+            }
+        );
+        assert_eq!(error.into_value(), rejected);
+    }
+
+    #[test]
+    fn bounded_vec_property_matrix_matches_exact_item_limits() {
+        assert_collection_property_matrix::<0>();
+        assert_collection_property_matrix::<1>();
+        assert_collection_property_matrix::<2>();
+        assert_collection_property_matrix::<4>();
+        assert_collection_property_matrix::<8>();
+    }
 }

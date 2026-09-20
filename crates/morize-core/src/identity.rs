@@ -234,4 +234,89 @@ mod tests {
             "identifier contains non-canonical hexadecimal byte 0x41 at byte index 4"
         );
     }
+
+    macro_rules! assert_identifier_round_trip_matrix {
+        ($type:ty) => {{
+            for repeated_byte in u8::MIN..=u8::MAX {
+                let bytes = [repeated_byte; ID_BYTE_LENGTH];
+                let id = <$type>::from_bytes(bytes);
+                let text = id.to_string();
+
+                assert_eq!(text.len(), ID_TEXT_LENGTH);
+                assert!(
+                    text.bytes()
+                        .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+                );
+                assert_eq!(text, text.to_ascii_lowercase());
+
+                let parsed: $type = text.parse().expect("canonical matrix value must parse");
+                assert_eq!(parsed, id);
+                assert_eq!(parsed.into_bytes(), bytes);
+            }
+        }};
+    }
+
+    macro_rules! assert_identifier_parser_rejection_matrix {
+        ($type:ty) => {{
+            const NON_CANONICAL_ASCII: [u8; 4] = [b'A', b'G', b'/', b':'];
+
+            for index in 0..ID_TEXT_LENGTH {
+                for byte in NON_CANONICAL_ASCII {
+                    let mut candidate = vec![b'0'; ID_TEXT_LENGTH];
+                    candidate[index] = byte;
+                    let candidate =
+                        String::from_utf8(candidate).expect("matrix input is deterministic ASCII");
+
+                    assert_eq!(
+                        candidate.parse::<$type>(),
+                        Err(IdParseError::NonCanonicalHex { index, byte })
+                    );
+                }
+            }
+        }};
+    }
+
+    #[test]
+    fn durable_identifier_round_trip_property_matrix_is_canonical() {
+        assert_identifier_round_trip_matrix!(VaultId);
+        assert_identifier_round_trip_matrix!(PrincipalId);
+        assert_identifier_round_trip_matrix!(ScopeId);
+        assert_identifier_round_trip_matrix!(SourceId);
+        assert_identifier_round_trip_matrix!(ObservationId);
+        assert_identifier_round_trip_matrix!(EvidenceId);
+        assert_identifier_round_trip_matrix!(PropositionId);
+        assert_identifier_round_trip_matrix!(MemoryId);
+        assert_identifier_round_trip_matrix!(MemoryVersionId);
+        assert_identifier_round_trip_matrix!(RelationId);
+        assert_identifier_round_trip_matrix!(DecisionId);
+        assert_identifier_round_trip_matrix!(MutationId);
+        assert_identifier_round_trip_matrix!(PolicyRevisionId);
+        assert_identifier_round_trip_matrix!(BranchId);
+        assert_identifier_round_trip_matrix!(SnapshotId);
+        assert_identifier_round_trip_matrix!(ProjectionGenerationId);
+        assert_identifier_round_trip_matrix!(ContextBundleId);
+        assert_identifier_round_trip_matrix!(ConnectorBindingId);
+    }
+
+    #[test]
+    fn durable_identifier_parser_property_matrix_rejects_noncanonical_ascii() {
+        assert_identifier_parser_rejection_matrix!(VaultId);
+        assert_identifier_parser_rejection_matrix!(PrincipalId);
+        assert_identifier_parser_rejection_matrix!(ScopeId);
+        assert_identifier_parser_rejection_matrix!(SourceId);
+        assert_identifier_parser_rejection_matrix!(ObservationId);
+        assert_identifier_parser_rejection_matrix!(EvidenceId);
+        assert_identifier_parser_rejection_matrix!(PropositionId);
+        assert_identifier_parser_rejection_matrix!(MemoryId);
+        assert_identifier_parser_rejection_matrix!(MemoryVersionId);
+        assert_identifier_parser_rejection_matrix!(RelationId);
+        assert_identifier_parser_rejection_matrix!(DecisionId);
+        assert_identifier_parser_rejection_matrix!(MutationId);
+        assert_identifier_parser_rejection_matrix!(PolicyRevisionId);
+        assert_identifier_parser_rejection_matrix!(BranchId);
+        assert_identifier_parser_rejection_matrix!(SnapshotId);
+        assert_identifier_parser_rejection_matrix!(ProjectionGenerationId);
+        assert_identifier_parser_rejection_matrix!(ContextBundleId);
+        assert_identifier_parser_rejection_matrix!(ConnectorBindingId);
+    }
 }
