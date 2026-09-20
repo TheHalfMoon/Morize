@@ -1,10 +1,52 @@
 {
-  "acceptance": [],
-  "change_surface": [],
+  "acceptance": [
+    "The exact implementation changes only crates/morize-core/src/identity.rs, crates/morize-core/src/bounded.rs, and crates/morize-core/src/bounded_collection.rs.",
+    "For each changed file, all production source before its existing #[cfg(test)] module is byte-for-byte identical to the exact WorkPacket baseline.",
+    "The durable-ID property matrix deterministically exercises canonical from-bytes -> text -> parse round trips across all 256 repeated-byte patterns for every durable ID type, with lowercase canonical text preserved.",
+    "The durable-ID parser matrix deterministically verifies that representative non-canonical ASCII bytes are rejected at every text byte position without changing the existing error taxonomy or canonical-length contract.",
+    "The BoundedUtf8 property matrix covers multiple const byte limits and a fixed corpus containing empty, ASCII, multibyte, and decomposed Unicode values, proving acceptance iff byte length is within the limit, exact byte preservation on success, and exact TooLong counts on rejection.",
+    "The BoundedVec property matrix covers multiple const item limits and deterministic vector lengths, proving acceptance iff item count is within the limit, order/value preservation on success, and lossless rejected-value recovery on failed construction and push.",
+    "The property matrices use no randomness, wall clock, network, model, filesystem fixture, environment-dependent input, or third-party test framework.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes on the exact implementation head and executes the new deterministic property matrices.",
+    "Cargo manifests and Cargo.lock are unchanged; no runtime, build, dev, or test dependency is added.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for deterministic property coverage, preservation of production code, prerequisite identity, scope containment, absence of fuzz-engine/randomness/dependency claims, and required evidence.",
+    "ADR-0004 proof prerequisites SG-000012, SG-000013, and SG-000014 revalidate against the exact WorkPacket baseline before execution."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/identity.rs",
+    "crates/morize-core/src/bounded.rs",
+    "crates/morize-core/src/bounded_collection.rs"
+  ],
   "children": [],
-  "context": {},
+  "context": {
+    "budget_tokens": 12000,
+    "estimated_tokens": 7200
+  },
   "dependencies": [],
-  "evidence": {},
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000012",
+      "E-PROOF-PREREQUISITE-SG000013",
+      "E-PROOF-PREREQUISITE-SG000014",
+      "E-ID-PROPERTY-MATRIX",
+      "E-UTF8-PROPERTY-MATRIX",
+      "E-COLLECTION-PROPERTY-MATRIX",
+      "E-PRODUCTION-PREFIX-UNCHANGED",
+      "E-NO-RANDOMNESS-OR-FUZZ-ENGINE",
+      "E-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
   "id": "SG-000022",
   "labels": [],
   "metadata": {
@@ -34,16 +76,43 @@
           "spec_revision": "sha256:06df9fd48a398fb1b1af3e4a6c821efa9a0508d7e9e3a795c21edadf1045ef1e"
         }
       ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "Test-only deterministic matrices over the three already-proven core primitives are the narrowest P1 verification increment that increases parser/invariant coverage without inventing domain schemas or adding fuzz tooling, randomness, dependencies, timestamps, digests, serialization, or persistence."
+      },
+      "safety": {
+        "requirements": [
+          "The implementation must remain test-only and deterministic; it must not weaken fail-closed parser/bounds behavior, disclose hidden data, alter production semantics, or claim that deterministic matrices are equivalent to a true fuzz campaign."
+        ],
+        "status": "requirements-defined"
+      },
+      "unresolved_decisions": [],
+      "version": 1
     }
   },
   "method": "quick",
   "outcome": "morize-core strengthens the already-implemented durable-ID parser and bounded UTF-8/ordered-collection invariants with dependency-free deterministic property-style test matrices, without changing production API or behavior and without introducing a fuzz engine, randomness, serialization, persistence, or new dependencies.",
   "parent_id": "SG-000010",
   "rationale": "P1 requires property and fuzz tests for parsers/invariants. SG-000012, SG-000013, and SG-000014 already define the deterministic ID, bounded UTF-8, and bounded ordered-collection contracts. This Grain adds a reproducible property-style matrix over those existing contracts as the smallest safe next verification slice while leaving a true fuzz harness to a later dedicated Grain.",
-  "risk": {},
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the test-only SG-000022 implementation commit. Production behavior and persisted/user data are unaffected because this Grain changes only existing test modules."
+  },
   "schema_version": 1,
-  "scope_in": [],
-  "scope_out": [],
-  "state": "DRAFT",
+  "scope_in": [
+    "Extend only the existing #[cfg(test)] module in crates/morize-core/src/identity.rs with a deterministic property matrix that exercises canonical durable-ID round trips over a broad fixed byte corpus and rejects non-canonical ASCII parser input without changing the ID parser contract.",
+    "Extend only the existing #[cfg(test)] module in crates/morize-core/src/bounded.rs with deterministic corpus/limit matrices proving BoundedUtf8 accepts exactly values whose UTF-8 byte length is within the selected const bound, preserves accepted bytes exactly, and reports exact TooLong byte counts without truncation or normalization.",
+    "Extend only the existing #[cfg(test)] module in crates/morize-core/src/bounded_collection.rs with deterministic item-count/limit matrices proving construction accepts exactly values within the selected const bound, preserves accepted order/values, and returns rejected values unchanged when construction or push exceeds the bound.",
+    "Keep every property matrix deterministic, finite, standard-library-only, and reproducible on Linux, macOS, and Windows."
+  ],
+  "scope_out": [
+    "Any production code or public API change, including new constructors, parsers, error variants, traits, exports, normalization, serialization, persistence, timestamp, digest, policy, or domain behavior.",
+    "Randomized testing, nondeterministic seeds, proptest/quickcheck, cargo-fuzz/libFuzzer/AFL or any other fuzz engine or corpus infrastructure; those require a later dedicated Grain.",
+    "Any runtime, build, dev, or test dependency; Cargo.toml files and Cargo.lock must remain unchanged.",
+    "Any claim that this deterministic property matrix completes the separate P1 fuzz-testing requirement."
+  ],
+  "state": "SHAPED",
   "title": "Add deterministic core property matrices"
 }
