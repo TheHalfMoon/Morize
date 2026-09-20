@@ -209,7 +209,8 @@ jobs:
 
           git clone --quiet "https://github.com/alibaba/open-code-review.git" /tmp/ocr
           git -C /tmp/ocr checkout --quiet "$OCR_PIN"
-          node /tmp/ocr/bin/ocr.js delegate preview --format json --from "$BASE_MAIN" --to "$PLAN_HEAD" \
+          OCR_NO_UPDATE=1 node /tmp/ocr/scripts/install.js
+          OCR_NO_UPDATE=1 node /tmp/ocr/bin/ocr.js delegate preview --format json --from "$BASE_MAIN" --to "$PLAN_HEAD" \
             > /tmp/sg19-plan-ocr-preview.json
           python - <<'PY'
           import json,subprocess
