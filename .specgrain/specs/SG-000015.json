@@ -90,6 +90,6 @@
     "API version negotiation, feature flags, deprecation support windows, breaking-change policy execution, stable public error taxonomy, transport status mapping, or domain records.",
     "Any third-party runtime, build, or test dependency."
   ],
-  "state": "REFINING",
+  "state": "GRAIN",
   "title": "Add compatibility class primitive"
 }
