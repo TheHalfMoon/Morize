@@ -1,10 +1,51 @@
 {
-  "acceptance": [],
-  "change_surface": [],
+  "acceptance": [
+    "morize-core exports public Timestamp and TimestampError values from crates/morize-core/src/timestamp.rs.",
+    "Timestamp uses one normalized in-memory representation: signed Unix seconds plus subsecond nanoseconds in the inclusive range 0..=999_999_999; the seconds component is the mathematical floor second for negative instants, so each represented instant has one value representation.",
+    "Timestamp::from_unix_parts rejects subsecond_nanoseconds >= 1_000_000_000 with TimestampError::NanosecondsOutOfRange { actual } and does not normalize, truncate, wrap, or silently alter input.",
+    "Timestamp exposes unix_seconds() and subsecond_nanoseconds() accessors and an associated UNIX_EPOCH value without acquiring the current time.",
+    "Timestamp supports Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, and Hash; focused tests confirm ordering across negative pre-epoch values, UNIX_EPOCH, positive values, and adjacent nanosecond boundaries.",
+    "Focused tests confirm canonical negative-time semantics, including that (-1, 999_999_999) is exactly one nanosecond before UNIX_EPOCH and orders before (0, 0).",
+    "TimestampError is bounded metadata-only and never carries source text, clock/provider state, or platform-specific error payloads.",
+    "The implementation defines no now/current clock API, SystemTime conversion, duration arithmetic, timezone/calendar conversion, leap-second policy, Display, FromStr, parser, serde integration, numeric wire encoding, persistence format, migration, or transport mapping.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and includes focused timestamp tests for bounds, normalization convention, negative-time ordering, epoch behavior, value semantics, and Copy behavior.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for normalized Unix-part semantics, negative-time ordering, bounds validation, absence of clock/calendar/wire behavior, scope containment, and required evidence.",
+    "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+    "The implementation changes no path outside crates/morize-core/src/timestamp.rs and crates/morize-core/src/lib.rs."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/timestamp.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
   "children": [],
-  "context": {},
+  "context": {
+    "budget_tokens": 12000,
+    "estimated_tokens": 6500
+  },
   "dependencies": [],
-  "evidence": {},
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000011",
+      "E-TIMESTAMP-NORMALIZED-UNIX-PARTS",
+      "E-TIMESTAMP-NANOSECOND-BOUNDS",
+      "E-TIMESTAMP-NEGATIVE-ORDERING",
+      "E-TIMESTAMP-VALUE-SEMANTICS",
+      "E-TIMESTAMP-NO-CLOCK-OR-WIRE",
+      "E-TIMESTAMP-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
   "id": "SG-000022",
   "labels": [],
   "metadata": {
@@ -22,16 +63,44 @@
           "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
         }
       ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "One standard-library-only two-field timestamp value plus a bounded validation error is the narrowest reusable P1 timestamp contract. It fixes deterministic instant ordering while deferring clock acquisition, calendar/timezone behavior, serialization, persistence, and third-party time libraries."
+      },
+      "safety": {
+        "requirements": [
+          "Invalid subsecond nanoseconds must fail closed rather than normalize, truncate, wrap, or silently change the represented instant.",
+          "No API in this Grain may acquire current wall-clock time or imply clock trust, synchronization, timezone, or distributed-causality semantics."
+        ],
+        "status": "requirements-defined"
+      },
+      "unresolved_decisions": [],
+      "version": 1
     }
   },
   "method": "quick",
   "outcome": "morize-core exposes one dependency-free Timestamp value with a unique normalized in-memory instant representation as signed Unix seconds plus a nanosecond fraction, deterministic ordering/value semantics, and strict nanosecond bounds, without adding clocks, timezone/calendar behavior, parsing/formatting, serialization, persistence, transport semantics, or third-party dependencies.",
   "parent_id": "SG-000010",
   "rationale": "P1 explicitly requires timestamps, and docs/DATA_MODEL.md requires the first data-model SpecGrains to refine timestamp representation. This Grain defines only a normalized in-memory instant value using signed Unix seconds plus a non-negative nanosecond fraction so ordering is deterministic across pre/post-epoch values while clock acquisition, calendar/timezone conversion, serialization, persistence, and domain timestamps remain separate decisions.",
-  "risk": {},
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the timestamp primitive implementation commits; no persisted timestamp format, migration, clock state, or user data has been written by this Grain."
+  },
   "schema_version": 1,
-  "scope_in": [],
-  "scope_out": [],
-  "state": "DRAFT",
+  "scope_in": [
+    "Define public Timestamp with private signed Unix-seconds and subsecond-nanoseconds fields using the canonical convention that unix_seconds is the mathematical floor second and subsecond_nanoseconds is in 0..=999_999_999.",
+    "Define public bounded TimestampError::NanosecondsOutOfRange { actual } for invalid subsecond values; reject rather than normalize or truncate.",
+    "Provide const UNIX_EPOCH, checked from_unix_parts, unix_seconds, and subsecond_nanoseconds while preserving deterministic Clone/Copy/Debug/Eq/Ord/Hash value semantics.",
+    "Add standard-library-only focused tests covering epoch, maximum valid nanoseconds, invalid one-billion nanoseconds, negative pre-epoch ordering, adjacent nanosecond boundaries, deterministic equality/hash/order, and Copy behavior."
+  ],
+  "scope_out": [
+    "Current-time acquisition, monotonic clocks, SystemTime/Instant conversion, clock trust/synchronization, distributed causality, NTP, or provider/platform clock behavior.",
+    "Duration arithmetic, normalization of out-of-range parts, timezone offsets, named timezones, calendars, locale, leap-second interpretation, daylight-saving behavior, or human date/time formatting.",
+    "Display/FromStr, parsers, RFC3339/ISO-8601 contracts, serde or other serialization integration, persisted/wire encoding, configuration formats, migrations, storage, APIs, MCP, retrieval, or domain-record integration.",
+    "Any third-party runtime, build, or test dependency."
+  ],
+  "state": "SHAPED",
   "title": "Add normalized timestamp primitive"
 }
