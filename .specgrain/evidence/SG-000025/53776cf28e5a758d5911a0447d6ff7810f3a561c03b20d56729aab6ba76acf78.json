@@ -1,0 +1,239 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:53776cf28e5a758d5911a0447d6ff7810f3a561c03b20d56729aab6ba76acf78",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisite SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+        "detail": "ADR-0004 SG-000011 proof identity and implementation ancestry revalidated against the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=788bc7129ce815bc31888be58ebc95408eeb7ea1",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for SHA-256 value-width semantics, strict canonical text parsing, metadata-only errors, non-disclosing Debug behavior, no hashing/security overclaim, scope containment, prerequisite identity, and required evidence.",
+        "detail": "Independent semantic implementation review is bound to the exact accepted head and returned C/H/M/L NONE, findings NONE, final gate PASS.",
+        "evidence_ref": "independent-review:sha256:e8960bdbb326448ec6854631d4547aad64354a3b7bb485a77e347b7dae549932;head=5c745e16481a3dea2bb9b7e6df65a49cdbac2f57",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain adds no runtime, build, dev, or test dependency.",
+        "detail": "Cargo manifests and Cargo.lock are unchanged and no runtime/build/dev/test dependency is added.",
+        "evidence_ref": "git-diff:788bc7129ce815bc31888be58ebc95408eeb7ea1...5c745e16481a3dea2bb9b7e6df65a49cdbac2f57;sha256=78a2a0cf6604b2a9918df84d4357fb91eef0b0dee6a1172add2f18f1217c3229;manifest-lock-unchanged=true;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "DigestParseError is bounded metadata-only and never carries the source string or digest bytes.",
+        "detail": "DigestParseError carries bounded metadata only and does not retain source text or digest bytes.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;errors=metadata-only",
+        "passed": true
+      },
+      {
+        "check_id": "Display emits exactly 64 lowercase hexadecimal ASCII characters with no prefix, separators, normalization, truncation, or alternate representation.",
+        "detail": "Display emits exactly 64 lowercase hexadecimal ASCII characters with no alternate representation.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;display=lowercase-hex-64",
+        "passed": true
+      },
+      {
+        "check_id": "Focused deterministic tests cover all 256 repeated-byte patterns for bytes -> canonical text -> parse -> bytes round trips and representative non-canonical ASCII at every canonical text position.",
+        "detail": "Focused tests execute all 256 repeated-byte round trips and representative non-canonical ASCII at every text position; canonical workspace total is 39/39.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;property-matrix=256-repeated-bytes+all-text-positions;tests=39/39",
+        "passed": true
+      },
+      {
+        "check_id": "FromStr accepts exactly the canonical 64-byte lowercase hexadecimal representation and reconstructs the exact original 32 bytes.",
+        "detail": "FromStr accepts the strict canonical 64-byte lowercase hexadecimal form and reconstructs exact bytes.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;fromstr=strict-canonical",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact-head and post-merge GitHub Actions pass Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35532387146;main=35532566576;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "Parsing rejects any input whose UTF-8 byte length is not exactly 64 with DigestParseError::InvalidLength { actual }.",
+        "detail": "Invalid-length parsing fails closed with metadata-only actual byte count.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;invalid-length=actual-only",
+        "passed": true
+      },
+      {
+        "check_id": "Parsing rejects uppercase hexadecimal and every other non-canonical byte with DigestParseError::NonCanonicalHex { index, byte } at the exact offending byte position.",
+        "detail": "Uppercase and other non-canonical bytes fail at the exact first offending index and byte.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;noncanonical=exact-index-byte",
+        "passed": true
+      },
+      {
+        "check_id": "Sha256Digest stores exactly 32 opaque bytes and provides const from_bytes, as_bytes, and into_bytes operations that preserve those bytes exactly.",
+        "detail": "Sha256Digest stores exactly 32 opaque bytes and const byte accessors preserve them exactly.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;width=32;accessors=exact",
+        "passed": true
+      },
+      {
+        "check_id": "Sha256Digest supports Clone, Copy, Eq, PartialEq, Ord, PartialOrd, and Hash value semantics; Debug does not disclose the digest bytes or canonical digest text.",
+        "detail": "Sha256Digest provides deterministic Clone/Copy/Eq/Ord/Hash semantics while Debug discloses only byte length.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;traits=clone-copy-eq-ord-hash;debug=metadata-only",
+        "passed": true
+      },
+      {
+        "check_id": "The exact implementation changes only crates/morize-core/src/digest.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Observed implementation diff changes exactly digest.rs and lib.rs, the two authorized paths.",
+        "evidence_ref": "git-diff:788bc7129ce815bc31888be58ebc95408eeb7ea1...5c745e16481a3dea2bb9b7e6df65a49cdbac2f57;sha256=78a2a0cf6604b2a9918df84d4357fb91eef0b0dee6a1172add2f18f1217c3229;paths=digest.rs,lib.rs",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation defines no blob store, content-addressed path builder, evidence-chain logic, idempotency behavior, serialization framework integration, persisted/wire schema, migration, storage, API, MCP, retrieval, or domain-record integration.",
+        "detail": "No blob store, path derivation, evidence-chain, idempotency, serialization, persistence, API, MCP, retrieval, or domain-record integration is introduced.",
+        "evidence_ref": "git-diff:788bc7129ce815bc31888be58ebc95408eeb7ea1...5c745e16481a3dea2bb9b7e6df65a49cdbac2f57;sha256=78a2a0cf6604b2a9918df84d4357fb91eef0b0dee6a1172add2f18f1217c3229;storage-serialization-domain-integration=false",
+        "passed": true
+      },
+      {
+        "check_id": "This Grain defines only an algorithm-specific SHA-256 digest value representation; it does not compute SHA-256, canonicalize content bytes, authenticate content, prove authority, or establish collision/preimage/security claims.",
+        "detail": "The implementation defines representation only and makes no SHA-256 computation, authentication, authority, collision, preimage, or security claim.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;representation-only=true;hash-computation=false;security-claim=false",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passes on the exact implementation head and canonical merge.",
+        "evidence_ref": "github-actions:pr=35532387146;main=35532566576;ubuntu=success;macos=success;windows=success;check=cargo-check-offline",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passes on the exact implementation head and canonical merge.",
+        "evidence_ref": "github-actions:pr=35532387146;main=35532566576;ubuntu=success;macos=success;windows=success;check=clippy-offline",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "cargo fmt passes on the exact implementation head and canonical merge.",
+        "evidence_ref": "github-actions:pr=35532387146;main=35532566576;ubuntu=success;macos=success;windows=success;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and executes the focused SHA-256 digest value/parser tests.",
+        "detail": "Offline workspace tests pass with 39/39 tests and execute the focused digest tests.",
+        "evidence_ref": "github-actions:pr=35532387146;main=35532566576;ubuntu=success;macos=success;windows=success;tests=39/39",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core exports public Sha256Digest and DigestParseError values plus SHA256_DIGEST_BYTE_LENGTH = 32 and SHA256_DIGEST_TEXT_LENGTH = 64.",
+        "detail": "morize-core publicly exports the digest value, parse error, and exact 32-byte/64-text constants.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/lib.rs;exports=Sha256Digest,DigestParseError,SHA256_DIGEST_BYTE_LENGTH,SHA256_DIGEST_TEXT_LENGTH",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and post-merge standard CI pass Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35532387146;main=35532566576;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000011",
+        "detail": "Canonical SG-000011 proof identity and implementation ancestry revalidated at the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=788bc7129ce815bc31888be58ebc95408eeb7ea1",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35532387146;main=35532566576;ubuntu=success;macos=success;windows=success;check=cargo-check-offline",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with -D warnings passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35532387146;main=35532566576;ubuntu=success;macos=success;windows=success;check=clippy-offline",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35532387146;main=35532566576;ubuntu=success;macos=success;windows=success;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline workspace tests pass with 39/39 tests on canonical main.",
+        "evidence_ref": "github-actions:pr=35532387146;main=35532566576;ubuntu=success;macos=success;windows=success;tests=39/39",
+        "passed": true
+      },
+      {
+        "check_id": "E-SHA256-DIGEST-CANONICAL-TEXT",
+        "detail": "Display has one exact lowercase 64-character hexadecimal representation.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;text-bytes=64;lowercase-hex=true",
+        "passed": true
+      },
+      {
+        "check_id": "E-SHA256-DIGEST-METADATA-ONLY-ERRORS",
+        "detail": "Parse errors retain only bounded length or offending index/byte metadata.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;errors=invalid-length-or-index-byte-only",
+        "passed": true
+      },
+      {
+        "check_id": "E-SHA256-DIGEST-NO-DEPENDENCIES",
+        "detail": "No Cargo manifest/lock change or runtime/build/dev/test dependency was introduced.",
+        "evidence_ref": "git-diff:788bc7129ce815bc31888be58ebc95408eeb7ea1...5c745e16481a3dea2bb9b7e6df65a49cdbac2f57;sha256=78a2a0cf6604b2a9918df84d4357fb91eef0b0dee6a1172add2f18f1217c3229;manifest-lock-unchanged=true;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-SHA256-DIGEST-NO-HASHING-OR-SECURITY-CLAIM",
+        "detail": "The type is representation-only and explicitly does not compute SHA-256 or imply authentication, authority, trust, collision, preimage, or security guarantees.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;hash-computation=false;authority=false;security-claim=false",
+        "passed": true
+      },
+      {
+        "check_id": "E-SHA256-DIGEST-NONDISCLOSING-DEBUG",
+        "detail": "Debug does not reveal digest bytes or canonical digest text.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;debug=Sha256Digest-byte-length-only",
+        "passed": true
+      },
+      {
+        "check_id": "E-SHA256-DIGEST-PROPERTY-MATRIX",
+        "detail": "Deterministic property matrices cover all 256 repeated-byte values and representative non-canonical ASCII at every text position.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;repeated-byte-values=256;noncanonical-every-position=true;tests=39/39",
+        "passed": true
+      },
+      {
+        "check_id": "E-SHA256-DIGEST-STRICT-PARSER",
+        "detail": "FromStr fails closed on wrong byte length and every tested non-canonical byte position.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;parser=exact-length+lowercase-hex;tests=39/39",
+        "passed": true
+      },
+      {
+        "check_id": "E-SHA256-DIGEST-WIDTH",
+        "detail": "Sha256Digest stores exactly 32 opaque bytes and exact accessors preserve those bytes.",
+        "evidence_ref": "git:478239655cc34265956ec4da9db4bde9a509e57c:crates/morize-core/src/digest.rs;bytes=32",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Exact-head independent semantic implementation review returned PASS with C/H/M/L NONE and no findings.",
+        "evidence_ref": "independent-review:sha256:e8960bdbb326448ec6854631d4547aad64354a3b7bb485a77e347b7dae549932;head=5c745e16481a3dea2bb9b7e6df65a49cdbac2f57",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "A normal forward revert removes the SG-000025 value/export implementation; no persisted format, hash computation, migration, or user data depends on it.",
+        "evidence_ref": "git-history:base=788bc7129ce815bc31888be58ebc95408eeb7ea1;merge=478239655cc34265956ec4da9db4bde9a509e57c;forward-revert-safe=true",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "478239655cc34265956ec4da9db4bde9a509e57c",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/digest.rs",
+      "crates/morize-core/src/lib.rs"
+    ],
+    "packet_digest": "sha256:d80b3274faa583f0d9575da54d2f86fd803e2c2ce79b64b048ec051350ca9952",
+    "result_digest": "sha256:2e3259d4e30b30f1b9ba2484170826980eeb3f099cafc2dbdce441e2d6bf14bc",
+    "spec_id": "SG-000025",
+    "spec_revision": "sha256:26514df5919182465e4eb163e774bdddfe556bec116856ba05215e8add7f35e6",
+    "verification_version": 1,
+    "verified": true
+  }
+}
