@@ -158,12 +158,12 @@ def proof_summary(path):
     }, sort_keys=True, separators=(",", ":"))
 
 source = git_show(PACKET_BASE, "docs/SOURCE_LEDGER.md")
-s = source.index("rust-fuzz/cargo-fuzz")
+s = source.index('- `rust-fuzz/cargo-fuzz`')
 try:
-    e = source.index("convaiinnovations/laya", s)
+    e = source.index('- `convaiinnovations/laya`', s)
 except ValueError:
     e = min(len(source), s + 5000)
-fuzz_source = source[max(0, s - 3):e]
+fuzz_source = source[s:e]
 
 roadmap = git_show(PACKET_BASE, "docs/roadmap/FOUNDATION_CORE.md")
 rs = roadmap.index("## P1 — Rust deterministic kernel")
