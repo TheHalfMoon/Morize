@@ -31,6 +31,7 @@ jobs:
       - name: Generate and qualify SG-000021 evidence
         shell: bash
         env:
+          GH_TOKEN: ${{ github.token }}
           EVIDENCE_BRANCH: evidence/sg-000021-verification
           CANONICAL_MAIN: 587d74068e4d794a95c42d90b2e4db475eaf9999
           PACKET_BASE: b9259e9ddcde53e0bdfa2c90c534265c51479420
