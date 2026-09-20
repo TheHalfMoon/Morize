@@ -2,7 +2,8 @@
   "acceptance": [],
   "change_surface": [],
   "children": [
-    "SG-000011"
+    "SG-000011",
+    "SG-000012"
   ],
   "context": {},
   "dependencies": [],

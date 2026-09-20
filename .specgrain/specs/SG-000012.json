@@ -1,0 +1,98 @@
+{
+  "acceptance": [
+    "morize-core exports exactly the planned durable identifier classes as distinct Rust types; no implicit cross-type conversion is implemented.",
+    "Every identifier has a canonical text length of 32 ASCII characters and Display emits lowercase hexadecimal only.",
+    "FromStr accepts exactly canonical lowercase 32-character hexadecimal input and rejects wrong length, uppercase input, and non-hexadecimal characters deterministically.",
+    "Fixed known byte values round-trip through every identifier type without changing bytes or canonical text.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and includes focused identity tests for all planned identifier classes and rejection cases.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for identity-type separation, canonical-form strictness, scope containment, and required evidence.",
+    "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+    "The implementation changes no path outside crates/morize-core/src/identity.rs and crates/morize-core/src/lib.rs."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/identity.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
+  "children": [],
+  "context": {
+    "budget_tokens": 14000,
+    "estimated_tokens": 9000
+  },
+  "dependencies": [],
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000011",
+      "E-ID-TYPE-SEPARATION",
+      "E-ID-CANONICAL-TEXT",
+      "E-ID-STRICT-PARSE",
+      "E-ID-ROUNDTRIP-TESTS",
+      "E-ID-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
+  "id": "SG-000012",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to typed identifier definitions, strict canonical text parsing/formatting, focused tests, and morize-core re-exports. No ID generation, persistence, serde, randomness, time semantics, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head, identity semantics, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the bounded typed-identifier implementation commits; no persisted Morize data or public stable release format exists yet."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
+        }
+      ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "A small standard-library-only typed-ID module inside the existing morize-core crate is the narrowest implementation. No crate split, donor code, serialization framework, random generator, or external dependency is required."
+      },
+      "safety": {
+        "requirements": [],
+        "status": "none-identified"
+      },
+      "unresolved_decisions": [],
+      "version": 1
+    }
+  },
+  "method": "controlled",
+  "outcome": "morize-core exposes non-interchangeable typed durable identifiers with one strict canonical textual representation and deterministic validation, without adding identifier generation, persistence, serde, or third-party dependencies.",
+  "parent_id": "SG-000010",
+  "rationale": "MZ-DATA-001 and DATA_MODEL identity rules require stable typed identity before higher-level domain contracts. This Grain fixes only the in-memory typed identifier/value boundary and canonical text form so later serialization, storage, policy, and mutation Grains can build on one deterministic identity contract.",
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the bounded typed-identifier implementation commits; no persistent format or user data has been written by this Grain."
+  },
+  "schema_version": 1,
+  "scope_in": [
+    "Define distinct public newtypes for VaultId, PrincipalId, ScopeId, SourceId, ObservationId, EvidenceId, PropositionId, MemoryId, MemoryVersionId, RelationId, DecisionId, MutationId, PolicyRevisionId, BranchId, SnapshotId, ProjectionGenerationId, ContextBundleId, and ConnectorBindingId.",
+    "Represent each identifier as an opaque fixed 16-byte value while exposing only type-safe construction/access and strict canonical text parsing/formatting.",
+    "Define one canonical textual representation: exactly 32 lowercase hexadecimal ASCII characters with deterministic equality, ordering, hashing, Display, Debug, and FromStr behavior.",
+    "Add a bounded public parse-error type for invalid length and non-canonical/invalid hexadecimal input.",
+    "Add focused standard-library-only tests covering all identifier classes, canonical round trips, invalid length, uppercase rejection, invalid characters, and stable formatting."
+  ],
+  "scope_out": [
+    "Identifier generation, randomness, UUID/ULID version semantics, clocks, monotonicity, database allocation, or collision-management services.",
+    "Serde or other serialization-framework integration, persisted field schemas, vault formats, migrations, configuration formats, or public API wire schemas.",
+    "Content digests, idempotency keys, timestamps, domain memory records, policy, authorization, retrieval, MCP, storage, or model behavior."
+  ],
+  "state": "GRAIN",
+  "title": "Define typed durable identifier values"
+}
