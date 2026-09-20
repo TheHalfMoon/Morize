@@ -1,0 +1,668 @@
+name: sg24-implementation-builder
+
+on:
+  push:
+    branches:
+      - automation/sg-000024-implementation-builder
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout automation branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+
+      - name: Build exact SG-000024 implementation candidate
+        shell: bash
+        env:
+          BASE_MAIN: e313503bc2b76fa8c6584ae27dad7aee0b831a25
+          IMPL_BRANCH: impl/sg-000024-isolated-fuzz-harness
+          SPEC_REVISION: sha256:6e5322c35dce79dee3b39e0451aba096c9680a40983590efebf09cc3a928eb9f
+          SPEC_GRAIN_PIN: 5de7d6499bb0a9e3a191fc0934399cf099d1980a
+          CARGO_FUZZ_VERSION: "0.13.2"
+          CARGO_FUZZ_SHA256: b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c
+          RUST_NIGHTLY: nightly-2026-09-18
+          FUZZ_TARGET_TRIPLE: x86_64-unknown-linux-gnu
+        run: |
+          set -euo pipefail
+
+          git fetch origin main --prune
+          test "$(git rev-parse origin/main)" = "$BASE_MAIN"
+          if git ls-remote --exit-code origin "refs/heads/$IMPL_BRANCH" >/dev/null 2>&1; then
+            echo "Refusing to overwrite existing $IMPL_BRANCH" >&2
+            exit 2
+          fi
+
+          git config user.name "Gocceri"
+          git config user.email "azialshehri@gmail.com"
+
+          git checkout --detach "$BASE_MAIN"
+          test -z "$(git status --porcelain)"
+
+          ROOT_CARGO_TOML_SHA="$(sha256sum Cargo.toml | awk '{print $1}')"
+          ROOT_CARGO_LOCK_SHA="$(sha256sum Cargo.lock | awk '{print $1}')"
+          ROOT_CI_SHA="$(sha256sum .github/workflows/ci.yml | awk '{print $1}')"
+          CORE_TREE="$(git rev-parse HEAD:crates/morize-core)"
+
+          python -m pip install --disable-pip-version-check --quiet             "git+https://github.com/TheHalfMoon/SpecGrain.git@$SPEC_GRAIN_PIN"
+
+          specgrain check --json . > /tmp/sg24-base-check.json
+          specgrain prove --json SG-000012 . > /tmp/p12.json
+          specgrain prove --json SG-000013 . > /tmp/p13.json
+          specgrain prove --json SG-000014 . > /tmp/p14.json
+          specgrain prove --json SG-000023 . > /tmp/p23.json
+
+          python - <<'PY'
+          import json, os, subprocess
+          check=json.load(open('/tmp/sg24-base-check.json'))
+          assert check['valid'] is True and check['issues']==[]
+          expected={
+            'SG-000012':('/tmp/p12.json','sha256:13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079','sha256:256a8c55a843f00798f3e8e3f0807ee38f676a7f50c9b9380b9d26167f4f7aa7','026b2e5849759915975f8ae12b111d1185fda89f'),
+            'SG-000013':('/tmp/p13.json','sha256:ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c','sha256:adf07a2ef558c801fcacbb3b1bb7ab627bdc0480fdec65e7fc2d1a2e86dafe8d','9db66a7b4225cd5d3eff9a65d910038352d29a59'),
+            'SG-000014':('/tmp/p14.json','sha256:95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977','sha256:06df9fd48a398fb1b1af3e4a6c821efa9a0508d7e9e3a795c21edadf1045ef1e','fac420fd87f86b97a5ee97397e0775d00795aaa3'),
+            'SG-000023':('/tmp/p23.json','sha256:14dc204de67286a282a2b4e1d8d65fc8d9837b140ced660aa230745ddb82f68c','sha256:9e5cba94eec7f7488cdb02605db5cd7f4d1b41200282ca4efc0c68f058d0a779','4620805a440fe1ef5d29c9015b781014a5c109d2'),
+          }
+          for sid,(path,record,srev,impl) in expected.items():
+              p=json.load(open(path))
+              assert p['verified'] is True
+              assert p['latest_record_digest']==record
+              latest=p['records'][-1]['report']
+              assert latest['spec_revision']==srev
+              assert latest['implementation_revision']==impl
+              assert latest['issues']==[]
+              subprocess.run(['git','merge-base','--is-ancestor',impl,os.environ['BASE_MAIN']],check=True)
+              print(sid+'_PREREQUISITE=PASS')
+          PY
+
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+
+          base='e313503bc2b76fa8c6584ae27dad7aee0b831a25'
+
+          def blob(path):
+              return subprocess.check_output(['git','rev-parse',f'{base}:{path}'],text=True).strip()
+
+          def full(path):
+              return subprocess.check_output(['git','show',f'{base}:{path}'],text=True)
+
+          def proof_summary(path):
+              raw=json.loads(full(path))
+              report=raw['report']
+              return json.dumps({
+                  'record_digest':raw['record_digest'],
+                  'verified':report['verified'],
+                  'spec_id':report['spec_id'],
+                  'spec_revision':report['spec_revision'],
+                  'implementation_revision':report['implementation_revision'],
+                  'issues':report['issues'],
+              },sort_keys=True,separators=(',',':'))
+
+          source=full('docs/SOURCE_LEDGER.md')
+          s=source.index('- `rust-fuzz/cargo-fuzz`')
+          e=source.index('- `convaiinnovations/laya`',s)
+          fuzz_source=source[s:e]
+
+          roadmap=full('docs/roadmap/FOUNDATION_CORE.md')
+          rs=roadmap.index('## P1 — Rust deterministic kernel')
+          re=roadmap.index('## P2',rs)
+          p1=roadmap[rs:re]
+
+          selections=[
+              ('sg24-grain','.specgrain/specs/SG-000024.json',full('.specgrain/specs/SG-000024.json'),
+               'Exact SG-000024 GRAIN contract, authorized surface, tool pins, acceptance criteria, non-claims, and required evidence.',100),
+              ('proof-policy','docs/adr/0004-verified-proof-prerequisites.md',full('docs/adr/0004-verified-proof-prerequisites.md'),
+               'Canonical ADR-0004 proof-prerequisite policy.',95),
+              ('sg12-proof','.specgrain/evidence/SG-000012/13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079.json',
+               proof_summary('.specgrain/evidence/SG-000012/13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079.json'),
+               'Exact canonical SG-000012 proof identity.',90),
+              ('sg13-proof','.specgrain/evidence/SG-000013/ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c.json',
+               proof_summary('.specgrain/evidence/SG-000013/ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c.json'),
+               'Exact canonical SG-000013 proof identity.',90),
+              ('sg14-proof','.specgrain/evidence/SG-000014/95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977.json',
+               proof_summary('.specgrain/evidence/SG-000014/95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977.json'),
+               'Exact canonical SG-000014 proof identity.',90),
+              ('sg23-proof','.specgrain/evidence/SG-000023/14dc204de67286a282a2b4e1d8d65fc8d9837b140ced660aa230745ddb82f68c.json',
+               proof_summary('.specgrain/evidence/SG-000023/14dc204de67286a282a2b4e1d8d65fc8d9837b140ced660aa230745ddb82f68c.json'),
+               'Exact canonical SG-000023 proof identity.',90),
+              ('fuzz-source-ledger','docs/SOURCE_LEDGER.md',fuzz_source,
+               'Pinned cargo-fuzz/libfuzzer-sys versions, checksums, license boundary, platform distinction, and fuzz-only provenance.',85),
+              ('p1-roadmap','docs/roadmap/FOUNDATION_CORE.md',p1,
+               'P1 requirement for property and fuzz tests plus deterministic-kernel gate.',80),
+          ]
+
+          records=[]
+          for source_id,path,data,reason,priority in selections:
+              encoded=data.encode()
+              records.append({
+                  'source_id':source_id,
+                  'provenance':f'git:{base}:{path}',
+                  'selection_reason':reason,
+                  'revision':f'git:{blob(path)}',
+                  'size_bytes':len(encoded),
+                  'token_cost':(len(encoded)+3)//4,
+                  'requirement':'required',
+                  'priority':priority,
+              })
+          total=sum(r['token_cost'] for r in records)
+          assert total <= 14000, total
+          Path('/tmp/sg24-context-sources.json').write_text(
+              json.dumps(records,indent=2,sort_keys=True,ensure_ascii=False)+'\n'
+          )
+          print('CONTEXT_SOURCE_COUNT='+str(len(records)))
+          print('CONTEXT_TOKEN_TOTAL='+str(total))
+          PY
+
+          specgrain packet SG-000024 .             --context-sources /tmp/sg24-context-sources.json             --json > /tmp/sg24-workpacket.json
+
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          x=json.load(open('/tmp/sg24-workpacket.json'))
+          assert x['spec_id']=='SG-000024'
+          assert x['spec_revision']==os.environ['SPEC_REVISION']
+          assert len(x['context_sources'])==8
+          print('WORKPACKET_DIGEST='+x['packet_digest'])
+          print('WORKPACKET_FILE_SHA256='+hashlib.sha256(Path('/tmp/sg24-workpacket.json').read_bytes()).hexdigest())
+          PY
+
+          git switch -C "$IMPL_BRANCH" "$BASE_MAIN"
+
+          mkdir -p fuzz/fuzz_targets .github/workflows
+
+          cat > fuzz/Cargo.toml <<'EOF'
+          [package]
+          name = "morize-fuzz"
+          version = "0.0.0"
+          edition = "2024"
+          publish = false
+          license = "Apache-2.0"
+
+          [package.metadata]
+          cargo-fuzz = true
+
+          [dependencies]
+          libfuzzer-sys = "=0.4.13"
+          morize-core = { path = "../crates/morize-core" }
+
+          [[bin]]
+          name = "durable_id"
+          path = "fuzz_targets/durable_id.rs"
+          test = false
+          doc = false
+          bench = false
+
+          [[bin]]
+          name = "bounded_utf8"
+          path = "fuzz_targets/bounded_utf8.rs"
+          test = false
+          doc = false
+          bench = false
+
+          [[bin]]
+          name = "bounded_vec"
+          path = "fuzz_targets/bounded_vec.rs"
+          test = false
+          doc = false
+          bench = false
+
+          [workspace]
+          members = ["."]
+          EOF
+
+          cat > fuzz/rust-toolchain.toml <<'EOF'
+          [toolchain]
+          channel = "nightly-2026-09-18"
+          profile = "minimal"
+          components = ["rust-src"]
+          targets = ["x86_64-unknown-linux-gnu"]
+          EOF
+
+          cat > fuzz/.gitignore <<'EOF'
+          /artifacts/
+          /corpus/
+          /coverage/
+          /target/
+          EOF
+
+          cat > fuzz/fuzz_targets/durable_id.rs <<'EOF'
+          #![no_main]
+
+          use libfuzzer_sys::fuzz_target;
+          use morize_core::{
+              BranchId, ConnectorBindingId, ContextBundleId, DecisionId, EvidenceId,
+              ID_TEXT_LENGTH, MemoryId, MemoryVersionId, MutationId, ObservationId,
+              PolicyRevisionId, PrincipalId, ProjectionGenerationId, PropositionId, RelationId,
+              ScopeId, SnapshotId, SourceId, VaultId,
+          };
+
+          macro_rules! check_identifier {
+              ($ty:ty, $text:expr) => {
+                  if let Ok(id) = $text.parse::<$ty>() {
+                      let rendered = id.to_string();
+                      assert_eq!(rendered, $text);
+                      assert_eq!(rendered.len(), ID_TEXT_LENGTH);
+                      assert!(rendered
+                          .bytes()
+                          .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte)));
+
+                      let bytes = id.into_bytes();
+                      let rebuilt = <$ty>::from_bytes(bytes);
+                      assert_eq!(rebuilt.as_bytes(), &bytes);
+                      assert_eq!(rebuilt.into_bytes(), bytes);
+                      assert_eq!(rebuilt.to_string(), $text);
+                  }
+              };
+          }
+
+          fuzz_target!(|data: &[u8]| {
+              let Ok(text) = core::str::from_utf8(data) else {
+                  return;
+              };
+
+              check_identifier!(VaultId, text);
+              check_identifier!(PrincipalId, text);
+              check_identifier!(ScopeId, text);
+              check_identifier!(SourceId, text);
+              check_identifier!(ObservationId, text);
+              check_identifier!(EvidenceId, text);
+              check_identifier!(PropositionId, text);
+              check_identifier!(MemoryId, text);
+              check_identifier!(MemoryVersionId, text);
+              check_identifier!(RelationId, text);
+              check_identifier!(DecisionId, text);
+              check_identifier!(MutationId, text);
+              check_identifier!(PolicyRevisionId, text);
+              check_identifier!(BranchId, text);
+              check_identifier!(SnapshotId, text);
+              check_identifier!(ProjectionGenerationId, text);
+              check_identifier!(ContextBundleId, text);
+              check_identifier!(ConnectorBindingId, text);
+          });
+          EOF
+
+          cat > fuzz/fuzz_targets/bounded_utf8.rs <<'EOF'
+          #![no_main]
+
+          use libfuzzer_sys::fuzz_target;
+          use morize_core::{BoundedUtf8, Utf8BoundsError};
+
+          fn check<const MAX_BYTES: usize>(text: &str) {
+              let actual_bytes = text.len();
+              match BoundedUtf8::<MAX_BYTES>::try_from(text) {
+                  Ok(value) => {
+                      assert!(actual_bytes <= MAX_BYTES);
+                      assert_eq!(value.len_bytes(), actual_bytes);
+                      assert_eq!(value.as_str().as_bytes(), text.as_bytes());
+                      assert_eq!(value.into_string().as_bytes(), text.as_bytes());
+                  }
+                  Err(error) => {
+                      assert!(actual_bytes > MAX_BYTES);
+                      match error {
+                          Utf8BoundsError::TooLong {
+                              max_bytes,
+                              actual_bytes: rejected_bytes,
+                          } => {
+                              assert_eq!(max_bytes, MAX_BYTES);
+                              assert_eq!(rejected_bytes, actual_bytes);
+                          }
+                          _ => panic!("unexpected BoundedUtf8 error variant"),
+                      }
+                  }
+              }
+          }
+
+          fuzz_target!(|data: &[u8]| {
+              let Ok(text) = core::str::from_utf8(data) else {
+                  return;
+              };
+
+              check::<0>(text);
+              check::<1>(text);
+              check::<2>(text);
+              check::<3>(text);
+              check::<4>(text);
+              check::<5>(text);
+              check::<8>(text);
+              check::<16>(text);
+              check::<32>(text);
+              check::<64>(text);
+          });
+          EOF
+
+          cat > fuzz/fuzz_targets/bounded_vec.rs <<'EOF'
+          #![no_main]
+
+          use libfuzzer_sys::fuzz_target;
+          use morize_core::{BoundedVec, CollectionBoundsError};
+
+          fn check<const MAX_ITEMS: usize>(data: &[u8]) {
+              let original = data.to_vec();
+
+              match BoundedVec::<u8, MAX_ITEMS>::try_from(original.clone()) {
+                  Ok(value) => {
+                      assert!(original.len() <= MAX_ITEMS);
+                      assert_eq!(value.len(), original.len());
+                      assert_eq!(value.as_slice(), original.as_slice());
+                      assert_eq!(value.into_vec(), original);
+                  }
+                  Err(error) => {
+                      assert!(original.len() > MAX_ITEMS);
+                      match error.bounds() {
+                          CollectionBoundsError::TooManyItems {
+                              max_items,
+                              actual_items,
+                          } => {
+                              assert_eq!(max_items, MAX_ITEMS);
+                              assert_eq!(actual_items, original.len());
+                          }
+                          _ => panic!("unexpected BoundedVec build error variant"),
+                      }
+                      assert_eq!(error.into_values(), original);
+                  }
+              }
+
+              let mut incremental = BoundedVec::<u8, MAX_ITEMS>::new();
+              for (index, value) in data.iter().copied().enumerate() {
+                  let before = incremental.as_slice().to_vec();
+                  match incremental.try_push(value) {
+                      Ok(()) => {
+                          assert!(index < MAX_ITEMS);
+                          assert_eq!(incremental.len(), index + 1);
+                          assert_eq!(incremental.as_slice(), &data[..=index]);
+                      }
+                      Err(error) => {
+                          assert!(index >= MAX_ITEMS);
+                          assert_eq!(incremental.as_slice(), before.as_slice());
+                          match error.bounds() {
+                              CollectionBoundsError::AtCapacity { max_items } => {
+                                  assert_eq!(max_items, MAX_ITEMS);
+                              }
+                              _ => panic!("unexpected BoundedVec push error variant"),
+                          }
+                          assert_eq!(error.into_value(), value);
+                      }
+                  }
+              }
+          }
+
+          fuzz_target!(|data: &[u8]| {
+              check::<0>(data);
+              check::<1>(data);
+              check::<2>(data);
+              check::<4>(data);
+              check::<8>(data);
+              check::<16>(data);
+          });
+          EOF
+
+          cat > fuzz/README.md <<'EOF'
+          # Morize fuzz harness
+
+          This directory is an isolated fuzz-only Cargo workspace for SG-000024. It is not a member of the Morize root workspace and does not add runtime, build, or test dependencies to normal Morize artifacts.
+
+          ## Pinned toolchain
+
+          - Rust: `nightly-2026-09-18`
+          - cargo-fuzz: `0.13.2`
+          - cargo-fuzz Linux x86_64 musl executable SHA-256: `b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c`
+          - libfuzzer-sys: exactly `0.4.13`
+          - fuzz target triple: `x86_64-unknown-linux-gnu`
+
+          The musl asset identifies only the prebuilt cargo-fuzz executable. Sanitizer-instrumented fuzz targets are explicitly compiled and run for GNU libc because AddressSanitizer is incompatible with statically linked musl libc.
+
+          ## Targets
+
+          - `durable_id`: raw-byte durable-ID parser/canonical round-trip invariants for every durable ID type.
+          - `bounded_utf8`: raw-byte UTF-8 bound, preservation, and rejection-metadata invariants.
+          - `bounded_vec`: raw-byte collection bound, order, lossless-rejection, and failed-push invariants.
+
+          ## Local bounded smoke
+
+          Install the pinned nightly and cargo-fuzz version, then run from the repository root:
+
+          ```bash
+          export RUSTUP_TOOLCHAIN=nightly-2026-09-18
+          cargo fuzz build --fuzz-dir fuzz --target x86_64-unknown-linux-gnu
+          cargo fuzz run --fuzz-dir fuzz --target x86_64-unknown-linux-gnu durable_id -- -runs=5000 -seed=424242 -timeout=5 -rss_limit_mb=2048 -max_len=512
+          cargo fuzz run --fuzz-dir fuzz --target x86_64-unknown-linux-gnu bounded_utf8 -- -runs=5000 -seed=424243 -timeout=5 -rss_limit_mb=2048 -max_len=512
+          cargo fuzz run --fuzz-dir fuzz --target x86_64-unknown-linux-gnu bounded_vec -- -runs=5000 -seed=424244 -timeout=5 -rss_limit_mb=2048 -max_len=512
+          ```
+
+          The CI smoke campaign is intentionally bounded. A passing run is evidence only for the executed budget; it is not a claim of exhaustive fuzzing, bug absence, complete security coverage, or coverage completeness.
+
+          Fuzz corpora and crash artifacts must contain generated/synthetic bytes only. Do not add real user data, secrets, credentials, PHI, or copied production fixtures.
+          EOF
+
+          cat > fuzz/THIRD_PARTY.md <<'EOF'
+          # Fuzz-only third-party components
+
+          SG-000024 isolates all fuzz tooling and dependencies from Morize runtime artifacts.
+
+          ## cargo-fuzz
+
+          - Project: rust-fuzz/cargo-fuzz
+          - Version: 0.13.2
+          - Release commit: 984c861c8dfea28055254c5f1d2659ab2cd63f76
+          - License: MIT OR Apache-2.0
+          - CI executable: cargo-fuzz-0.13.2-x86_64-unknown-linux-musl.tar.gz
+          - Pinned SHA-256: b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c
+          - Use: fuzz-only development/CI frontend; never linked into Morize runtime artifacts.
+
+          ## libfuzzer-sys
+
+          - Project: rust-fuzz/libfuzzer
+          - Crate: libfuzzer-sys
+          - Version: exactly 0.4.13
+          - Release commit: 719e4efb9b8857ebaa782ae59376c8cbb78fed0f
+          - Wrapper license: MIT OR Apache-2.0
+          - Combined crate expression: (MIT OR Apache-2.0) AND NCSA
+          - Bundled libFuzzer source license: NCSA
+          - Use: fuzz-only dependency in the independent `fuzz/` workspace; never part of the root dependency graph or production artifacts.
+
+          The committed `fuzz/Cargo.lock` closes the exact fuzz-only transitive dependency graph. Root `Cargo.toml` and root `Cargo.lock` remain independent and unchanged.
+          EOF
+
+          cat > .github/workflows/fuzz-smoke.yml <<'EOF'
+          name: fuzz-smoke
+
+          on:
+            pull_request:
+              paths:
+                - "fuzz/**"
+                - ".github/workflows/fuzz-smoke.yml"
+            push:
+              branches: [main]
+              paths:
+                - "fuzz/**"
+                - ".github/workflows/fuzz-smoke.yml"
+
+          permissions:
+            contents: read
+
+          jobs:
+            smoke:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+                  with:
+                    fetch-depth: 0
+                    ref: __DOLLAR__{{ github.event.pull_request.head.sha || github.sha }}
+
+                - name: Verify exact checkout
+                  shell: bash
+                  run: test "$(git rev-parse HEAD)" = "__DOLLAR__{{ github.event.pull_request.head.sha || github.sha }}"
+
+                - name: Install pinned nightly
+                  shell: bash
+                  run: |
+                    set -euo pipefail
+                    rustup toolchain install nightly-2026-09-18 --profile minimal
+                    rustup component add rust-src --toolchain nightly-2026-09-18
+                    rustc +nightly-2026-09-18 --version --verbose | tee /tmp/rustc-version.txt
+                    grep -q "release: 1.100.0-nightly" /tmp/rustc-version.txt
+                    grep -q "commit-hash: 330d317121e16b5db8e5adc63595910528ff2ee7" /tmp/rustc-version.txt
+
+                - name: Install pinned cargo-fuzz executable
+                  shell: bash
+                  run: |
+                    set -euo pipefail
+                    curl --fail --location --silent --show-error                       "https://github.com/rust-fuzz/cargo-fuzz/releases/download/0.13.2/cargo-fuzz-0.13.2-x86_64-unknown-linux-musl.tar.gz"                       --output /tmp/cargo-fuzz.tar.gz
+                    echo "b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c  /tmp/cargo-fuzz.tar.gz" | sha256sum --check
+                    tar -xzf /tmp/cargo-fuzz.tar.gz -C /tmp
+                    install -m 0755 /tmp/cargo-fuzz "$HOME/.cargo/bin/cargo-fuzz"
+                    cargo fuzz --version | tee /tmp/cargo-fuzz-version.txt
+                    grep -q "cargo-fuzz 0.13.2" /tmp/cargo-fuzz-version.txt
+
+                - name: Verify fuzz workspace isolation and lock closure
+                  shell: bash
+                  env:
+                    RUSTUP_TOOLCHAIN: nightly-2026-09-18
+                  run: |
+                    set -euo pipefail
+                    cargo metadata --manifest-path fuzz/Cargo.toml --locked --format-version 1 > /tmp/fuzz-metadata.json
+                    python - <<'PY'
+                    import json
+                    x=json.load(open('/tmp/fuzz-metadata.json'))
+                    root=x['workspace_root']
+                    assert root.endswith('/fuzz'), root
+                    packages={p['name']:p for p in x['packages']}
+                    assert packages['morize-fuzz']['publish'] == []
+                    lib=[p for p in x['packages'] if p['name']=='libfuzzer-sys']
+                    assert len(lib)==1 and lib[0]['version']=='0.4.13'
+                    core=[p for p in x['packages'] if p['name']=='morize-core']
+                    assert len(core)==1
+                    PY
+                    test "$(grep -c '^\[\[package\]\]$' Cargo.lock)" -eq 1
+                    grep -q '^name = "morize-core"$' Cargo.lock
+                    grep -q '^version = "0.4.13"$' fuzz/Cargo.lock
+                    grep -q 'cargo-fuzz: MIT OR Apache-2.0' fuzz/THIRD_PARTY.md
+                    grep -q 'Combined crate expression: (MIT OR Apache-2.0) AND NCSA' fuzz/THIRD_PARTY.md
+                    grep -q 'Bundled libFuzzer source license: NCSA' fuzz/THIRD_PARTY.md
+
+                - name: Build fuzz targets
+                  shell: bash
+                  env:
+                    RUSTUP_TOOLCHAIN: nightly-2026-09-18
+                  run: |
+                    set -euo pipefail
+                    cargo fuzz build --fuzz-dir fuzz --target x86_64-unknown-linux-gnu durable_id
+                    cargo fuzz build --fuzz-dir fuzz --target x86_64-unknown-linux-gnu bounded_utf8
+                    cargo fuzz build --fuzz-dir fuzz --target x86_64-unknown-linux-gnu bounded_vec
+
+                - name: Run bounded libFuzzer smoke
+                  shell: bash
+                  env:
+                    RUSTUP_TOOLCHAIN: nightly-2026-09-18
+                  run: |
+                    set -euo pipefail
+                    rm -rf /tmp/morize-fuzz-corpus
+                    mkdir -p /tmp/morize-fuzz-corpus/durable_id /tmp/morize-fuzz-corpus/bounded_utf8 /tmp/morize-fuzz-corpus/bounded_vec
+                    printf '%032d' 0 > /tmp/morize-fuzz-corpus/durable_id/zero
+                    printf 'memory' > /tmp/morize-fuzz-corpus/bounded_utf8/ascii
+                    printf '\x00\x01\x02\x03' > /tmp/morize-fuzz-corpus/bounded_vec/bytes
+
+                    cargo fuzz run --fuzz-dir fuzz --target x86_64-unknown-linux-gnu durable_id /tmp/morize-fuzz-corpus/durable_id --                       -runs=5000 -seed=424242 -timeout=5 -rss_limit_mb=2048 -max_len=512
+                    cargo fuzz run --fuzz-dir fuzz --target x86_64-unknown-linux-gnu bounded_utf8 /tmp/morize-fuzz-corpus/bounded_utf8 --                       -runs=5000 -seed=424243 -timeout=5 -rss_limit_mb=2048 -max_len=512
+                    cargo fuzz run --fuzz-dir fuzz --target x86_64-unknown-linux-gnu bounded_vec /tmp/morize-fuzz-corpus/bounded_vec --                       -runs=5000 -seed=424244 -timeout=5 -rss_limit_mb=2048 -max_len=512
+
+                - name: Upload fuzz failure artifacts
+                  if: __DOLLAR__{{ failure() }}
+                  uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+                  with:
+                    name: fuzz-crash-artifacts-__DOLLAR__{{ github.event.pull_request.head.sha || github.sha }}
+                    path: fuzz/artifacts/
+                    if-no-files-found: ignore
+          EOF
+          sed -i 's/__DOLLAR__/$/g' .github/workflows/fuzz-smoke.yml
+
+          rustup toolchain install "$RUST_NIGHTLY" --profile minimal
+          rustup component add rust-src --toolchain "$RUST_NIGHTLY"
+
+          curl --fail --location --silent --show-error             "https://github.com/rust-fuzz/cargo-fuzz/releases/download/$CARGO_FUZZ_VERSION/cargo-fuzz-$CARGO_FUZZ_VERSION-x86_64-unknown-linux-musl.tar.gz"             --output /tmp/cargo-fuzz.tar.gz
+          echo "$CARGO_FUZZ_SHA256  /tmp/cargo-fuzz.tar.gz" | sha256sum --check
+          tar -xzf /tmp/cargo-fuzz.tar.gz -C /tmp
+          install -m 0755 /tmp/cargo-fuzz "$HOME/.cargo/bin/cargo-fuzz"
+          cargo fuzz --version | grep -q "cargo-fuzz 0.13.2"
+
+          export RUSTUP_TOOLCHAIN="$RUST_NIGHTLY"
+          cargo generate-lockfile --manifest-path fuzz/Cargo.toml
+          cargo metadata --manifest-path fuzz/Cargo.toml --locked --format-version 1 > /tmp/sg24-fuzz-metadata.json
+
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/sg24-fuzz-metadata.json'))
+          assert x['workspace_root'].endswith('/fuzz'), x['workspace_root']
+          package={p['name']:p for p in x['packages']}
+          assert package['morize-fuzz']['publish']==[]
+          libs=[p for p in x['packages'] if p['name']=='libfuzzer-sys']
+          assert len(libs)==1 and libs[0]['version']=='0.4.13'
+          assert len([p for p in x['packages'] if p['name']=='morize-core'])==1
+          print('FUZZ_METADATA_LOCK_CLOSURE=PASS')
+          PY
+
+          cargo fuzz list --fuzz-dir fuzz | tee /tmp/sg24-targets.txt
+          grep -qx durable_id /tmp/sg24-targets.txt
+          grep -qx bounded_utf8 /tmp/sg24-targets.txt
+          grep -qx bounded_vec /tmp/sg24-targets.txt
+
+          cargo fuzz build --fuzz-dir fuzz --target "$FUZZ_TARGET_TRIPLE" durable_id
+          cargo fuzz build --fuzz-dir fuzz --target "$FUZZ_TARGET_TRIPLE" bounded_utf8
+          cargo fuzz build --fuzz-dir fuzz --target "$FUZZ_TARGET_TRIPLE" bounded_vec
+
+          rm -rf /tmp/sg24-corpus
+          mkdir -p /tmp/sg24-corpus/durable_id /tmp/sg24-corpus/bounded_utf8 /tmp/sg24-corpus/bounded_vec
+          printf '%032d' 0 > /tmp/sg24-corpus/durable_id/zero
+          printf 'memory' > /tmp/sg24-corpus/bounded_utf8/ascii
+          printf '\x00\x01\x02\x03' > /tmp/sg24-corpus/bounded_vec/bytes
+
+          cargo fuzz run --fuzz-dir fuzz --target "$FUZZ_TARGET_TRIPLE" durable_id /tmp/sg24-corpus/durable_id --             -runs=2000 -seed=424242 -timeout=5 -rss_limit_mb=2048 -max_len=512
+          cargo fuzz run --fuzz-dir fuzz --target "$FUZZ_TARGET_TRIPLE" bounded_utf8 /tmp/sg24-corpus/bounded_utf8 --             -runs=2000 -seed=424243 -timeout=5 -rss_limit_mb=2048 -max_len=512
+          cargo fuzz run --fuzz-dir fuzz --target "$FUZZ_TARGET_TRIPLE" bounded_vec /tmp/sg24-corpus/bounded_vec --             -runs=2000 -seed=424244 -timeout=5 -rss_limit_mb=2048 -max_len=512
+          unset RUSTUP_TOOLCHAIN
+
+          cargo fmt --all -- --check
+          cargo check --workspace --all-targets --offline
+          cargo clippy --workspace --all-targets --offline -- -D warnings
+          cargo test --workspace --all-targets --offline 2>&1 | tee /tmp/sg24-root-tests.txt
+
+          test "$(sha256sum Cargo.toml | awk '{print $1}')" = "$ROOT_CARGO_TOML_SHA"
+          test "$(sha256sum Cargo.lock | awk '{print $1}')" = "$ROOT_CARGO_LOCK_SHA"
+          test "$(sha256sum .github/workflows/ci.yml | awk '{print $1}')" = "$ROOT_CI_SHA"
+          test "$(git rev-parse HEAD:crates/morize-core)" = "$CORE_TREE"
+
+          expected=".github/workflows/fuzz-smoke.yml fuzz/.gitignore fuzz/Cargo.lock fuzz/Cargo.toml fuzz/README.md fuzz/THIRD_PARTY.md fuzz/fuzz_targets/bounded_utf8.rs fuzz/fuzz_targets/bounded_vec.rs fuzz/fuzz_targets/durable_id.rs fuzz/rust-toolchain.toml "
+          actual="$(git status --porcelain | awk '{print $2}' | sort | tr '\n' ' ')"
+          test "$actual" = "$expected"
+
+          git add .github/workflows/fuzz-smoke.yml fuzz
+          git diff --cached --check
+          test "$(git diff --cached --name-only | wc -l)" -eq 10
+
+          git commit -s -m "test: add isolated SG-000024 fuzz harness"
+
+          IMPL_HEAD="$(git rev-parse HEAD)"
+          IMPL_TREE="$(git rev-parse HEAD^{tree})"
+          DIFF_SHA256="$(git diff "$BASE_MAIN...$IMPL_HEAD" | sha256sum | awk '{print $1}')"
+          FILE_LIST_SHA256="$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" | sha256sum | awk '{print $1}')"
+          LOCK_SHA256="$(sha256sum fuzz/Cargo.lock | awk '{print $1}')"
+
+          test -z "$(git status --porcelain)"
+          git push origin "HEAD:refs/heads/$IMPL_BRANCH"
+
+          echo "IMPLEMENTATION_HEAD=$IMPL_HEAD"
+          echo "IMPLEMENTATION_TREE=$IMPL_TREE"
+          echo "IMPLEMENTATION_DIFF_SHA256=$DIFF_SHA256"
+          echo "IMPLEMENTATION_FILE_LIST_SHA256=$FILE_LIST_SHA256"
+          echo "FUZZ_LOCK_SHA256=$LOCK_SHA256"
+          cat /tmp/sg24-workpacket.json
