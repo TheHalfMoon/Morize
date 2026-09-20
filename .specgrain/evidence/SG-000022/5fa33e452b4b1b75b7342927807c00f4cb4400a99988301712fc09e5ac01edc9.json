@@ -1,0 +1,209 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:5fa33e452b4b1b75b7342927807c00f4cb4400a99988301712fc09e5ac01edc9",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000011 proof prerequisite matched the exact WorkPacket baseline before execution.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=2ef2a6c1ca13e7d2e6daf337884f84b4c2bc60d9",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for normalized Unix-part semantics, negative-time ordering, bounds validation, absence of clock/calendar/wire behavior, scope containment, and required evidence.",
+        "detail": "Independent North Mini Code exact-head semantic review returned PASS with CRITICAL/HIGH/MEDIUM/LOW NONE and no findings.",
+        "evidence_ref": "independent-review:sha256:fd11c1fd6e0f4bb78e5925009c04bad1639972e9adb1cbbe96649a07590b4470;head=19f0e651845e7a73c27cd5c815fe808c8ec60a86",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+        "detail": "Cargo manifests and Cargo.lock are unchanged; no runtime, build, or test dependency was added.",
+        "evidence_ref": "git-diff:2ef2a6c1ca13e7d2e6daf337884f84b4c2bc60d9...19f0e651845e7a73c27cd5c815fe808c8ec60a86;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "Focused tests confirm canonical negative-time semantics, including that (-1, 999_999_999) is exactly one nanosecond before UNIX_EPOCH and orders before (0, 0).",
+        "detail": "Focused tests prove canonical pre-epoch semantics including (-1, 999_999_999) immediately before UNIX_EPOCH.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;negative=(-1,999999999);epoch=(0,0);github-actions:pr=35517213482;main=35517629122",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact implementation-head and canonical-main CI completed successfully on Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35517213482;main=35517629122;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation changes no path outside crates/morize-core/src/timestamp.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Independent diff observation contains exactly lib.rs and timestamp.rs, both within the authorized change surface.",
+        "evidence_ref": "git-diff:2ef2a6c1ca13e7d2e6daf337884f84b4c2bc60d9...19f0e651845e7a73c27cd5c815fe808c8ec60a86;sha256=555f47a569137a5b45706524e1a0eb35505eb87bc64e4a27b4496a73508ed708;paths=lib.rs,timestamp.rs",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation defines no now/current clock API, SystemTime conversion, duration arithmetic, timezone/calendar conversion, leap-second policy, Display, FromStr, parser, serde integration, numeric wire encoding, persistence format, migration, or transport mapping.",
+        "detail": "Source plus independent semantic review confirm no clock acquisition, SystemTime/Instant conversion, arithmetic, timezone/calendar/leap-second behavior, parsing/formatting, serialization, persistence, migration, or transport behavior.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;independent-review:sha256:fd11c1fd6e0f4bb78e5925009c04bad1639972e9adb1cbbe96649a07590b4470;excluded-behavior=absent",
+        "passed": true
+      },
+      {
+        "check_id": "Timestamp exposes unix_seconds() and subsecond_nanoseconds() accessors and an associated UNIX_EPOCH value without acquiring the current time.",
+        "detail": "The public API exposes UNIX_EPOCH, checked from_unix_parts, unix_seconds, and subsecond_nanoseconds without acquiring a clock.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;api=UNIX_EPOCH,from_unix_parts,unix_seconds,subsecond_nanoseconds",
+        "passed": true
+      },
+      {
+        "check_id": "Timestamp supports Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, and Hash; focused tests confirm ordering across negative pre-epoch values, UNIX_EPOCH, positive values, and adjacent nanosecond boundaries.",
+        "detail": "Timestamp derives the required deterministic value traits and focused tests verify ordering and value behavior.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;traits=Clone,Copy,Debug,PartialEq,Eq,PartialOrd,Ord,Hash;github-actions:pr=35517213482;main=35517629122",
+        "passed": true
+      },
+      {
+        "check_id": "Timestamp uses one normalized in-memory representation: signed Unix seconds plus subsecond nanoseconds in the inclusive range 0..=999_999_999; the seconds component is the mathematical floor second for negative instants, so each represented instant has one value representation.",
+        "detail": "Timestamp uses signed Unix mathematical floor-seconds plus normalized non-negative nanoseconds, giving a unique represented value for each supported instant.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;representation=floor-seconds+nanos;independent-review:sha256:fd11c1fd6e0f4bb78e5925009c04bad1639972e9adb1cbbe96649a07590b4470",
+        "passed": true
+      },
+      {
+        "check_id": "Timestamp::from_unix_parts rejects subsecond_nanoseconds >= 1_000_000_000 with TimestampError::NanosecondsOutOfRange { actual } and does not normalize, truncate, wrap, or silently alter input.",
+        "detail": "from_unix_parts rejects every subsecond nanosecond value >= 1_000_000_000 without normalization, truncation, wrap, or silent alteration.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;nanosecond-upper-bound=1000000000;reject=true",
+        "passed": true
+      },
+      {
+        "check_id": "TimestampError is bounded metadata-only and never carries source text, clock/provider state, or platform-specific error payloads.",
+        "detail": "TimestampError contains only the rejected u32 nanosecond value and no source text, provider/clock state, or platform payload.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;error=NanosecondsOutOfRange;bounded-metadata-only",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passed on exact implementation head and canonical main.",
+        "evidence_ref": "github-actions:pr=35517213482;main=35517629122;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passed on exact implementation head and canonical main.",
+        "evidence_ref": "github-actions:pr=35517213482;main=35517629122;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "cargo fmt --all -- --check passed on exact implementation head and canonical main.",
+        "evidence_ref": "github-actions:pr=35517213482;main=35517629122;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and includes focused timestamp tests for bounds, normalization convention, negative-time ordering, epoch behavior, value semantics, and Copy behavior.",
+        "detail": "Offline workspace tests passed with 29/29 tests including timestamp bounds, negative ordering, epoch, value, and Copy tests.",
+        "evidence_ref": "github-actions:pr=35517213482;main=35517629122;tests=29/29",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core exports public Timestamp and TimestampError values from crates/morize-core/src/timestamp.rs.",
+        "detail": "Canonical merge exports public Timestamp and TimestampError from morize-core timestamp.rs and the crate root.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;exports=Timestamp,TimestampError;review-head=19f0e651845e7a73c27cd5c815fe808c8ec60a86",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and canonical-main CI both passed Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35517213482;main=35517629122;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000011",
+        "detail": "Canonical SG-000011 verified proof and ancestry revalidated at the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=2ef2a6c1ca13e7d2e6daf337884f84b4c2bc60d9",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35517213482;main=35517629122;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with -D warnings passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35517213482;main=35517629122;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt --all -- --check passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35517213482;main=35517629122;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline workspace tests passed with 29/29 tests on the canonical implementation tree.",
+        "evidence_ref": "github-actions:pr=35517213482;main=35517629122;tests=29/29",
+        "passed": true
+      },
+      {
+        "check_id": "E-TIMESTAMP-NANOSECOND-BOUNDS",
+        "detail": "Invalid subsecond nanoseconds are rejected rather than normalized, truncated, or wrapped.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;reject-nanos-gte=1000000000;github-actions:pr=35517213482;main=35517629122",
+        "passed": true
+      },
+      {
+        "check_id": "E-TIMESTAMP-NEGATIVE-ORDERING",
+        "detail": "Focused tests prove pre-epoch floor-second ordering through UNIX_EPOCH and positive instants.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;negative=(-1,999999999);epoch=(0,0);github-actions:pr=35517213482;main=35517629122",
+        "passed": true
+      },
+      {
+        "check_id": "E-TIMESTAMP-NO-CLOCK-OR-WIRE",
+        "detail": "No clock acquisition, calendar/timezone/leap-second, parser/formatter, serialization, persistence, migration, transport, API, MCP, or retrieval behavior is introduced.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;independent-review:sha256:fd11c1fd6e0f4bb78e5925009c04bad1639972e9adb1cbbe96649a07590b4470",
+        "passed": true
+      },
+      {
+        "check_id": "E-TIMESTAMP-NO-DEPENDENCIES",
+        "detail": "No Cargo manifest or lockfile change; no runtime, build, or test dependency was added.",
+        "evidence_ref": "git-diff:2ef2a6c1ca13e7d2e6daf337884f84b4c2bc60d9...19f0e651845e7a73c27cd5c815fe808c8ec60a86;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-TIMESTAMP-NORMALIZED-UNIX-PARTS",
+        "detail": "Timestamp is represented by signed Unix floor-seconds plus a normalized non-negative nanosecond fraction.",
+        "evidence_ref": "git:c1068f7459ff01816e302031030dfdf60597e404:crates/morize-core/src/timestamp.rs;representation=floor-seconds+nanos",
+        "passed": true
+      },
+      {
+        "check_id": "E-TIMESTAMP-VALUE-SEMANTICS",
+        "detail": "Focused tests prove deterministic equality, hashing, ordering, boundary, and Copy semantics.",
+        "evidence_ref": "github-actions:pr=35517213482;main=35517629122;tests=29/29",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Exact-head independent semantic implementation review returned PASS with C/H/M/L NONE and no findings.",
+        "evidence_ref": "independent-review:sha256:fd11c1fd6e0f4bb78e5925009c04bad1639972e9adb1cbbe96649a07590b4470;head=19f0e651845e7a73c27cd5c815fe808c8ec60a86",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "A normal forward revert removes the timestamp primitive; no persisted timestamp format, migration, clock state, or user data depends on this Grain.",
+        "evidence_ref": "git-history:base=2ef2a6c1ca13e7d2e6daf337884f84b4c2bc60d9;merge=c1068f7459ff01816e302031030dfdf60597e404;no-persisted-timestamp-format-clock-state-or-user-data",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "c1068f7459ff01816e302031030dfdf60597e404",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/lib.rs",
+      "crates/morize-core/src/timestamp.rs"
+    ],
+    "packet_digest": "sha256:5fe0c2094862ff768b29d87755fbf117413e5d4b63a35d725385edf2ab3be5ec",
+    "result_digest": "sha256:ae8b28a18d48a34a68837db97d4c89db19c8bd6d13d4d7110dd4507c18c0ddf1",
+    "spec_id": "SG-000022",
+    "spec_revision": "sha256:caf22aceeb05340b62832819a6aea59b6ed80c67cdbb80f5c77a20c5fea43afd",
+    "verification_version": 1,
+    "verified": true
+  }
+}
