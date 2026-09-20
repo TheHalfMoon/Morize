@@ -237,4 +237,57 @@ mod tests {
             }
         );
     }
+
+    fn assert_utf8_property_matrix<const MAX_BYTES: usize>() {
+        const CORPUS: &[&str] = &[
+            "",
+            "a",
+            "ab",
+            "ascii",
+            "é",
+            "éé",
+            "🙂",
+            "e\u{301}",
+            "mañana",
+            "東京",
+            "memory-safe",
+        ];
+
+        for value in CORPUS {
+            let actual_bytes = value.len();
+            let should_accept = actual_bytes <= MAX_BYTES;
+
+            match BoundedUtf8::<MAX_BYTES>::try_from(*value) {
+                Ok(bounded) => {
+                    assert!(should_accept);
+                    assert_eq!(bounded.len_bytes(), actual_bytes);
+                    assert_eq!(bounded.as_str().as_bytes(), value.as_bytes());
+                    assert_eq!(bounded.clone().into_string().as_bytes(), value.as_bytes());
+                }
+                Err(error) => {
+                    assert!(!should_accept);
+                    assert_eq!(
+                        error,
+                        Utf8BoundsError::TooLong {
+                            max_bytes: MAX_BYTES,
+                            actual_bytes,
+                        }
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn bounded_utf8_property_matrix_matches_exact_byte_limits() {
+        assert_utf8_property_matrix::<0>();
+        assert_utf8_property_matrix::<1>();
+        assert_utf8_property_matrix::<2>();
+        assert_utf8_property_matrix::<3>();
+        assert_utf8_property_matrix::<4>();
+        assert_utf8_property_matrix::<5>();
+        assert_utf8_property_matrix::<8>();
+        assert_utf8_property_matrix::<16>();
+    }
+
 }
