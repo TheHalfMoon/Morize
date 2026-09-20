@@ -7,6 +7,7 @@ pub mod compatibility;
 pub mod decision;
 pub mod error;
 pub mod identity;
+pub mod relation;
 pub mod scope;
 
 pub use bounded::{BoundedUtf8, Utf8BoundsError};
@@ -22,4 +23,5 @@ pub use identity::{
     PolicyRevisionId, PrincipalId, ProjectionGenerationId, PropositionId, RelationId, ScopeId,
     SnapshotId, SourceId, VaultId,
 };
+pub use relation::MemoryRelationType;
 pub use scope::ScopeKind;
