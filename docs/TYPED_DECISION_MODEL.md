@@ -71,6 +71,8 @@ Optional model/runtime on user or Morize-controlled infrastructure.
 
 Its identity includes material model/runtime/configuration state.
 
+Laya is a current P8 evaluation candidate for this class because it exposes bounded typed answers and calibrated probabilities instead of generated prose. Morize does not pre-authorize Laya as a dependency: admission requires exact artifact/runtime identity, Morize-specific calibration and abstention evidence, resource/cost qualification, and a replaceable adapter. Its confidence is evidence only and cannot grant mutation authority.
+
 ### Remote inference engine
 
 Optional provider adapter.
