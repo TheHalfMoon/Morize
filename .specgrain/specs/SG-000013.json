@@ -1,37 +1,101 @@
 {
-  "acceptance": [],
-  "change_surface": [],
+  "acceptance": [
+    "morize-core exports BoundedUtf8 and Utf8BoundsError from one new bounded-value module, with no additional public domain behavior.",
+    "BoundedUtf8<4> accepts empty text, four ASCII bytes, and two two-byte UTF-8 characters, while rejecting five-byte inputs with Utf8BoundsError::TooLong { max_bytes: 4, actual_bytes: 5 }.",
+    "MAX_BYTES=0 accepts only empty text; all rejected inputs fail without truncation or content mutation.",
+    "Owned String construction, borrowed-str construction, and FromStr enforce the same byte-bound contract and accepted text round-trips byte-for-byte through as_str and into_string.",
+    "Display emits the contained text exactly, while Debug does not contain the text and reports only bounded metadata.",
+    "Equality, ordering, and hashing depend only on the preserved string value and do not normalize, trim, or case-fold text.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and includes focused ASCII, multibyte, zero-limit, no-truncation, preservation, and Debug non-disclosure tests.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for byte-bound correctness, no-truncation behavior, UTF-8 preservation, Debug non-disclosure, scope containment, and required evidence.",
+    "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+    "The implementation changes no path outside crates/morize-core/src/bounded.rs and crates/morize-core/src/lib.rs."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/bounded.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
   "children": [],
-  "context": {},
+  "context": {
+    "budget_tokens": 13000,
+    "estimated_tokens": 8000
+  },
   "dependencies": [],
-  "evidence": {},
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000011",
+      "E-UTF8-BOUNDARY",
+      "E-UTF8-NO-TRUNCATION",
+      "E-UTF8-PRESERVATION",
+      "E-UTF8-VALUE-SEMANTICS",
+      "E-UTF8-DEBUG-NONDISCLOSURE",
+      "E-UTF8-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
   "id": "SG-000013",
   "labels": [],
   "metadata": {
     "method": {
-      "rollback": "Revert the bounded UTF-8 primitive implementation commits; no persisted format, migration, or user data depends on this Grain.",
+      "control": "Implementation is limited to one dependency-free bounded UTF-8 value/error module, focused tests, and morize-core re-exports. No field-specific limits, normalization, serde, persistence, collections, timestamps, or domain behavior is authorized.",
       "review_separation": "An independent semantic reviewer must review the exact implementation head, byte-bound semantics, no-truncation behavior, Debug redaction, and required evidence separately from the implementing agent before acceptance.",
-      "control": "Implementation is limited to one dependency-free bounded UTF-8 value/error module, focused tests, and morize-core re-exports. No field-specific limits, normalization, serde, persistence, collections, timestamps, or domain behavior is authorized."
+      "rollback": "Revert the bounded UTF-8 primitive implementation commits; no persisted format, migration, or user data depends on this Grain."
     },
     "morize": {
       "proof_prerequisites": [
         {
-          "spec_id": "SG-000011",
-          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d",
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
           "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
-          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6"
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
         }
       ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "A single standard-library-only generic bounded UTF-8 value inside existing morize-core is the narrowest reusable implementation. It avoids choosing field limits, Unicode policy, persistence formats, or third-party libraries prematurely."
+      },
+      "safety": {
+        "requirements": [],
+        "status": "none-identified"
+      },
+      "unresolved_decisions": [],
+      "version": 1
     }
   },
   "method": "controlled",
   "outcome": "morize-core exposes a dependency-free BoundedUtf8<const MAX_BYTES: usize> value that enforces a hard UTF-8 byte ceiling without truncation or normalization, provides deterministic value semantics, and avoids exposing contained text through Debug.",
   "parent_id": "SG-000010",
   "rationale": "P1 explicitly requires bounded strings, and DATA_MODEL serialization invariants require bounded field sizes. This Grain adds only the reusable in-memory UTF-8 byte-bound primitive; field-specific limits, normalization rules, persistence, serialization, collections, timestamps, and domain records remain separate decisions.",
-  "risk": {},
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the bounded UTF-8 primitive implementation commits; no persistent format or user data has been written by this Grain."
+  },
   "schema_version": 1,
-  "scope_in": [],
-  "scope_out": [],
-  "state": "DRAFT",
+  "scope_in": [
+    "Define public BoundedUtf8<const MAX_BYTES: usize> with private owned UTF-8 string storage and an exact byte-count ceiling.",
+    "Provide one bounded public Utf8BoundsError::TooLong { max_bytes, actual_bytes } error that never includes the rejected text.",
+    "Provide checked construction from owned String and borrowed str, FromStr, as_str, len_bytes, is_empty, into_string, max_bytes, Display, AsRef<str>, and deterministic Eq/Ord/Hash value semantics.",
+    "Make Debug metadata-only: it may expose the configured maximum and actual byte length but not the contained text.",
+    "Add standard-library-only tests for empty input, exact ASCII boundary, over-limit ASCII, multibyte UTF-8 byte boundaries, zero-byte limits, no truncation, byte preservation, value semantics, and Debug non-disclosure."
+  ],
+  "scope_out": [
+    "Unicode normalization, case folding, trimming, control-character policy, locale behavior, grapheme/code-point limits, or field-specific validation.",
+    "Field-specific aliases or maximums, collections, timestamps, content digests, domain records, identity behavior, policy, storage, retrieval, MCP, or model behavior.",
+    "Serde or other serialization-framework integration, persisted schemas, configuration formats, wire contracts, migrations, or any third-party dependency."
+  ],
+  "state": "SHAPED",
   "title": "Add bounded UTF-8 text primitive"
 }
