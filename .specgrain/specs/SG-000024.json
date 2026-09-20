@@ -1,0 +1,60 @@
+{
+  "acceptance": [],
+  "change_surface": [],
+  "children": [],
+  "context": {},
+  "dependencies": [],
+  "evidence": {},
+  "id": "SG-000024",
+  "labels": [
+    "p1",
+    "rust",
+    "fuzzing",
+    "verification"
+  ],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to an isolated fuzz workspace, three raw-byte fuzz targets, fuzz-only license/provenance documentation, and one Linux-only bounded fuzz-smoke workflow. The root Cargo workspace, root Cargo.lock, morize-core production source, public APIs, standard cross-platform CI, runtime behavior, persistence, serialization, and domain semantics must remain unchanged.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head for isolation from the root workspace/runtime graph, target invariant fidelity, bounded true-libFuzzer execution, pinned toolchain/tool identity, license handling, failure artifact behavior, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the SG-000024 fuzz workspace/workflow commit. Root runtime code, root lockfile, persisted data, public APIs, and user data are unaffected."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "spec_id": "SG-000012",
+          "record_digest": "sha256:13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079",
+          "spec_revision": "sha256:256a8c55a843f00798f3e8e3f0807ee38f676a7f50c9b9380b9d26167f4f7aa7",
+          "implementation_revision": "026b2e5849759915975f8ae12b111d1185fda89f"
+        },
+        {
+          "spec_id": "SG-000013",
+          "record_digest": "sha256:ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c",
+          "spec_revision": "sha256:adf07a2ef558c801fcacbb3b1bb7ab627bdc0480fdec65e7fc2d1a2e86dafe8d",
+          "implementation_revision": "9db66a7b4225cd5d3eff9a65d910038352d29a59"
+        },
+        {
+          "spec_id": "SG-000014",
+          "record_digest": "sha256:95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977",
+          "spec_revision": "sha256:06df9fd48a398fb1b1af3e4a6c821efa9a0508d7e9e3a795c21edadf1045ef1e",
+          "implementation_revision": "fac420fd87f86b97a5ee97397e0775d00795aaa3"
+        },
+        {
+          "spec_id": "SG-000023",
+          "record_digest": "sha256:14dc204de67286a282a2b4e1d8d65fc8d9837b140ced660aa230745ddb82f68c",
+          "spec_revision": "sha256:9e5cba94eec7f7488cdb02605db5cd7f4d1b41200282ca4efc0c68f058d0a779",
+          "implementation_revision": "4620805a440fe1ef5d29c9015b781014a5c109d2"
+        }
+      ]
+    }
+  },
+  "method": "controlled",
+  "outcome": "Morize has an isolated, reproducible, zero-runtime-impact libFuzzer harness for the durable-ID parser and bounded UTF-8/ordered-collection primitives, with pinned fuzz tooling, bounded Linux smoke execution, independent fuzz-only dependency/license closure, and no coupling to the root workspace or production artifacts.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 explicitly requires property and fuzz tests for parsers/invariants. SG-000023 closed the deterministic property-matrix portion while explicitly deferring a true fuzz campaign. The official rust-fuzz cargo-fuzz/libfuzzer-sys path provides coverage-guided libFuzzer execution but requires nightly and sanitizer support and is not a Windows production concern, so the smallest safe next slice is an isolated fuzz workspace plus a Linux-only bounded smoke gate.",
+  "risk": {},
+  "schema_version": 1,
+  "scope_in": [],
+  "scope_out": [],
+  "state": "DRAFT",
+  "title": "Add isolated true-fuzz harness for core invariants"
+}
