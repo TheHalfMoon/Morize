@@ -19,6 +19,7 @@
     "cargo fmt --all -- --check, cargo check --workspace --all-targets --offline, cargo clippy --workspace --all-targets --offline -- -D warnings, and cargo test --workspace --all-targets --offline continue to pass for the root workspace.",
     "The dedicated fuzz workspace builds all three fuzz targets with the pinned nightly/tool/dependency graph and completes the bounded fuzz-smoke campaign on Linux.",
     "The standard GitHub Actions matrix continues to pass Ubuntu, macOS, and Windows on the exact implementation head, and the dedicated Linux fuzz-smoke workflow passes on that same implementation head.",
+    "Before WorkPacket export, the canonical repository Diffcipline policy admits exactly the new `fuzz/**` expected-file surface required by this Grain, while preserving the existing forbidden surfaces, verification commands, dependency-manifest policy, lockfile policy, and untracked-file policy unchanged.",
     "Diffcipline verifies the exact implementation head with no scope violation; Alibaba Open Code Review accounts for every changed file; an independent semantic reviewer separately reviews isolation, target invariants, toolchain/tool identity, bounded campaign semantics, license closure, failure-artifact behavior, and non-claims.",
     "ADR-0004 proof prerequisites SG-000012, SG-000013, SG-000014, and SG-000023 revalidate against the exact WorkPacket baseline before execution."
   ],
@@ -64,6 +65,7 @@
       "E-ROOT-RUST-CHECK-OFFLINE",
       "E-ROOT-RUST-CLIPPY-OFFLINE",
       "E-ROOT-RUST-TEST-OFFLINE",
+      "E-DIFFCIPLINE-FUZZ-SCOPE-ADMISSION",
       "E-CROSS-PLATFORM-CI",
       "E-LINUX-FUZZ-SMOKE"
     ]
@@ -77,7 +79,7 @@
   ],
   "metadata": {
     "method": {
-      "control": "Implementation is limited to an isolated fuzz workspace, three raw-byte fuzz targets, fuzz-only license/provenance documentation, and one Linux-only bounded fuzz-smoke workflow. The root Cargo workspace, root Cargo.lock, morize-core production source, public APIs, standard cross-platform CI, runtime behavior, persistence, serialization, and domain semantics must remain unchanged.",
+      "control": "Implementation is limited to an isolated fuzz workspace, three raw-byte fuzz targets, fuzz-only license/provenance documentation, and one Linux-only bounded fuzz-smoke workflow. The root Cargo workspace, root Cargo.lock, morize-core production source, public APIs, standard cross-platform CI, runtime behavior, persistence, serialization, and domain semantics must remain unchanged. Before WorkPacket export, the canonical planning baseline must admit only `fuzz/**` to Diffcipline `expected_files`; that baseline governance correction is not part of the ten-file implementation diff and must not weaken any other Diffcipline policy field.",
       "review_separation": "An independent semantic reviewer must review the exact implementation head for isolation from the root workspace/runtime graph, target invariant fidelity, bounded true-libFuzzer execution, pinned toolchain/tool identity, license handling, failure artifact behavior, scope containment, and required evidence separately from the implementing agent before acceptance.",
       "rollback": "Revert the SG-000024 fuzz workspace/workflow commit. Root runtime code, root lockfile, persisted data, public APIs, and user data are unaffected."
     },
@@ -132,7 +134,22 @@
         "fuzz_target_triple": "x86_64-unknown-linux-gnu"
       },
       "unresolved_decisions": [],
-      "version": 1
+      "version": 1,
+      "diffcipline_scope_admission": {
+        "required_before_packet": true,
+        "allowed_delta": "Add fuzz/** to policy.expected_files only.",
+        "unchanged_fields": [
+          "policy.forbidden_surfaces",
+          "policy.dependency_manifest_changes",
+          "policy.lockfile_changes",
+          "policy.untracked_files",
+          "verification.commands",
+          "verification.r0_commands",
+          "verification.r1_commands",
+          "verification.r2_commands",
+          "verification.r3_commands"
+        ]
+      }
     }
   },
   "method": "controlled",
@@ -149,7 +166,8 @@
     "Pin libfuzzer-sys exactly to 0.4.13 and cargo-fuzz exactly to 0.13.2; verify the published Linux x86_64 musl cargo-fuzz executable checksum before use, and explicitly compile/run fuzz targets for x86_64-unknown-linux-gnu.",
     "Implement three raw-byte libFuzzer targets covering durable-ID parser canonicalization, BoundedUtf8 byte-bound invariants, and BoundedVec item-bound/lossless-rejection invariants.",
     "Add one Ubuntu-only fuzz-smoke workflow that executes bounded coverage-guided runs for every target and uploads crash artifacts on failure.",
-    "Document fuzz-only dependency licensing/provenance, local reproduction commands, bounded-smoke semantics, and explicit non-claims."
+    "Document fuzz-only dependency licensing/provenance, local reproduction commands, bounded-smoke semantics, and explicit non-claims.",
+    "Admit only `fuzz/**` to the canonical repository Diffcipline `expected_files` policy before WorkPacket export so the authorized isolated fuzz workspace can be proved without weakening forbidden surfaces, verification commands, dependency/lock policy, or untracked-file handling."
   ],
   "scope_out": [
     "Any root Cargo workspace member/exclude change, root Cargo.lock change, morize-core production source/public API change, runtime dependency, build dependency, production packaging linkage, or user-facing runtime behavior.",
