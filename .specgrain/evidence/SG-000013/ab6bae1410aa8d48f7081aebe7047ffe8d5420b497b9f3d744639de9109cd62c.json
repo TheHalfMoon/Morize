@@ -1,0 +1,197 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000011 proof prerequisite revalidated at exact packet baseline.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=e43587d3c532fa8b292ec2e8fe688e3fac6164c4",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for byte-bound correctness, no-truncation behavior, UTF-8 preservation, Debug non-disclosure, scope containment, and required evidence.",
+        "detail": "Independent Qwen semantic review covered exact implementation head and returned PASS.",
+        "evidence_ref": "independent-review:sha256:7073b601f0291435a96576643ab009d91ec9dd9434d1f54902f8bc2daed2e55c;head=eedf8b92d468f4da7c9095d413c3f1f39e4e53f6",
+        "passed": true
+      },
+      {
+        "check_id": "BoundedUtf8<4> accepts empty text, four ASCII bytes, and two two-byte UTF-8 characters, while rejecting five-byte inputs with Utf8BoundsError::TooLong { max_bytes: 4, actual_bytes: 5 }.",
+        "detail": "Focused tests prove ASCII and multibyte exact-boundary acceptance and five-byte rejection.",
+        "evidence_ref": "git:9db66a7b4225cd5d3eff9a65d910038352d29a59:crates/morize-core/src/bounded.rs;github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+        "detail": "Manifest and lockfile diff is empty; cargo metadata reports zero dependencies.",
+        "evidence_ref": "git-diff:e43587d3c532fa8b292ec2e8fe688e3fac6164c4...9db66a7b4225cd5d3eff9a65d910038352d29a59;cargo-metadata:workspace=1,dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "Display emits the contained text exactly, while Debug does not contain the text and reports only bounded metadata.",
+        "detail": "Display preserves content while Debug tests confirm metadata-only non-disclosure.",
+        "evidence_ref": "git:9db66a7b4225cd5d3eff9a65d910038352d29a59:crates/morize-core/src/bounded.rs;github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "Equality, ordering, and hashing depend only on the preserved string value and do not normalize, trim, or case-fold text.",
+        "detail": "Derived value semantics operate on preserved String value without normalization.",
+        "evidence_ref": "git:9db66a7b4225cd5d3eff9a65d910038352d29a59:crates/morize-core/src/bounded.rs;github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact PR head and canonical post-merge main passed all three OS matrix jobs.",
+        "evidence_ref": "github-actions:pr=35486162971;ubuntu=success;macos=success;windows=success;main=35486292302",
+        "passed": true
+      },
+      {
+        "check_id": "MAX_BYTES=0 accepts only empty text; all rejected inputs fail without truncation or content mutation.",
+        "detail": "Zero-limit and over-limit tests pass without truncation or mutation.",
+        "evidence_ref": "github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "Owned String construction, borrowed-str construction, and FromStr enforce the same byte-bound contract and accepted text round-trips byte-for-byte through as_str and into_string.",
+        "detail": "Owned, borrowed, and FromStr paths share byte validation and accepted content round-trips byte-for-byte.",
+        "evidence_ref": "git:9db66a7b4225cd5d3eff9a65d910038352d29a59:crates/morize-core/src/bounded.rs;github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation changes no path outside crates/morize-core/src/bounded.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Independent git diff observes exactly bounded.rs and lib.rs.",
+        "evidence_ref": "git-diff:e43587d3c532fa8b292ec2e8fe688e3fac6164c4...9db66a7b4225cd5d3eff9a65d910038352d29a59;sha256=7c5ea2440c7547882f22227a8a3ac81f3880d1e4c6ab6797874a8947e3883ed5;paths=bounded.rs,lib.rs",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passed locally and cross-platform.",
+        "evidence_ref": "github-actions:pr=35486162971;ubuntu=success;macos=success;windows=success;main=35486292302",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passed locally and cross-platform.",
+        "evidence_ref": "github-actions:pr=35486162971;ubuntu=success;macos=success;windows=success;main=35486292302",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "Formatting check passed locally and cross-platform.",
+        "evidence_ref": "github-actions:pr=35486162971;ubuntu=success;macos=success;windows=success;main=35486292302",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and includes focused ASCII, multibyte, zero-limit, no-truncation, preservation, and Debug non-disclosure tests.",
+        "detail": "Offline tests passed locally and cross-platform with required bounded UTF-8 cases.",
+        "evidence_ref": "github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core exports BoundedUtf8 and Utf8BoundsError from one new bounded-value module, with no additional public domain behavior.",
+        "detail": "Source and independent review confirm only the planned bounded-value module/API was introduced.",
+        "evidence_ref": "git:9db66a7b4225cd5d3eff9a65d910038352d29a59:crates/morize-core/src/bounded.rs;independent-review:sha256:7073b601f0291435a96576643ab009d91ec9dd9434d1f54902f8bc2daed2e55c;head=eedf8b92d468f4da7c9095d413c3f1f39e4e53f6",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and canonical-main Ubuntu/macOS/Windows CI succeeded.",
+        "evidence_ref": "github-actions:pr=35486162971;ubuntu=success;macos=success;windows=success;main=35486292302",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000011",
+        "detail": "Canonical SG-000011 proof matched exact prerequisite metadata.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=e43587d3c532fa8b292ec2e8fe688e3fac6164c4",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passed.",
+        "evidence_ref": "github-actions:pr=35486162971;ubuntu=success;macos=success;windows=success;main=35486292302",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with warnings denied passed.",
+        "evidence_ref": "github-actions:pr=35486162971;ubuntu=success;macos=success;windows=success;main=35486292302",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt --check passed.",
+        "evidence_ref": "github-actions:pr=35486162971;ubuntu=success;macos=success;windows=success;main=35486292302",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline cargo test passed.",
+        "evidence_ref": "github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "E-UTF8-BOUNDARY",
+        "detail": "ASCII, multibyte, and zero byte boundaries passed.",
+        "evidence_ref": "github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "E-UTF8-DEBUG-NONDISCLOSURE",
+        "detail": "Debug and error diagnostics omit contained/rejected text.",
+        "evidence_ref": "git:9db66a7b4225cd5d3eff9a65d910038352d29a59:crates/morize-core/src/bounded.rs;github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "E-UTF8-NO-DEPENDENCIES",
+        "detail": "No manifest/lock change and zero dependencies.",
+        "evidence_ref": "git-diff:e43587d3c532fa8b292ec2e8fe688e3fac6164c4...9db66a7b4225cd5d3eff9a65d910038352d29a59;cargo-metadata:workspace=1,dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-UTF8-NO-TRUNCATION",
+        "detail": "Over-limit inputs return error without truncation.",
+        "evidence_ref": "git:9db66a7b4225cd5d3eff9a65d910038352d29a59:crates/morize-core/src/bounded.rs;github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "E-UTF8-PRESERVATION",
+        "detail": "Accepted decomposed UTF-8 bytes round-trip unchanged.",
+        "evidence_ref": "github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "E-UTF8-VALUE-SEMANTICS",
+        "detail": "Eq/Ord/Hash/Display semantics are deterministic over preserved value.",
+        "evidence_ref": "git:9db66a7b4225cd5d3eff9a65d910038352d29a59:crates/morize-core/src/bounded.rs;github-actions:pr=35486162971;main=35486292302;local-workspace-tests=6/6",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Independent semantic review PASS with C/H/M/L NONE.",
+        "evidence_ref": "independent-review:sha256:7073b601f0291435a96576643ab009d91ec9dd9434d1f54902f8bc2daed2e55c;head=eedf8b92d468f4da7c9095d413c3f1f39e4e53f6",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "Bounded two-file implementation can be reverted without persistent data migration.",
+        "evidence_ref": "git-history:base=e43587d3c532fa8b292ec2e8fe688e3fac6164c4;merge=9db66a7b4225cd5d3eff9a65d910038352d29a59;no-persisted-format-or-user-data",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "9db66a7b4225cd5d3eff9a65d910038352d29a59",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/bounded.rs",
+      "crates/morize-core/src/lib.rs"
+    ],
+    "packet_digest": "sha256:5cea0c9ed250761faa28f2803f70eb695721839e8890ee9898e6f022f02ba4d0",
+    "result_digest": "sha256:6a5bb53ff794f3bac867963ba66efca04a41bfc04a0bacefe4a1d46b1ea0717e",
+    "spec_id": "SG-000013",
+    "spec_revision": "sha256:adf07a2ef558c801fcacbb3b1bb7ab627bdc0480fdec65e7fc2d1a2e86dafe8d",
+    "verification_version": 1,
+    "verified": true
+  }
+}
