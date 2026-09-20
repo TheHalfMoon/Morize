@@ -104,6 +104,6 @@
     "Display/FromStr, parsers, serde or other serialization integration, numeric repr/discriminants, persisted or wire encoding, configuration formats, migrations, storage, retrieval, or domain-record integration.",
     "Any third-party runtime, build, or test dependency."
   ],
-  "state": "REFINING",
+  "state": "GRAIN",
   "title": "Add relation edge class primitive"
 }
