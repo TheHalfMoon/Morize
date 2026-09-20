@@ -1,0 +1,37 @@
+{
+  "acceptance": [],
+  "change_surface": [],
+  "children": [],
+  "context": {},
+  "dependencies": [],
+  "evidence": {},
+  "id": "SG-000019",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free non-exhaustive in-memory MemoryRelationType enum, focused tests, and morize-core re-exports. No MemoryRelation struct, relation endpoints, edge class, inference/evidence thresholds, graph traversal or mutation, authorization, serialization, persistence, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head, exact initial-relation fidelity, non-exhaustive extensibility, absence of graph/inference/authority semantics, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the memory-relation-type implementation commits; no persisted format, graph state, inference policy, authorization rule, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
+        }
+      ]
+    }
+  },
+  "method": "quick",
+  "outcome": "morize-core exposes one dependency-free non-exhaustive MemoryRelationType enum covering the 11 initial relation types already fixed by docs/DATA_MODEL.md, without defining relation endpoints, edge inference class, evidence thresholds, graph traversal, serialization, persistence, or policy behavior.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 requires MemoryRelation, and docs/DATA_MODEL.md already fixes the initial relation vocabulary. This Grain adds only the typed in-memory relation-type vocabulary so later edge-class, relation-structure, evidence, policy, and graph contracts can build on one definition without inventing inference or graph semantics.",
+  "risk": {},
+  "schema_version": 1,
+  "scope_in": [],
+  "scope_out": [],
+  "state": "DRAFT",
+  "title": "Add baseline memory relation type vocabulary"
+}
