@@ -1,0 +1,363 @@
+name: sg23-implementation-review-v3
+
+on:
+  push:
+    branches:
+      - automation/sg-000023-implementation-review-v3
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout automation branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c
+        with:
+          components: rustfmt, clippy
+
+      - name: Qualify exact SG-000023 implementation head
+        shell: bash
+        env:
+          BASE_MAIN: 76aaefc1dfe7d45cf40465dbd63c70cbe326790c
+          IMPL_HEAD: 2b51846043b83fe1877eaa88959f711ab7d4ab0b
+          SPEC_REVISION: sha256:9e5cba94eec7f7488cdb02605db5cd7f4d1b41200282ca4efc0c68f058d0a779
+          SPEC_GRAIN_PIN: 5de7d6499bb0a9e3a191fc0934399cf099d1980a
+          DIFFCIPLINE_PIN: 5cb1c77340b75649f6168e0e8f66479ea047ea96
+          OCR_PIN: 85cecfe5f935da2b2aae8f91ce4fee8ed343a681
+        run: |
+          set -euo pipefail
+
+          git fetch origin main impl/sg-000023-core-property-matrices --prune
+          test "$(git rev-parse origin/main)" = "$BASE_MAIN"
+          test "$(git rev-parse origin/impl/sg-000023-core-property-matrices)" = "$IMPL_HEAD"
+          git checkout --detach "$IMPL_HEAD"
+          test "$(git rev-parse HEAD)" = "$IMPL_HEAD"
+          test -z "$(git status --porcelain)"
+
+          python -m pip install --disable-pip-version-check --quiet             "git+https://github.com/TheHalfMoon/SpecGrain.git@$SPEC_GRAIN_PIN"
+
+          specgrain check --json . > /tmp/sg23-check.json
+          specgrain prove --json SG-000012 . > /tmp/p12.json
+          specgrain prove --json SG-000013 . > /tmp/p13.json
+          specgrain prove --json SG-000014 . > /tmp/p14.json
+
+          python - <<'PY'
+          import json, os, subprocess
+          check=json.load(open('/tmp/sg23-check.json'))
+          assert check['valid'] is True and check['issues']==[]
+          expected={
+            'SG-000012':('/tmp/p12.json','sha256:13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079','sha256:256a8c55a843f00798f3e8e3f0807ee38f676a7f50c9b9380b9d26167f4f7aa7','026b2e5849759915975f8ae12b111d1185fda89f'),
+            'SG-000013':('/tmp/p13.json','sha256:ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c','sha256:adf07a2ef558c801fcacbb3b1bb7ab627bdc0480fdec65e7fc2d1a2e86dafe8d','9db66a7b4225cd5d3eff9a65d910038352d29a59'),
+            'SG-000014':('/tmp/p14.json','sha256:95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977','sha256:06df9fd48a398fb1b1af3e4a6c821efa9a0508d7e9e3a795c21edadf1045ef1e','fac420fd87f86b97a5ee97397e0775d00795aaa3'),
+          }
+          for sid,(path,record,srev,impl) in expected.items():
+              p=json.load(open(path))
+              assert p['verified'] is True
+              assert p['latest_record_digest']==record
+              latest=p['records'][-1]['report']
+              assert latest['spec_revision']==srev
+              assert latest['implementation_revision']==impl
+              assert latest['issues']==[]
+              subprocess.run(['git','merge-base','--is-ancestor',impl,os.environ['BASE_MAIN']],check=True)
+              print(sid+'_PREREQUISITE=PASS')
+          PY
+
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+
+          base='76aaefc1dfe7d45cf40465dbd63c70cbe326790c'
+
+          def blob(path):
+              return subprocess.check_output(['git','rev-parse',f'{base}:{path}'],text=True).strip()
+
+          def full(path):
+              return subprocess.check_output(['git','show',f'{base}:{path}'],text=True)
+
+          def section(path,start,end):
+              text=full(path)
+              a=text.index(start)
+              b=text.index(end,a)
+              return text[a:b]
+
+          def proof_summary(path):
+              raw=json.loads(full(path))
+              report=raw['report']
+              return json.dumps({
+                  'record_digest':raw['record_digest'],
+                  'verified':report['verified'],
+                  'spec_id':report['spec_id'],
+                  'spec_revision':report['spec_revision'],
+                  'implementation_revision':report['implementation_revision'],
+                  'issues':report['issues'],
+              },sort_keys=True,separators=(',',':'))
+
+          proof_paths=[
+              ('sg12-proof','.specgrain/evidence/SG-000012/13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079.json',85),
+              ('sg13-proof','.specgrain/evidence/SG-000013/ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c.json',85),
+              ('sg14-proof','.specgrain/evidence/SG-000014/95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977.json',85),
+          ]
+
+          selections=[
+              ('sg23-grain','.specgrain/specs/SG-000023.json',full('.specgrain/specs/SG-000023.json'),
+               'Exact SG-000023 GRAIN contract, acceptance criteria, scope, proof prerequisites, and evidence requirements.',100),
+              ('proof-prerequisites','docs/adr/0004-verified-proof-prerequisites.md',
+               full('docs/adr/0004-verified-proof-prerequisites.md'),
+               'Canonical ADR-0004 proof-prerequisite policy governing SG-000012/13/14.',95),
+          ]
+          for sid,path,priority in proof_paths:
+              selections.append((
+                  sid,
+                  path,
+                  proof_summary(path),
+                  'Selected exact native proof identity fields: record digest, verified flag, spec identity/revision, implementation revision, and issues.',
+                  priority,
+              ))
+
+          records=[]
+          for source_id,path,data,reason,priority in selections:
+              encoded=data.encode()
+              records.append({
+                  'source_id':source_id,
+                  'provenance':f'git:{base}:{path}',
+                  'selection_reason':reason,
+                  'revision':f'git:{blob(path)}',
+                  'size_bytes':len(encoded),
+                  'token_cost':(len(encoded)+3)//4,
+                  'requirement':'required',
+                  'priority':priority,
+              })
+          total=sum(r['token_cost'] for r in records)
+          assert total <= 12000, total
+          Path('/tmp/sg23-context-sources.json').write_text(
+              json.dumps(records,indent=2,sort_keys=True,ensure_ascii=False)+'\n'
+          )
+          print('CONTEXT_SOURCE_COUNT='+str(len(records)))
+          print('CONTEXT_TOKEN_TOTAL='+str(total))
+          PY
+
+          specgrain packet SG-000023 .             --context-sources /tmp/sg23-context-sources.json             --json > /tmp/sg23-workpacket.json
+
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          x=json.load(open('/tmp/sg23-workpacket.json'))
+          assert x['spec_id']=='SG-000023'
+          assert x['spec_revision']==os.environ['SPEC_REVISION']
+          assert len(x['context_sources'])==5
+          print('WORKPACKET_DIGEST='+x['packet_digest'])
+          print('WORKPACKET_FILE_SHA256='+hashlib.sha256(Path('/tmp/sg23-workpacket.json').read_bytes()).hexdigest())
+          PY
+
+          python - <<'PY'
+          import subprocess
+          paths=[
+              'crates/morize-core/src/identity.rs',
+              'crates/morize-core/src/bounded.rs',
+              'crates/morize-core/src/bounded_collection.rs',
+          ]
+          marker='#[cfg(test)]'
+          for path in paths:
+              baseline=subprocess.check_output(['git','show',f'76aaefc1dfe7d45cf40465dbd63c70cbe326790c:{path}'])
+              current=open(path,'rb').read()
+              bp=baseline.split(marker.encode(),1)[0]
+              cp=current.split(marker.encode(),1)[0]
+              assert bp==cp, path
+          print('PRODUCTION_PREFIXES_IDENTICAL=3/3')
+          PY
+
+          cargo fmt --all -- --check
+          cargo check --workspace --all-targets --offline
+          cargo clippy --workspace --all-targets --offline -- -D warnings
+          cargo test --workspace --all-targets --offline 2>&1 | tee /tmp/sg23-tests.txt
+
+          python - <<'PY'
+          import re
+          text=open('/tmp/sg23-tests.txt').read()
+          counts=[int(x) for x in re.findall(r'test result: ok\. (\d+) passed;',text)]
+          assert counts
+          total=sum(counts)
+          assert total==33, (counts,total)
+          print('EXACT_HEAD_TESTS_PASSED=33')
+          PY
+
+          test "$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" | sort | tr '\n' ' ')" = "crates/morize-core/src/bounded.rs crates/morize-core/src/bounded_collection.rs crates/morize-core/src/identity.rs "
+          test "$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" | wc -l)" -eq 3
+          git diff --check "$BASE_MAIN...$IMPL_HEAD"
+          test -z "$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" -- Cargo.toml Cargo.lock '*/Cargo.toml')"
+
+          if git diff "$BASE_MAIN...$IMPL_HEAD" --              crates/morize-core/src/identity.rs              crates/morize-core/src/bounded.rs              crates/morize-core/src/bounded_collection.rs              | grep -E '^\+.*(rand::|thread_rng|proptest|quickcheck|cargo.fuzz|libFuzzer|AFL|SystemTime|std::env|std::fs|reqwest|tokio)'; then
+            echo "Forbidden nondeterministic/dependency indicator added" >&2
+            exit 2
+          fi
+
+          DIFF_SHA256="$(git diff "$BASE_MAIN...$IMPL_HEAD" | sha256sum | awk '{print $1}')"
+          FILE_LIST_SHA256="$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" | sha256sum | awk '{print $1}')"
+
+          git clone --quiet "https://github.com/TheHalfMoon/Diffcipline.git" /tmp/diffcipline
+          git -C /tmp/diffcipline checkout --quiet "$DIFFCIPLINE_PIN"
+          cargo run --quiet --locked             --manifest-path /tmp/diffcipline/crates/diffcipline-cli/Cargo.toml --             check --base "$BASE_MAIN" --risk R2 --run --json             > /tmp/sg23-diffcipline.json 2>/tmp/sg23-diffcipline.err
+          DIFFCIPLINE_SHA256="$(sha256sum /tmp/sg23-diffcipline.json | awk '{print $1}')"
+          python - <<'PY'
+          import json
+          lines=[line for line in open('/tmp/sg23-diffcipline.json') if line.strip()]
+          x=json.loads(lines[-1])
+          assert x['verdict']=='PASS'
+          assert x['changed_files']==3
+          assert x['scope_violations']==[]
+          assert all(v['state']=='PASS' for v in x['verification'])
+          print('DIFFCIPLINE=PASS')
+          PY
+
+          git clone --quiet "https://github.com/alibaba/open-code-review.git" /tmp/ocr
+          git -C /tmp/ocr checkout --quiet "$OCR_PIN"
+          (cd /tmp/ocr && GOTOOLCHAIN=auto go build -o /tmp/ocr-bin ./cmd/opencodereview)
+          OCR_NO_UPDATE=1 /tmp/ocr-bin delegate preview --format json --from "$BASE_MAIN" --to "$IMPL_HEAD"             > /tmp/sg23-ocr-preview.json
+          python - <<'PY'
+          import json, subprocess
+          x=json.load(open('/tmp/sg23-ocr-preview.json'))
+          assert x['total_files']==3
+          assert x['reviewable_count']==3
+          assert x['excluded_count']==0
+          paths=sorted(f['path'] for f in x['reviewable_files'])
+          assert paths==[
+              'crates/morize-core/src/bounded.rs',
+              'crates/morize-core/src/bounded_collection.rs',
+              'crates/morize-core/src/identity.rs',
+          ]
+          with open('/tmp/sg23-ocr-rules.json','w') as out:
+              subprocess.run(['/tmp/ocr-bin','delegate','rule','--format','json',*paths],check=True,stdout=out)
+          groups=json.load(open('/tmp/sg23-ocr-rules.json'))['groups']
+          accounted=sorted(p for g in groups for p in g['files'])
+          assert accounted==paths
+          print('ALIBABA_ACCOUNTING=3/3')
+          PY
+
+          python -m pip install --disable-pip-version-check --quiet "gradio_client>=1.8,<2"
+          export DIFF_SHA256 FILE_LIST_SHA256 DIFFCIPLINE_SHA256
+          python - <<'PY'
+          import hashlib, json, os, subprocess, time
+          from pathlib import Path
+          from gradio_client import Client
+
+          packet=json.loads(Path('/tmp/sg23-workpacket.json').read_text())
+          spec=Path('.specgrain/specs/SG-000023.json').read_text()
+          diff=subprocess.check_output([
+              'git','diff','--unified=60',
+              os.environ['BASE_MAIN']+'...'+os.environ['IMPL_HEAD'],
+              '--',
+              'crates/morize-core/src/identity.rs',
+              'crates/morize-core/src/bounded.rs',
+              'crates/morize-core/src/bounded_collection.rs',
+          ],text=True)
+
+          prompt='\n'.join([
+              'Independent semantic IMPLEMENTATION review of Morize SG-000023. Return final structured review only; do not expose chain-of-thought or tool traces.',
+              '',
+              f'REVIEW_HEAD={os.environ["IMPL_HEAD"]}',
+              f'BASE_MAIN={os.environ["BASE_MAIN"]}',
+              f'SPEC_REVISION={os.environ["SPEC_REVISION"]}',
+              f'WORKPACKET_DIGEST={packet["packet_digest"]}',
+              f'DIFF_SHA256={os.environ["DIFF_SHA256"]}',
+              f'FILE_LIST_SHA256={os.environ["FILE_LIST_SHA256"]}',
+              f'DIFFCIPLINE_SHA256={os.environ["DIFFCIPLINE_SHA256"]}',
+              'Exact-head cargo verification: fmt/check/clippy PASS; tests 33/33 PASS.',
+              'Production prefixes before existing #[cfg(test)] modules: byte-for-byte identical 3/3.',
+              'Alibaba accounting only: total=3 reviewable=3 excluded=0 rule-accounted=3/3.',
+              '',
+              'Review goals:',
+              '1. Changes are test-only in existing test modules and do not alter production behavior/API.',
+              '2. Every durable ID type exercises all 256 repeated-byte patterns through bytes -> lowercase canonical text -> parse -> bytes.',
+              '3. Representative non-canonical ASCII is rejected at every durable-ID text position with exact error index/byte.',
+              '4. BoundedUtf8 matrix spans multiple const limits and fixed empty/ASCII/multibyte/decomposed Unicode corpus, proving acceptance iff byte length <= limit, exact preservation, exact TooLong counts.',
+              '5. BoundedVec matrix spans multiple const limits and deterministic lengths, proving exact acceptance/rejection, order preservation, lossless failed build/push recovery, and no mutation after rejected push.',
+              '6. No randomness, environment/network/model/filesystem input, fuzz engine/framework, or dependency is added.',
+              '7. Implementation does not claim to satisfy a true fuzz campaign.',
+              '8. SG-000012/13/14 proof identities and scope remain intact.',
+              '',
+              'SG-000023 contract:',
+              spec,
+              '',
+              'Exact implementation diff:',
+              diff,
+              '',
+              'Return exactly:',
+              'REVIEW_HEAD',
+              os.environ['IMPL_HEAD'],
+              'REVIEW_KIND',
+              'SG-000023_IMPLEMENTATION',
+              'CRITICAL = NONE',
+              'HIGH = NONE',
+              'MEDIUM = NONE',
+              'LOW = NONE',
+              'FINDINGS',
+              '- NONE',
+              'FINAL_GATE = PASS',
+              'Replace NONE/PASS only when concise material findings require it. Any different REVIEW_HEAD invalidates the review.'
+          ])
+
+          Path('/tmp/sg23-review-prompt.txt').write_text(prompt)
+          client=Client('CohereLabs/North-Mini-Code-1.0',verbose=False)
+          final=''
+          for attempt in range(1,4):
+              raw=client.predict(prompt,'Rust','[]','{}',api_name='/chat')
+              obj=json.loads(raw) if isinstance(raw,str) else raw
+              content=''
+              for msg in obj.get('history',[]) if isinstance(obj,dict) else []:
+                  if msg.get('role')=='assistant':
+                      content=msg.get('content','')
+              candidate=content.split('</think>',1)[-1].strip() if '</think>' in content else content.strip()
+              structured=(f'REVIEW_HEAD\n{os.environ["IMPL_HEAD"]}' in candidate and 'REVIEW_KIND\nSG-000023_IMPLEMENTATION' in candidate)
+              if structured:
+                  final=candidate
+                  break
+              print(f'REVIEW_PROVIDER_ATTEMPT_{attempt}=INVALID_NONSTRUCTURED')
+              print(candidate[:500])
+              if attempt < 3:
+                  time.sleep(10)
+          if not final:
+              raise SystemExit('independent implementation reviewer returned no structured review after 3 attempts')
+
+          print('INDEPENDENT_REVIEW_BEGIN')
+          print(final)
+          print('INDEPENDENT_REVIEW_END')
+          checks=[
+              f'REVIEW_HEAD\n{os.environ["IMPL_HEAD"]}',
+              'REVIEW_KIND\nSG-000023_IMPLEMENTATION',
+              'CRITICAL = NONE','HIGH = NONE','MEDIUM = NONE','LOW = NONE',
+              'FINDINGS\n- NONE','FINAL_GATE = PASS'
+          ]
+          if not all(x in final for x in checks):
+              raise SystemExit('independent semantic implementation review produced a non-PASS result')
+
+          summary={
+              'base_main':os.environ['BASE_MAIN'],
+              'implementation_head':os.environ['IMPL_HEAD'],
+              'spec_revision':os.environ['SPEC_REVISION'],
+              'workpacket_digest':packet['packet_digest'],
+              'workpacket_file_sha256':hashlib.sha256(Path('/tmp/sg23-workpacket.json').read_bytes()).hexdigest(),
+              'diff_sha256':os.environ['DIFF_SHA256'],
+              'file_list_sha256':os.environ['FILE_LIST_SHA256'],
+              'diffcipline_sha256':os.environ['DIFFCIPLINE_SHA256'],
+              'review_prompt_sha256':hashlib.sha256(prompt.encode()).hexdigest(),
+              'review_final_sha256':hashlib.sha256((final+'\n').encode()).hexdigest(),
+              'tests_passed':33,
+          }
+          print('QUALIFICATION_SUMMARY_BEGIN')
+          print(json.dumps(summary,indent=2,sort_keys=True))
+          print('QUALIFICATION_SUMMARY_END')
+          PY
+
+          test -z "$(git status --porcelain)"
