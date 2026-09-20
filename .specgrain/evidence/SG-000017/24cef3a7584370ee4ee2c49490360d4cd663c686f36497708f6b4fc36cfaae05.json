@@ -1,0 +1,191 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:24cef3a7584370ee4ee2c49490360d4cd663c686f36497708f6b4fc36cfaae05",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000011 proof prerequisite matched the exact WorkPacket baseline before execution.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=470e2b4599a283c139141f4470cfecd5cac316f1",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for baseline-kind fidelity, non-exhaustive extensibility, Reference non-publicness, absence of hierarchy/authorization/wire semantics, scope containment, and required evidence.",
+        "detail": "Independent North Mini Code review is bound exactly to the implementation head and returned PASS with no findings.",
+        "evidence_ref": "independent-review:sha256:72972cd6534fa304324047ee348fef25de3946f97cd7cc232f946d4b2f09c701;head=a51e0b48e7d53aaff3cd41e0ce101e8d8da18461",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+        "detail": "Cargo manifests and Cargo.lock are unchanged; the workspace remains dependency-free.",
+        "evidence_ref": "git-diff:470e2b4599a283c139141f4470cfecd5cac316f1...a51e0b48e7d53aaff3cd41e0ce101e8d8da18461;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "Every current ScopeKind variant is fieldless, and Reference defines no public-access, inheritance, visibility, or authorization behavior.",
+        "detail": "Every current variant is fieldless; Reference is classification only and defines no public visibility, anonymous access, inheritance, or authorization behavior.",
+        "evidence_ref": "git:898391952507c068893969c129cba6ae28011975:crates/morize-core/src/scope.rs;reference=fieldless-classification-only",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact PR-head CI completed successfully on Ubuntu, macOS, and Windows before merge.",
+        "evidence_ref": "github-actions:pr=35493640447;head=a51e0b48e7d53aaff3cd41e0ce101e8d8da18461;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "ScopeKind is marked non_exhaustive because docs/DATA_MODEL.md calls these initial kinds and MZ-AUTH-002 requires at least the documented scope families; the current implementation adds no ninth kind.",
+        "detail": "Source and independent review confirm #[non_exhaustive] extensibility with no ninth current kind.",
+        "evidence_ref": "git:898391952507c068893969c129cba6ae28011975:crates/morize-core/src/scope.rs;independent-review:sha256:72972cd6534fa304324047ee348fef25de3946f97cd7cc232f946d4b2f09c701",
+        "passed": true
+      },
+      {
+        "check_id": "ScopeKind supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests exercise all eight variants and confirm distinct value semantics without defining an ordering contract.",
+        "detail": "Focused tests exercise all eight values, equality/hash distinctness, and Copy behavior; no ordering trait is implemented.",
+        "evidence_ref": "github-actions:pr=35493640447;main=35494238693;local-tests=17/17",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation changes no path outside crates/morize-core/src/scope.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Independent diff observation contains exactly scope.rs and lib.rs, both within the authorized change surface.",
+        "evidence_ref": "git-diff:470e2b4599a283c139141f4470cfecd5cac316f1...a51e0b48e7d53aaff3cd41e0ce101e8d8da18461;sha256=f31c5f0a8b38c2b6f32f4f9516f74921c77aef522694e3f6732bead3bd6f22df;paths=scope.rs,lib.rs",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation defines no Scope struct, ScopeId composition, parent relation, hierarchy, inheritance, policy attachment, Display, FromStr, serde integration, numeric repr/discriminants, public-access behavior, or wire/persistence format.",
+        "detail": "Source and independent review confirm no Scope struct, ScopeId composition, hierarchy, inheritance, visibility, policy attachment, public-access behavior, textual/numeric encoding, serialization, wire, or persistence semantics were introduced.",
+        "evidence_ref": "independent-review:sha256:72972cd6534fa304324047ee348fef25de3946f97cd7cc232f946d4b2f09c701;head=a51e0b48e7d53aaff3cd41e0ce101e8d8da18461",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passed locally, on the exact PR head, and on canonical main.",
+        "evidence_ref": "github-actions:pr=35493640447;main=35494238693;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passed locally, on the exact PR head, and on canonical main.",
+        "evidence_ref": "github-actions:pr=35493640447;main=35494238693;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "Formatting passed locally, on the exact PR head, and on canonical main.",
+        "evidence_ref": "github-actions:pr=35493640447;main=35494238693;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and includes focused tests for all eight scope kinds and required value semantics.",
+        "detail": "Offline workspace tests passed locally with 17/17 tests and passed on the exact PR head and canonical main.",
+        "evidence_ref": "github-actions:pr=35493640447;main=35494238693;local-tests=17/17",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core exports ScopeKind from one new scope module with exactly Run, Session, Agent, Project, User, Team, Organization, and Reference as the current baseline variants.",
+        "detail": "Canonical merge exports ScopeKind with exactly the eight planned current baseline variants.",
+        "evidence_ref": "git:898391952507c068893969c129cba6ae28011975:crates/morize-core/src/scope.rs;review-head=a51e0b48e7d53aaff3cd41e0ce101e8d8da18461",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and canonical-main CI both passed Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35493640447;main=35494238693;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000011",
+        "detail": "Canonical SG-000011 verified proof and ancestry revalidated at the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=470e2b4599a283c139141f4470cfecd5cac316f1",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passed locally and in exact-head/post-merge CI.",
+        "evidence_ref": "github-actions:pr=35493640447;main=35494238693;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with -D warnings passed locally and in exact-head/post-merge CI.",
+        "evidence_ref": "github-actions:pr=35493640447;main=35494238693;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt --all -- --check passed locally and in exact-head/post-merge CI.",
+        "evidence_ref": "github-actions:pr=35493640447;main=35494238693;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline workspace tests passed locally and cross-platform.",
+        "evidence_ref": "github-actions:pr=35493640447;main=35494238693;local-tests=17/17",
+        "passed": true
+      },
+      {
+        "check_id": "E-SCOPE-BASELINE-KINDS",
+        "detail": "Exactly Run, Session, Agent, Project, User, Team, Organization, and Reference are implemented as current baseline kinds.",
+        "evidence_ref": "git:898391952507c068893969c129cba6ae28011975:crates/morize-core/src/scope.rs;github-actions:pr=35493640447;main=35494238693",
+        "passed": true
+      },
+      {
+        "check_id": "E-SCOPE-FIELDLESS",
+        "detail": "All eight current variants are fieldless, including Reference.",
+        "evidence_ref": "git:898391952507c068893969c129cba6ae28011975:crates/morize-core/src/scope.rs;reference=fieldless",
+        "passed": true
+      },
+      {
+        "check_id": "E-SCOPE-NO-AUTH-SEMANTICS",
+        "detail": "Reference remains classification only; no hierarchy, inheritance, visibility, public-access, policy, or authorization semantics are defined.",
+        "evidence_ref": "git:898391952507c068893969c129cba6ae28011975:crates/morize-core/src/scope.rs;independent-review:sha256:72972cd6534fa304324047ee348fef25de3946f97cd7cc232f946d4b2f09c701",
+        "passed": true
+      },
+      {
+        "check_id": "E-SCOPE-NO-DEPENDENCIES",
+        "detail": "No Cargo manifest or lockfile change; no runtime, build, or test dependency was added.",
+        "evidence_ref": "git-diff:470e2b4599a283c139141f4470cfecd5cac316f1...a51e0b48e7d53aaff3cd41e0ce101e8d8da18461;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-SCOPE-NONEXHAUSTIVE",
+        "detail": "ScopeKind is non-exhaustive while defining no ninth current kind.",
+        "evidence_ref": "git:898391952507c068893969c129cba6ae28011975:crates/morize-core/src/scope.rs;independent-review:sha256:72972cd6534fa304324047ee348fef25de3946f97cd7cc232f946d4b2f09c701",
+        "passed": true
+      },
+      {
+        "check_id": "E-SCOPE-VALUE-SEMANTICS",
+        "detail": "Focused tests prove distinct equality/hash values and Copy behavior without ordering semantics.",
+        "evidence_ref": "github-actions:pr=35493640447;main=35494238693;local-tests=17/17",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Exact-head independent semantic review returned PASS with C/H/M/L NONE.",
+        "evidence_ref": "independent-review:sha256:72972cd6534fa304324047ee348fef25de3946f97cd7cc232f946d4b2f09c701;head=a51e0b48e7d53aaff3cd41e0ce101e8d8da18461",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "A normal forward revert removes the primitive; no persisted format, policy attachment, hierarchy, authorization rule, or user data depends on it.",
+        "evidence_ref": "git-history:base=470e2b4599a283c139141f4470cfecd5cac316f1;merge=898391952507c068893969c129cba6ae28011975;no-persisted-format-policy-hierarchy-auth-or-user-data",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "898391952507c068893969c129cba6ae28011975",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/lib.rs",
+      "crates/morize-core/src/scope.rs"
+    ],
+    "packet_digest": "sha256:33f313bfc8339070b24f5d2eedbe51f704f4009f4185d14a8c3787686fde4b55",
+    "result_digest": "sha256:a657936a24225dbb2e8c185eccb1ee4f1ee8ca73796872f6bb531ff617445488",
+    "spec_id": "SG-000017",
+    "spec_revision": "sha256:d71434abb20ac395f9786c904733b7a8e8640401db5d01d106643df0c2f32a00",
+    "verification_version": 1,
+    "verified": true
+  }
+}
