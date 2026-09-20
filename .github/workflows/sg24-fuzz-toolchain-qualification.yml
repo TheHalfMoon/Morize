@@ -1,0 +1,107 @@
+name: sg24-fuzz-toolchain-qualification
+
+on:
+  push:
+    branches:
+      - automation/sg-000024-fuzz-toolchain-qualification
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout qualification baseline
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Install pinned nightly
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install nightly-2026-06-09 --profile minimal
+          rustup component add rust-src --toolchain nightly-2026-06-09
+          rustc +nightly-2026-06-09 --version --verbose
+
+      - name: Install pinned cargo-fuzz release binary
+        shell: bash
+        env:
+          CARGO_FUZZ_VERSION: "0.13.2"
+          CARGO_FUZZ_SHA256: "b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c"
+        run: |
+          set -euo pipefail
+          url="https://github.com/rust-fuzz/cargo-fuzz/releases/download/${CARGO_FUZZ_VERSION}/cargo-fuzz-${CARGO_FUZZ_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+          curl --fail --location --silent --show-error "$url" -o /tmp/cargo-fuzz.tar.gz
+          echo "${CARGO_FUZZ_SHA256}  /tmp/cargo-fuzz.tar.gz" | sha256sum --check
+          tar -tzf /tmp/cargo-fuzz.tar.gz
+          tar -xzf /tmp/cargo-fuzz.tar.gz -C /tmp
+          install -m 0755 /tmp/cargo-fuzz "$HOME/.cargo/bin/cargo-fuzz"
+          cargo fuzz --version
+
+      - name: Build and execute ephemeral libFuzzer probe against morize-core
+        shell: bash
+        env:
+          RUSTUP_TOOLCHAIN: nightly-2026-06-09
+        run: |
+          set -euo pipefail
+
+          rm -rf fuzz-toolchain-probe
+          mkdir -p fuzz-toolchain-probe/fuzz_targets
+          cat > fuzz-toolchain-probe/Cargo.toml <<'EOF'
+          [package]
+          name = "morize-fuzz-toolchain-probe"
+          version = "0.0.0"
+          edition = "2024"
+          publish = false
+
+          [package.metadata]
+          cargo-fuzz = true
+
+          [dependencies]
+          libfuzzer-sys = "=0.4.13"
+          morize-core = { path = "../crates/morize-core" }
+
+          [[bin]]
+          name = "identity_parser_probe"
+          path = "fuzz_targets/identity_parser_probe.rs"
+          test = false
+          doc = false
+          bench = false
+
+          [workspace]
+          members = ["."]
+          EOF
+
+          cat > fuzz-toolchain-probe/fuzz_targets/identity_parser_probe.rs <<'EOF'
+          #![no_main]
+
+          use libfuzzer_sys::fuzz_target;
+          use morize_core::{ID_TEXT_LENGTH, VaultId};
+
+          fuzz_target!(|data: &[u8]| {
+              if let Ok(text) = core::str::from_utf8(data) {
+                  if let Ok(id) = text.parse::<VaultId>() {
+                      assert_eq!(text.len(), ID_TEXT_LENGTH);
+                      assert_eq!(id.to_string(), text);
+                  }
+              }
+          });
+          EOF
+
+          cargo fuzz --manifest-path fuzz-toolchain-probe/Cargo.toml list
+          cargo fuzz --manifest-path fuzz-toolchain-probe/Cargo.toml build identity_parser_probe
+
+          mkdir -p /tmp/sg24-probe-corpus
+          printf '%064d' 0 > /tmp/sg24-probe-corpus/valid-zero
+          printf 'ABCDEF' > /tmp/sg24-probe-corpus/noncanonical
+          printf 'short' > /tmp/sg24-probe-corpus/short
+
+          cargo fuzz --manifest-path fuzz-toolchain-probe/Cargo.toml run identity_parser_probe /tmp/sg24-probe-corpus --             -runs=2000             -seed=424242             -timeout=5             -max_len=128
+
+          git diff --exit-code --             Cargo.toml Cargo.lock             crates/morize-core/src/lib.rs             crates/morize-core/src/identity.rs             crates/morize-core/src/bounded.rs             crates/morize-core/src/bounded_collection.rs
+
+          rm -rf fuzz-toolchain-probe
+          test -z "$(git status --porcelain)"
+          echo "SG24_FUZZ_TOOLCHAIN_QUALIFICATION=PASS"
