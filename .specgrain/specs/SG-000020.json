@@ -1,10 +1,49 @@
 {
-  "acceptance": [],
-  "change_surface": [],
+  "acceptance": [
+    "morize-core exports RelationEdgeClass from the existing relation module with exactly Explicit and Inferred as current variants and no additional current edge class.",
+    "RelationEdgeClass is a closed vocabulary for this Grain and is not marked non_exhaustive; future edge-class expansion requires a separate compatibility-governed Grain.",
+    "Both RelationEdgeClass variants are fieldless, and neither Explicit nor Inferred defines evidence sufficiency, truth, authority, graph mutation, memory mutation, or authorization behavior.",
+    "RelationEdgeClass supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests exercise both variants and confirm distinct value semantics without defining an ordering contract.",
+    "The implementation defines no relation endpoints, evidence references, engine identity, confidence, inference/evidence thresholds, graph behavior, Display, FromStr, parser, serde integration, numeric repr/discriminants, or wire/persistence format.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and includes focused tests for both relation edge classes and required value semantics.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for exact Explicit/Inferred fidelity, closed-vocabulary correctness, absence of inference-policy/authority/graph/wire semantics, scope containment, and required evidence.",
+    "ADR-0004 proof prerequisites for SG-000011 and SG-000019 revalidate against the exact WorkPacket baseline before execution.",
+    "The implementation changes no path outside crates/morize-core/src/relation.rs and crates/morize-core/src/lib.rs."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/relation.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
   "children": [],
-  "context": {},
+  "context": {
+    "budget_tokens": 11000,
+    "estimated_tokens": 6200
+  },
   "dependencies": [],
-  "evidence": {},
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000011",
+      "E-PROOF-PREREQUISITE-SG000019",
+      "E-EDGE-CLASS-BASELINE",
+      "E-EDGE-CLASS-CLOSED",
+      "E-EDGE-CLASS-FIELDLESS",
+      "E-EDGE-CLASS-NO-INFERENCE-POLICY",
+      "E-EDGE-CLASS-VALUE-SEMANTICS",
+      "E-EDGE-CLASS-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
   "id": "SG-000020",
   "labels": [],
   "metadata": {
@@ -28,16 +67,43 @@
           "spec_revision": "sha256:0628d10f31cef46fd9e0c11fcd9fe530112d617c164d573c9171e7f5f92ae04a"
         }
       ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "One standard-library-only two-variant enum in the existing relation module is the narrowest implementation of the already-fixed explicit/inferred distinction while deferring relation structure, thresholds, inference behavior, serialization, and persistence."
+      },
+      "safety": {
+        "requirements": [
+          "RelationEdgeClass is descriptive provenance classification only; Inferred must not itself imply evidence sufficiency, truth, authority, authorization, or permission to mutate memory or graph state."
+        ],
+        "status": "requirements-defined"
+      },
+      "unresolved_decisions": [],
+      "version": 1
     }
   },
   "method": "quick",
   "outcome": "morize-core exposes one dependency-free closed RelationEdgeClass enum with exactly Explicit and Inferred as fixed by docs/DATA_MODEL.md, without defining relation endpoints, evidence sufficiency, inference thresholds, graph behavior, authorization, serialization, persistence, or policy effects.",
   "parent_id": "SG-000010",
   "rationale": "docs/DATA_MODEL.md fixes every MemoryRelation edge_class as explicit or inferred, and MZ-PROV-005 requires inferred graph relationships to identify their inference/evidence class. This Grain adds only the typed edge-class distinction so later relation structure and inference-policy Grains can build on a bounded primitive without inventing thresholds or graph semantics.",
-  "risk": {},
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the relation-edge-class implementation commits; no persisted format, graph state, inference policy, authorization rule, or user data has been written by this Grain."
+  },
   "schema_version": 1,
-  "scope_in": [],
-  "scope_out": [],
-  "state": "DRAFT",
+  "scope_in": [
+    "Define public closed RelationEdgeClass with exactly Explicit and Inferred, matching docs/DATA_MODEL.md edge_class = explicit | inferred.",
+    "Keep both variants fieldless and derive only Clone, Copy, Debug, PartialEq, Eq, and Hash so edge class is typed without defining ordering, textual/numeric encoding, evidence sufficiency, confidence, or policy semantics.",
+    "Treat Explicit and Inferred as descriptive provenance classification only; neither value itself grants authority, proves truth, establishes evidence sufficiency, authorizes mutation, or triggers graph behavior.",
+    "Add standard-library-only focused tests covering both values, distinct equality/hash semantics, and Copy behavior without serialization or parser contracts."
+  ],
+  "scope_out": [
+    "A MemoryRelation struct, RelationId composition, from_ref/to_ref endpoints, evidence_refs, engine identity, confidence, policy revision binding, or inference/evidence thresholds.",
+    "Graph traversal or mutation, relationship discovery, inference engines, conflict/supersession policy, truth/authority semantics, authorization, or any behavior inferred merely from RelationEdgeClass.",
+    "Display/FromStr, parsers, serde or other serialization integration, numeric repr/discriminants, persisted or wire encoding, configuration formats, migrations, storage, retrieval, or domain-record integration.",
+    "Any third-party runtime, build, or test dependency."
+  ],
+  "state": "SHAPED",
   "title": "Add relation edge class primitive"
 }
