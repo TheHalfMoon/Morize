@@ -96,6 +96,6 @@
     "Field-specific aliases or maximums, collections, timestamps, content digests, domain records, identity behavior, policy, storage, retrieval, MCP, or model behavior.",
     "Serde or other serialization-framework integration, persisted schemas, configuration formats, wire contracts, migrations, or any third-party dependency."
   ],
-  "state": "SHAPED",
+  "state": "REFINING",
   "title": "Add bounded UTF-8 text primitive"
 }
