@@ -155,6 +155,6 @@
     "Long-running scheduled campaigns, distributed fuzzing, OSS-Fuzz enrollment, persistent corpus governance, coverage thresholds, mutation dictionaries, custom mutators, structure-aware Arbitrary inputs, Miri, sanitizers beyond cargo-fuzz defaults, or fuzzing later persistence/network/policy layers.",
     "Any claim of exhaustive fuzzing, proof of bug absence, complete security coverage, or completion of future fuzz targets outside the three authorized P1 primitives."
   ],
-  "state": "SHAPED",
+  "state": "REFINING",
   "title": "Add isolated true-fuzz harness for core invariants"
 }
