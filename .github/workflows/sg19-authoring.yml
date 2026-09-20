@@ -209,8 +209,8 @@ jobs:
 
           git clone --quiet "https://github.com/alibaba/open-code-review.git" /tmp/ocr
           git -C /tmp/ocr checkout --quiet "$OCR_PIN"
-          OCR_NO_UPDATE=1 node /tmp/ocr/scripts/install.js
-          OCR_NO_UPDATE=1 node /tmp/ocr/bin/ocr.js delegate preview --format json --from "$BASE_MAIN" --to "$PLAN_HEAD" \
+          (cd /tmp/ocr && GOTOOLCHAIN=auto go build -o /tmp/ocr-bin ./cmd/opencodereview)
+          OCR_NO_UPDATE=1 /tmp/ocr-bin delegate preview --format json --from "$BASE_MAIN" --to "$PLAN_HEAD" \
             > /tmp/sg19-plan-ocr-preview.json
           python - <<'PY'
           import json,subprocess
@@ -222,7 +222,7 @@ jobs:
           assert sorted(paths)==['.specgrain/specs/SG-000010.json','.specgrain/specs/SG-000019.json']
           with open('/tmp/sg19-plan-ocr-rules.json','w') as out:
               subprocess.run(
-                ['node','/tmp/ocr/bin/ocr.js','delegate','rule','--format','json',*paths],
+                ['/tmp/ocr-bin','delegate','rule','--format','json',*paths],
                 check=True, stdout=out
               )
           groups=json.load(open('/tmp/sg19-plan-ocr-rules.json'))['groups']
