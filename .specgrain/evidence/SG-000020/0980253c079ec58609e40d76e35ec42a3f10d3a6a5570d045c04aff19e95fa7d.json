@@ -1,0 +1,197 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:0980253c079ec58609e40d76e35ec42a3f10d3a6a5570d045c04aff19e95fa7d",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisites for SG-000011 and SG-000019 revalidate against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000011 and SG-000019 proof prerequisites matched the exact WorkPacket baseline before execution.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;specgrain:SG-000019:sha256:5f162f7283d2dd29ab35c8de2c79fd27af10b943fe8ba7e1c8f3e81ee2261e1f;packet-baseline=2f84412f65a4d3a3b07d884bc1870f70135b19ff",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for exact Explicit/Inferred fidelity, closed-vocabulary correctness, absence of inference-policy/authority/graph/wire semantics, scope containment, and required evidence.",
+        "detail": "Independent North Mini Code review is bound exactly to the implementation head and returned PASS with no findings.",
+        "evidence_ref": "independent-review:sha256:cfc99b4166cc69c7a08135e2d5f4644c077c3514fc322207fc9c900d958ee4dc;head=a956b1b41411b372346ec3e355028dae54826608",
+        "passed": true
+      },
+      {
+        "check_id": "Both RelationEdgeClass variants are fieldless, and neither Explicit nor Inferred defines evidence sufficiency, truth, authority, graph mutation, memory mutation, or authorization behavior.",
+        "detail": "Both variants are fieldless descriptive provenance classification only; neither value establishes evidence sufficiency, truth, authority, graph mutation, memory mutation, or authorization.",
+        "evidence_ref": "git:70e2e94b8b19b1165fd4c4fe950d3b9e9b5f3dc5:crates/morize-core/src/relation.rs;fieldless-descriptive-only;independent-review:sha256:cfc99b4166cc69c7a08135e2d5f4644c077c3514fc322207fc9c900d958ee4dc",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+        "detail": "Cargo manifests and Cargo.lock are unchanged; no runtime, build, or test dependency was added.",
+        "evidence_ref": "git-diff:2f84412f65a4d3a3b07d884bc1870f70135b19ff...a956b1b41411b372346ec3e355028dae54826608;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact PR-head CI completed successfully on Ubuntu, macOS, and Windows before merge.",
+        "evidence_ref": "github-actions:pr=35499197464;head=a956b1b41411b372346ec3e355028dae54826608;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "RelationEdgeClass is a closed vocabulary for this Grain and is not marked non_exhaustive; future edge-class expansion requires a separate compatibility-governed Grain.",
+        "detail": "Source and independent review confirm RelationEdgeClass is intentionally closed for this Grain and is not non-exhaustive.",
+        "evidence_ref": "git:70e2e94b8b19b1165fd4c4fe950d3b9e9b5f3dc5:crates/morize-core/src/relation.rs;closed-vocabulary;independent-review:sha256:cfc99b4166cc69c7a08135e2d5f4644c077c3514fc322207fc9c900d958ee4dc",
+        "passed": true
+      },
+      {
+        "check_id": "RelationEdgeClass supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests exercise both variants and confirm distinct value semantics without defining an ordering contract.",
+        "detail": "Focused tests exercise both values, equality/hash distinctness, and Copy behavior; no ordering trait is implemented.",
+        "evidence_ref": "github-actions:pr=35499197464;main=35499243965;local-tests=23/23",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation changes no path outside crates/morize-core/src/relation.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Independent diff observation contains exactly relation.rs and lib.rs, both within the authorized change surface.",
+        "evidence_ref": "git-diff:2f84412f65a4d3a3b07d884bc1870f70135b19ff...a956b1b41411b372346ec3e355028dae54826608;sha256=85e8a84ee57e8b5be844e84883e3e894c588b39a6dd308b10a192b7a8ce1a9aa;paths=relation.rs,lib.rs",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation defines no relation endpoints, evidence references, engine identity, confidence, inference/evidence thresholds, graph behavior, Display, FromStr, parser, serde integration, numeric repr/discriminants, or wire/persistence format.",
+        "detail": "Source and independent review confirm no endpoints, evidence refs, engine identity, confidence, inference/evidence thresholds, graph behavior, parser, serialization, numeric, wire, or persistence semantics were introduced.",
+        "evidence_ref": "independent-review:sha256:cfc99b4166cc69c7a08135e2d5f4644c077c3514fc322207fc9c900d958ee4dc;head=a956b1b41411b372346ec3e355028dae54826608",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passed on the exact PR head and canonical main.",
+        "evidence_ref": "github-actions:pr=35499197464;main=35499243965;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passed on the exact PR head and canonical main.",
+        "evidence_ref": "github-actions:pr=35499197464;main=35499243965;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "Formatting passed on the exact PR head and canonical main.",
+        "evidence_ref": "github-actions:pr=35499197464;main=35499243965;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and includes focused tests for both relation edge classes and required value semantics.",
+        "detail": "Offline workspace tests passed with 23/23 tests and passed on the exact PR head and canonical main.",
+        "evidence_ref": "github-actions:pr=35499197464;main=35499243965;local-tests=23/23",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core exports RelationEdgeClass from the existing relation module with exactly Explicit and Inferred as current variants and no additional current edge class.",
+        "detail": "Canonical merge exports exactly Explicit and Inferred as RelationEdgeClass values, with no additional current edge class.",
+        "evidence_ref": "git:70e2e94b8b19b1165fd4c4fe950d3b9e9b5f3dc5:crates/morize-core/src/relation.rs;review-head=a956b1b41411b372346ec3e355028dae54826608",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and canonical-main CI both passed Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35499197464;main=35499243965;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-EDGE-CLASS-BASELINE",
+        "detail": "Exactly Explicit and Inferred are implemented as the current RelationEdgeClass values.",
+        "evidence_ref": "git:70e2e94b8b19b1165fd4c4fe950d3b9e9b5f3dc5:crates/morize-core/src/relation.rs;github-actions:pr=35499197464;main=35499243965",
+        "passed": true
+      },
+      {
+        "check_id": "E-EDGE-CLASS-CLOSED",
+        "detail": "RelationEdgeClass is closed for this Grain and is not marked non-exhaustive.",
+        "evidence_ref": "git:70e2e94b8b19b1165fd4c4fe950d3b9e9b5f3dc5:crates/morize-core/src/relation.rs;independent-review:sha256:cfc99b4166cc69c7a08135e2d5f4644c077c3514fc322207fc9c900d958ee4dc",
+        "passed": true
+      },
+      {
+        "check_id": "E-EDGE-CLASS-FIELDLESS",
+        "detail": "Both current edge-class variants are fieldless.",
+        "evidence_ref": "git:70e2e94b8b19b1165fd4c4fe950d3b9e9b5f3dc5:crates/morize-core/src/relation.rs;fieldless",
+        "passed": true
+      },
+      {
+        "check_id": "E-EDGE-CLASS-NO-DEPENDENCIES",
+        "detail": "No Cargo manifest or lockfile change; no runtime, build, or test dependency was added.",
+        "evidence_ref": "git-diff:2f84412f65a4d3a3b07d884bc1870f70135b19ff...a956b1b41411b372346ec3e355028dae54826608;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-EDGE-CLASS-NO-INFERENCE-POLICY",
+        "detail": "Source and independent review confirm Inferred is descriptive provenance only and introduces no thresholds, evidence sufficiency, truth, authority, authorization, graph mutation, or memory mutation semantics.",
+        "evidence_ref": "git:70e2e94b8b19b1165fd4c4fe950d3b9e9b5f3dc5:crates/morize-core/src/relation.rs;independent-review:sha256:cfc99b4166cc69c7a08135e2d5f4644c077c3514fc322207fc9c900d958ee4dc",
+        "passed": true
+      },
+      {
+        "check_id": "E-EDGE-CLASS-VALUE-SEMANTICS",
+        "detail": "Focused tests prove distinct equality/hash values and Copy behavior without ordering semantics.",
+        "evidence_ref": "github-actions:pr=35499197464;main=35499243965;local-tests=23/23",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000011",
+        "detail": "Canonical SG-000011 verified proof and ancestry revalidated at the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=2f84412f65a4d3a3b07d884bc1870f70135b19ff",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000019",
+        "detail": "Canonical SG-000019 verified proof and ancestry revalidated at the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000019:sha256:5f162f7283d2dd29ab35c8de2c79fd27af10b943fe8ba7e1c8f3e81ee2261e1f;packet-baseline=2f84412f65a4d3a3b07d884bc1870f70135b19ff",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35499197464;main=35499243965;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with -D warnings passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35499197464;main=35499243965;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt --all -- --check passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35499197464;main=35499243965;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline workspace tests passed with 23/23 tests and cross-platform.",
+        "evidence_ref": "github-actions:pr=35499197464;main=35499243965;local-tests=23/23",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Exact-head independent semantic implementation review returned PASS with C/H/M/L NONE.",
+        "evidence_ref": "independent-review:sha256:cfc99b4166cc69c7a08135e2d5f4644c077c3514fc322207fc9c900d958ee4dc;head=a956b1b41411b372346ec3e355028dae54826608",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "A normal forward revert removes the primitive; no persisted representation, graph state, inference policy, authorization rule, or user data depends on it.",
+        "evidence_ref": "git-history:base=2f84412f65a4d3a3b07d884bc1870f70135b19ff;merge=70e2e94b8b19b1165fd4c4fe950d3b9e9b5f3dc5;no-persisted-format-graph-state-policy-or-user-data",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "70e2e94b8b19b1165fd4c4fe950d3b9e9b5f3dc5",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/lib.rs",
+      "crates/morize-core/src/relation.rs"
+    ],
+    "packet_digest": "sha256:1608c767541c397a9488f1854c7704d6f3ed0dcb412b8ac5c5124b9d67dfeabc",
+    "result_digest": "sha256:14074f7298a51fd5b90b1e66510d08e4812803e3a43f8f07ec4b2a78a3066b2d",
+    "spec_id": "SG-000020",
+    "spec_revision": "sha256:fd7230363b32044967180106592bc371dd688ddad7c9182a45b8fbe78aedaab1",
+    "verification_version": 1,
+    "verified": true
+  }
+}
