@@ -642,7 +642,8 @@ jobs:
           test "$(git rev-parse HEAD:crates/morize-core)" = "$CORE_TREE"
 
           expected=".github/workflows/fuzz-smoke.yml fuzz/.gitignore fuzz/Cargo.lock fuzz/Cargo.toml fuzz/README.md fuzz/THIRD_PARTY.md fuzz/fuzz_targets/bounded_utf8.rs fuzz/fuzz_targets/bounded_vec.rs fuzz/fuzz_targets/durable_id.rs fuzz/rust-toolchain.toml "
-          actual="$(git status --porcelain | awk '{print $2}' | sort | tr '\n' ' ')"
+          actual="$(git status --porcelain --untracked-files=all | awk '{print $2}' | sort | tr '\n' ' ')"
+          echo "IMPLEMENTATION_STATUS_PATHS=$actual"
           test "$actual" = "$expected"
 
           git add .github/workflows/fuzz-smoke.yml fuzz
