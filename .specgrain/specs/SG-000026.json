@@ -103,6 +103,6 @@
     "Authorization, target selection, mutation execution, side effects, FORGET/REDACT behavior, policy evaluation, or any authority-bearing interpretation of a version value.",
     "Any third-party runtime, build, dev, or test dependency."
   ],
-  "state": "SHAPED",
+  "state": "REFINING",
   "title": "Add memory action-set version primitive"
 }
