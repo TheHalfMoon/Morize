@@ -10,6 +10,7 @@ pub mod identity;
 pub mod mutation;
 pub mod relation;
 pub mod scope;
+pub mod timestamp;
 
 pub use bounded::{BoundedUtf8, Utf8BoundsError};
 pub use bounded_collection::{
@@ -27,3 +28,4 @@ pub use identity::{
 pub use mutation::MutationTerminalState;
 pub use relation::{MemoryRelationType, RelationEdgeClass};
 pub use scope::ScopeKind;
+pub use timestamp::{Timestamp, TimestampError};
