@@ -1,37 +1,104 @@
 {
-  "acceptance": [],
-  "change_surface": [],
+  "acceptance": [
+    "morize-core exports BoundedVec, CollectionBoundsError, BoundedVecBuildError, and BoundedVecPushError from one new bounded-collection module, with no additional domain behavior.",
+    "BoundedVec::<u8, 2> accepts empty, one-item, and two-item vectors while over-limit Vec construction fails with max_items=2 and actual_items=3 and returns the original Vec unchanged and in order.",
+    "MAX_ITEMS=0 accepts only an empty collection; failed construction and failed push return rejected data without mutating, truncating, reordering, or dropping it.",
+    "try_push succeeds below capacity and, at capacity, leaves the existing collection unchanged while BoundedVecPushError returns the exact rejected value and bounded AtCapacity metadata.",
+    "as_slice and into_vec preserve element order and values exactly; equality, ordering, and hashing follow the underlying ordered values without hidden normalization.",
+    "Debug for BoundedVec, BoundedVecBuildError, and BoundedVecPushError reports bounded metadata only and does not format or expose contained/rejected T values.",
+    "The public API exposes no mutable Vec reference and implements no DerefMut, AsMut<Vec<T>>, IndexMut, unchecked push/extend/insert, or equivalent bound-bypass surface.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and includes focused boundary, lossless rejection, preservation, value-semantics, and Debug non-disclosure tests.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for boundary correctness, lossless rejection, order/value preservation, no-bypass API surface, Debug non-disclosure, scope containment, and required evidence.",
+    "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+    "The implementation changes no path outside crates/morize-core/src/bounded_collection.rs and crates/morize-core/src/lib.rs."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/bounded_collection.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
   "children": [],
-  "context": {},
+  "context": {
+    "budget_tokens": 13500,
+    "estimated_tokens": 8200
+  },
   "dependencies": [],
-  "evidence": {},
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000011",
+      "E-COLLECTION-BOUNDARY",
+      "E-COLLECTION-BUILD-LOSSLESS",
+      "E-COLLECTION-PUSH-LOSSLESS",
+      "E-COLLECTION-PRESERVATION",
+      "E-COLLECTION-VALUE-SEMANTICS",
+      "E-COLLECTION-DEBUG-NONDISCLOSURE",
+      "E-COLLECTION-NO-BYPASS",
+      "E-COLLECTION-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
   "id": "SG-000014",
   "labels": [],
   "metadata": {
     "method": {
-      "rollback": "Revert the bounded ordered collection implementation commits; no persisted format, migration, or user data depends on this Grain.",
+      "control": "Implementation is limited to one dependency-free bounded ordered collection module, focused tests, and morize-core re-exports. No field-specific limits, maps/sets, serialization, persistence, domain records, or third-party dependencies are authorized.",
       "review_separation": "An independent semantic reviewer must review the exact implementation head, item-count boundaries, lossless rejection, no-bypass API surface, Debug non-disclosure, and required evidence separately from the implementing agent before acceptance.",
-      "control": "Implementation is limited to one dependency-free bounded ordered collection module, focused tests, and morize-core re-exports. No field-specific limits, maps/sets, serialization, persistence, domain records, or third-party dependencies are authorized."
+      "rollback": "Revert the bounded ordered collection implementation commits; no persisted format, migration, or user data depends on this Grain."
     },
     "morize": {
       "proof_prerequisites": [
         {
-          "spec_id": "SG-000011",
-          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d",
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
           "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
-          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6"
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
         }
       ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "A single standard-library-only ordered collection wrapper inside existing morize-core is the narrowest reusable bounded-collection contract. Returning rejected values avoids hidden data loss while keeping field limits, serialization, maps/sets, and domain policy out of scope."
+      },
+      "safety": {
+        "requirements": [],
+        "status": "none-identified"
+      },
+      "unresolved_decisions": [],
+      "version": 1
     }
   },
   "method": "controlled",
   "outcome": "morize-core exposes a dependency-free BoundedVec<T, const MAX_ITEMS: usize> ordered collection that enforces a hard item-count ceiling, preserves order and values, returns rejected data on failed construction or push, and exposes no mutation path that can bypass the bound.",
   "parent_id": "SG-000010",
   "rationale": "P1 explicitly requires bounded collections and the data-model contract requires bounded field sizes. This Grain adds only a reusable in-memory ordered collection primitive; field-specific limits, maps/sets, serialization, persistence, domain records, and collection policy remain separate decisions.",
-  "risk": {},
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the bounded ordered collection implementation commits; no persistent format or user data has been written by this Grain."
+  },
   "schema_version": 1,
-  "scope_in": [],
-  "scope_out": [],
-  "state": "DRAFT",
+  "scope_in": [
+    "Define public BoundedVec<T, const MAX_ITEMS: usize> with private Vec<T> storage and an exact item-count ceiling.",
+    "Define bounded metadata-only CollectionBoundsError plus lossless BoundedVecBuildError<T> and BoundedVecPushError<T> wrappers that return rejected values without exposing their contents through Debug.",
+    "Provide empty construction, checked Vec<T> construction, lossless try_push, as_slice, len, is_empty, into_vec, max_items, AsRef<[T]>, and deterministic Clone/Eq/Ord/Hash value semantics where T supports them.",
+    "Keep all mutating storage private: do not expose DerefMut, AsMut<Vec<T>>, IndexMut, mutable Vec access, unchecked push/extend/insert, or any other API that can exceed MAX_ITEMS.",
+    "Add standard-library-only tests for zero limits, exact boundaries, over-limit construction, lossless failed construction, lossless failed push, stable order/value preservation, value semantics, and Debug non-disclosure."
+  ],
+  "scope_out": [
+    "Field-specific aliases or maximums, unordered maps/sets, uniqueness/deduplication, sorting, normalization, pagination, concurrency, domain-specific collection semantics, or automatic truncation.",
+    "Serde or other serialization-framework integration, persisted schemas, configuration formats, wire contracts, migrations, storage, retrieval, policy, MCP, models, or domain records.",
+    "Any third-party runtime, build, or test dependency."
+  ],
+  "state": "SHAPED",
   "title": "Add bounded ordered collection primitive"
 }
