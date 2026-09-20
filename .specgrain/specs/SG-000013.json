@@ -1,0 +1,37 @@
+{
+  "acceptance": [],
+  "change_surface": [],
+  "children": [],
+  "context": {},
+  "dependencies": [],
+  "evidence": {},
+  "id": "SG-000013",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "rollback": "Revert the bounded UTF-8 primitive implementation commits; no persisted format, migration, or user data depends on this Grain.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head, byte-bound semantics, no-truncation behavior, Debug redaction, and required evidence separately from the implementing agent before acceptance.",
+      "control": "Implementation is limited to one dependency-free bounded UTF-8 value/error module, focused tests, and morize-core re-exports. No field-specific limits, normalization, serde, persistence, collections, timestamps, or domain behavior is authorized."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6"
+        }
+      ]
+    }
+  },
+  "method": "controlled",
+  "outcome": "morize-core exposes a dependency-free BoundedUtf8<const MAX_BYTES: usize> value that enforces a hard UTF-8 byte ceiling without truncation or normalization, provides deterministic value semantics, and avoids exposing contained text through Debug.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 explicitly requires bounded strings, and DATA_MODEL serialization invariants require bounded field sizes. This Grain adds only the reusable in-memory UTF-8 byte-bound primitive; field-specific limits, normalization rules, persistence, serialization, collections, timestamps, and domain records remain separate decisions.",
+  "risk": {},
+  "schema_version": 1,
+  "scope_in": [],
+  "scope_out": [],
+  "state": "DRAFT",
+  "title": "Add bounded UTF-8 text primitive"
+}
