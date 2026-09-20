@@ -1,0 +1,95 @@
+{
+  "acceptance": [
+    "morize-core exports CompatibilityClass from one new compatibility module with exactly Internal, Experimental, Stable, Deprecated, and Removed variants and no additional public compatibility behavior.",
+    "The enum is a closed vocabulary for this Grain: it is not marked non_exhaustive and defines no additional variants.",
+    "CompatibilityClass supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests exercise all five variants and confirm distinct value semantics without defining an ordering contract.",
+    "The implementation defines no Display, FromStr, serde integration, numeric repr/discriminants, wire/persistence format, version-negotiation behavior, deprecation timing, or public error taxonomy.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and includes focused tests for the five compatibility variants and required value semantics.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for policy fidelity, closed-vocabulary correctness, absence of invented serialization/ordering semantics, scope containment, and required evidence.",
+    "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+    "The implementation changes no path outside crates/morize-core/src/compatibility.rs and crates/morize-core/src/lib.rs."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/compatibility.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
+  "children": [],
+  "context": {
+    "budget_tokens": 11000,
+    "estimated_tokens": 6500
+  },
+  "dependencies": [],
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000011",
+      "E-COMPAT-VARIANTS",
+      "E-COMPAT-VALUE-SEMANTICS",
+      "E-COMPAT-NO-WIRE-SEMANTICS",
+      "E-COMPAT-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
+  "id": "SG-000015",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free in-memory compatibility-class enum, focused tests, and morize-core re-exports. No serialization, parsing, numeric representation, version negotiation, deprecation window, error taxonomy, persistence, configuration, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head, closed-vocabulary fidelity, absence of invented wire semantics, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the compatibility-class implementation commits; no persisted format, migration, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
+        }
+      ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "A single standard-library-only enum inside existing morize-core is the narrowest implementation of the already-fixed compatibility vocabulary. It avoids inventing serialization, ordering, version negotiation, deprecation timing, or error semantics."
+      },
+      "safety": {
+        "requirements": [],
+        "status": "none-identified"
+      },
+      "unresolved_decisions": [],
+      "version": 1
+    }
+  },
+  "method": "controlled",
+  "outcome": "morize-core exposes one dependency-free CompatibilityClass enum for the five compatibility states already fixed by the repository policy, without adding serialization, parsing, version negotiation, deprecation timing, error taxonomy, persistence, or third-party dependencies.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 requires compatibility classes, and docs/API_COMPATIBILITY.md already freezes the exact five semantic classes. This Grain implements only that in-memory closed vocabulary so later public APIs and error contracts can reference one typed definition without deciding wire or persistence formats.",
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the compatibility-class implementation commits; no persistent format or user data has been written by this Grain."
+  },
+  "schema_version": 1,
+  "scope_in": [
+    "Define public CompatibilityClass with exactly Internal, Experimental, Stable, Deprecated, and Removed variants matching the five classes fixed by docs/API_COMPATIBILITY.md.",
+    "Keep the enum as an in-memory semantic vocabulary with Clone, Copy, Debug, PartialEq, Eq, and Hash value semantics and no implicit ordering contract.",
+    "Add standard-library-only focused tests that exercise all five variants, distinguish them by equality/hash semantics, and prove Copy behavior without introducing textual or numeric encoding."
+  ],
+  "scope_out": [
+    "Display/FromStr, serde or other serialization-framework integration, numeric repr/discriminants, persisted or wire encoding, schema fields, configuration formats, or migrations.",
+    "API version negotiation, feature flags, deprecation support windows, breaking-change policy execution, stable public error taxonomy, transport status mapping, or domain records.",
+    "Any third-party runtime, build, or test dependency."
+  ],
+  "state": "GRAIN",
+  "title": "Add compatibility class primitive"
+}
