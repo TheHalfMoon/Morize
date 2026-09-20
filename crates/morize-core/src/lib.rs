@@ -1,8 +1,10 @@
 #![forbid(unsafe_code)]
 //! Deterministic core contracts for Morize.
 
+pub mod bounded;
 pub mod identity;
 
+pub use bounded::{BoundedUtf8, Utf8BoundsError};
 pub use identity::{
     BranchId, ConnectorBindingId, ContextBundleId, DecisionId, EvidenceId, ID_BYTE_LENGTH,
     ID_TEXT_LENGTH, IdParseError, MemoryId, MemoryVersionId, MutationId, ObservationId,
