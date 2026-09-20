@@ -1,0 +1,37 @@
+[package]
+name = "morize-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+license = "Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "=0.4.13"
+morize-core = { path = "../crates/morize-core" }
+
+[[bin]]
+name = "durable_id"
+path = "fuzz_targets/durable_id.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "bounded_utf8"
+path = "fuzz_targets/bounded_utf8.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "bounded_vec"
+path = "fuzz_targets/bounded_vec.rs"
+test = false
+doc = false
+bench = false
+
+[workspace]
+members = ["."]
