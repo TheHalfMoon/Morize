@@ -1,0 +1,37 @@
+{
+  "acceptance": [],
+  "change_surface": [],
+  "children": [],
+  "context": {},
+  "dependencies": [],
+  "evidence": {},
+  "id": "SG-000021",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free non-exhaustive in-memory MutationTerminalState enum, focused tests, and morize-core re-exports. No mutation record, transition engine, dependent-mutation blocking, reconciliation execution, retry/idempotency policy, persistence, serialization, transport mapping, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head, exact four-state baseline fidelity, non-exhaustive compatibility choice, UNKNOWN_OUTCOME non-success semantics, absence of transition/reconciliation/persistence behavior, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the mutation-terminal-state implementation commits; no persisted mutation record, transition engine, retry state, reconciliation state, transport contract, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
+        }
+      ]
+    }
+  },
+  "method": "quick",
+  "outcome": "morize-core exposes one dependency-free non-exhaustive MutationTerminalState enum covering the four planned terminal states already fixed by docs/DATA_MODEL.md, without defining mutation records, transition rules, dependent-mutation blocking, reconciliation execution, retry/idempotency policy, serialization, persistence, or transport semantics.",
+  "parent_id": "SG-000010",
+  "rationale": "docs/DATA_MODEL.md fixes the planned mutation terminal states as COMMITTED, REJECTED, FAILED, and UNKNOWN_OUTCOME and states that unknown outcome is not success. This Grain adds only the typed terminal-state distinction so later mutation/reconciliation Grains can build on a bounded vocabulary without inventing transition, retry, persistence, or orchestration behavior.",
+  "risk": {},
+  "schema_version": 1,
+  "scope_in": [],
+  "scope_out": [],
+  "state": "DRAFT",
+  "title": "Add baseline mutation terminal state primitive"
+}
