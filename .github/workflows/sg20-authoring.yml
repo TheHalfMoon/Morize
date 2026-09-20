@@ -189,52 +189,52 @@ jobs:
           spec=Path('.specgrain/specs/SG-000020.json').read_text()
           head=os.environ['PLAN_HEAD']; base=os.environ['BASE_MAIN']
           prompt=f"""Independent semantic PLANNING review of Morize SG-000020. Return final structured review only; do not expose chain-of-thought or tool traces.
-
-REVIEW_HEAD={head}
-BASE_MAIN={base}
-SPEC_REVISION={os.environ['SPEC_REVISION']}
-DIFF_SHA256={os.environ['DIFF_SHA256']}
-FILE_LIST_SHA256={os.environ['FILE_LIST_SHA256']}
-DIFFCIPLINE_SHA256={os.environ['DIFFCIPLINE_SHA256']}
-Alibaba accounting only: total=2 reviewable=2 excluded=0 rule-accounted=2/2.
-Exact changed paths: .specgrain/specs/SG-000010.json and .specgrain/specs/SG-000020.json.
-SpecGrain check valid=true issues=[]; SG-000020 eligible=true.
-SG-000011 prerequisite: verified=true, record=sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9.
-SG-000019 prerequisite: verified=true, record=sha256:5f162f7283d2dd29ab35c8de2c79fd27af10b943fe8ba7e1c8f3e81ee2261e1f.
-
-Repository planning authority:
-- docs/DATA_MODEL.md fixes MemoryRelation edge_class = explicit | inferred.
-- MZ-PROV-005 requires inferred graph relationships to identify their inference/evidence class.
-- SG-000019 intentionally excluded edge class, so this Grain fills exactly that deferred primitive.
-- This Grain must not define relation endpoints, inference thresholds, evidence sufficiency, graph behavior, authority, serialization, or persistence.
-
-Review goals:
-1. Exact Explicit/Inferred fidelity with no third current edge class.
-2. Closed-vocabulary choice is coherent with edge_class = explicit | inferred.
-3. Both variants fieldless and descriptive only.
-4. Inferred must not imply evidence sufficiency, truth, authority, authorization, graph mutation, or memory mutation.
-5. No endpoints, evidence refs, engine identity, confidence, thresholds, graph traversal/mutation, parser, serialization, numeric, wire, or persistence semantics.
-6. Derives limited to Clone, Copy, Debug, PartialEq, Eq, Hash; no ordering.
-7. Exact two-file planning scope, rollback, both proof prerequisites, and acceptance/evidence coherence.
-8. No third-party implementation dependency.
-
-SG-000020 Grain:
-{spec}
-
-Return exactly:
-REVIEW_HEAD
-{head}
-REVIEW_KIND
-SG-000020_PLANNING
-CRITICAL = NONE
-HIGH = NONE
-MEDIUM = NONE
-LOW = NONE
-FINDINGS
-- NONE
-FINAL_GATE = PASS
-Replace NONE/PASS only when concise material findings require it. Any different REVIEW_HEAD invalidates the review.
-"""
+          
+          REVIEW_HEAD={head}
+          BASE_MAIN={base}
+          SPEC_REVISION={os.environ['SPEC_REVISION']}
+          DIFF_SHA256={os.environ['DIFF_SHA256']}
+          FILE_LIST_SHA256={os.environ['FILE_LIST_SHA256']}
+          DIFFCIPLINE_SHA256={os.environ['DIFFCIPLINE_SHA256']}
+          Alibaba accounting only: total=2 reviewable=2 excluded=0 rule-accounted=2/2.
+          Exact changed paths: .specgrain/specs/SG-000010.json and .specgrain/specs/SG-000020.json.
+          SpecGrain check valid=true issues=[]; SG-000020 eligible=true.
+          SG-000011 prerequisite: verified=true, record=sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9.
+          SG-000019 prerequisite: verified=true, record=sha256:5f162f7283d2dd29ab35c8de2c79fd27af10b943fe8ba7e1c8f3e81ee2261e1f.
+          
+          Repository planning authority:
+          - docs/DATA_MODEL.md fixes MemoryRelation edge_class = explicit | inferred.
+          - MZ-PROV-005 requires inferred graph relationships to identify their inference/evidence class.
+          - SG-000019 intentionally excluded edge class, so this Grain fills exactly that deferred primitive.
+          - This Grain must not define relation endpoints, inference thresholds, evidence sufficiency, graph behavior, authority, serialization, or persistence.
+          
+          Review goals:
+          1. Exact Explicit/Inferred fidelity with no third current edge class.
+          2. Closed-vocabulary choice is coherent with edge_class = explicit | inferred.
+          3. Both variants fieldless and descriptive only.
+          4. Inferred must not imply evidence sufficiency, truth, authority, authorization, graph mutation, or memory mutation.
+          5. No endpoints, evidence refs, engine identity, confidence, thresholds, graph traversal/mutation, parser, serialization, numeric, wire, or persistence semantics.
+          6. Derives limited to Clone, Copy, Debug, PartialEq, Eq, Hash; no ordering.
+          7. Exact two-file planning scope, rollback, both proof prerequisites, and acceptance/evidence coherence.
+          8. No third-party implementation dependency.
+          
+          SG-000020 Grain:
+          {spec}
+          
+          Return exactly:
+          REVIEW_HEAD
+          {head}
+          REVIEW_KIND
+          SG-000020_PLANNING
+          CRITICAL = NONE
+          HIGH = NONE
+          MEDIUM = NONE
+          LOW = NONE
+          FINDINGS
+          - NONE
+          FINAL_GATE = PASS
+          Replace NONE/PASS only when concise material findings require it. Any different REVIEW_HEAD invalidates the review.
+          """
           Path('/tmp/sg20-plan-north-prompt.txt').write_text(prompt)
           raw=Client('CohereLabs/North-Mini-Code-1.0',verbose=False).predict(prompt,'Rust','[]','{}',api_name='/chat')
           obj=json.loads(raw) if isinstance(raw,str) else raw
