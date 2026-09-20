@@ -243,9 +243,10 @@ mod tests {
                 let text = id.to_string();
 
                 assert_eq!(text.len(), ID_TEXT_LENGTH);
-                assert!(text
-                    .bytes()
-                    .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte)));
+                assert!(
+                    text.bytes()
+                        .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+                );
                 assert_eq!(text, text.to_ascii_lowercase());
 
                 let parsed: $type = text.parse().expect("canonical matrix value must parse");
@@ -318,5 +319,4 @@ mod tests {
         assert_identifier_parser_rejection_matrix!(ContextBundleId);
         assert_identifier_parser_rejection_matrix!(ConnectorBindingId);
     }
-
 }

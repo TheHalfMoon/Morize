@@ -289,5 +289,4 @@ mod tests {
         assert_utf8_property_matrix::<8>();
         assert_utf8_property_matrix::<16>();
     }
-
 }

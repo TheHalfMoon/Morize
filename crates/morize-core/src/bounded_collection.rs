@@ -402,5 +402,4 @@ mod tests {
         assert_collection_property_matrix::<4>();
         assert_collection_property_matrix::<8>();
     }
-
 }
