@@ -7,6 +7,7 @@ pub mod compatibility;
 pub mod decision;
 pub mod error;
 pub mod identity;
+pub mod mutation;
 pub mod relation;
 pub mod scope;
 
@@ -23,5 +24,6 @@ pub use identity::{
     PolicyRevisionId, PrincipalId, ProjectionGenerationId, PropositionId, RelationId, ScopeId,
     SnapshotId, SourceId, VaultId,
 };
+pub use mutation::MutationTerminalState;
 pub use relation::{MemoryRelationType, RelationEdgeClass};
 pub use scope::ScopeKind;
