@@ -146,17 +146,19 @@ jobs:
           EOF
 
           export RUSTUP_TOOLCHAIN="$RUST_NIGHTLY"
-          (
-            cd fuzz-toolchain-probe
-            cargo fuzz list | tee /tmp/sg24-fuzz-list.txt
-            grep -qx "identity_parser_probe" /tmp/sg24-fuzz-list.txt
-            cargo fuzz build identity_parser_probe
-            mkdir -p /tmp/sg24-probe-corpus
-            printf '%064d' 0 > /tmp/sg24-probe-corpus/valid-zero
-            printf 'ABCDEF' > /tmp/sg24-probe-corpus/noncanonical
-            printf 'short' > /tmp/sg24-probe-corpus/short
-            cargo fuzz run identity_parser_probe /tmp/sg24-probe-corpus --               -runs=2000               -seed=424242               -timeout=5               -rss_limit_mb=1024               -max_len=128
-          )
+          cargo fuzz list --fuzz-dir fuzz-toolchain-probe | tee /tmp/sg24-fuzz-list.txt
+          grep -qx "identity_parser_probe" /tmp/sg24-fuzz-list.txt
+          cargo fuzz build --fuzz-dir fuzz-toolchain-probe identity_parser_probe
+          mkdir -p /tmp/sg24-probe-corpus
+          printf '%064d' 0 > /tmp/sg24-probe-corpus/valid-zero
+          printf 'ABCDEF' > /tmp/sg24-probe-corpus/noncanonical
+          printf 'short' > /tmp/sg24-probe-corpus/short
+          cargo fuzz run --fuzz-dir fuzz-toolchain-probe identity_parser_probe /tmp/sg24-probe-corpus -- \
+            -runs=2000 \
+            -seed=424242 \
+            -timeout=5 \
+            -rss_limit_mb=1024 \
+            -max_len=128
           unset RUSTUP_TOOLCHAIN
           rm -rf fuzz-toolchain-probe
           test -z "$(git status --porcelain)"
