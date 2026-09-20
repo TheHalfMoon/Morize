@@ -101,6 +101,6 @@
     "Display/FromStr, parsers, RFC3339/ISO-8601 contracts, serde or other serialization integration, persisted/wire encoding, configuration formats, migrations, storage, APIs, MCP, retrieval, or domain-record integration.",
     "Any third-party runtime, build, or test dependency."
   ],
-  "state": "REFINING",
+  "state": "GRAIN",
   "title": "Add normalized timestamp primitive"
 }
