@@ -23,5 +23,5 @@ pub use identity::{
     PolicyRevisionId, PrincipalId, ProjectionGenerationId, PropositionId, RelationId, ScopeId,
     SnapshotId, SourceId, VaultId,
 };
-pub use relation::MemoryRelationType;
+pub use relation::{MemoryRelationType, RelationEdgeClass};
 pub use scope::ScopeKind;

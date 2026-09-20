@@ -1,9 +1,10 @@
 //! Baseline memory-relation classifications for deterministic Morize core contracts.
 //!
-//! This module defines only the initial in-memory relation vocabulary fixed by
-//! docs/DATA_MODEL.md. It does not define relation endpoints, explicit/inferred
-//! edge class, evidence sufficiency, truth, authority, graph traversal or
-//! mutation, memory mutation, serialization, persistence, or transport behavior.
+//! This module defines only the initial in-memory relation vocabulary and
+//! explicit/inferred edge-class distinction fixed by docs/DATA_MODEL.md. It does
+//! not define relation endpoints, evidence sufficiency, inference thresholds,
+//! truth, authority, graph traversal or mutation, memory mutation, serialization,
+//! persistence, or transport behavior.
 
 /// The initial memory-relation type vocabulary.
 ///
@@ -39,9 +40,22 @@ pub enum MemoryRelationType {
     SourceOf,
 }
 
+/// Whether a memory relation was recorded explicitly or inferred.
+///
+/// Edge class is descriptive provenance classification only. In particular,
+/// `Inferred` does not establish evidence sufficiency, truth, authority,
+/// authorization, or permission to mutate memory or graph state.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum RelationEdgeClass {
+    /// The relation was recorded explicitly.
+    Explicit,
+    /// The relation was inferred.
+    Inferred,
+}
+
 #[cfg(test)]
 mod tests {
-    use super::MemoryRelationType;
+    use super::{MemoryRelationType, RelationEdgeClass};
     use std::collections::HashSet;
 
     const ALL_RELATION_TYPES: [MemoryRelationType; 11] = [
@@ -73,6 +87,24 @@ mod tests {
     #[test]
     fn memory_relation_type_is_copy() {
         let original = MemoryRelationType::RelatedTo;
+        let copied = original;
+
+        assert_eq!(original, copied);
+    }
+
+    #[test]
+    fn relation_edge_classes_are_distinct_hashable_values() {
+        let classes = [RelationEdgeClass::Explicit, RelationEdgeClass::Inferred];
+
+        assert_ne!(classes[0], classes[1]);
+
+        let unique: HashSet<_> = classes.into_iter().collect();
+        assert_eq!(unique.len(), 2);
+    }
+
+    #[test]
+    fn relation_edge_class_is_copy() {
+        let original = RelationEdgeClass::Inferred;
         let copied = original;
 
         assert_eq!(original, copied);
