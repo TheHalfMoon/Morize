@@ -4,6 +4,7 @@
 pub mod bounded;
 pub mod bounded_collection;
 pub mod compatibility;
+pub mod decision;
 pub mod error;
 pub mod identity;
 pub mod scope;
@@ -13,6 +14,7 @@ pub use bounded_collection::{
     BoundedVec, BoundedVecBuildError, BoundedVecPushError, CollectionBoundsError,
 };
 pub use compatibility::CompatibilityClass;
+pub use decision::MemoryAction;
 pub use error::ErrorCategory;
 pub use identity::{
     BranchId, ConnectorBindingId, ContextBundleId, DecisionId, EvidenceId, ID_BYTE_LENGTH,
