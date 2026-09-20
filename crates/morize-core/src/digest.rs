@@ -66,11 +66,10 @@ fn parse_bytes(input: &str) -> Result<[u8; SHA256_DIGEST_BYTE_LENGTH], DigestPar
     while index < SHA256_DIGEST_BYTE_LENGTH {
         let high_index = index * 2;
         let low_index = high_index + 1;
-        let high =
-            decode_lower_hex(text[high_index]).ok_or(DigestParseError::NonCanonicalHex {
-                index: high_index,
-                byte: text[high_index],
-            })?;
+        let high = decode_lower_hex(text[high_index]).ok_or(DigestParseError::NonCanonicalHex {
+            index: high_index,
+            byte: text[high_index],
+        })?;
         let low = decode_lower_hex(text[low_index]).ok_or(DigestParseError::NonCanonicalHex {
             index: low_index,
             byte: text[low_index],
@@ -82,10 +81,7 @@ fn parse_bytes(input: &str) -> Result<[u8; SHA256_DIGEST_BYTE_LENGTH], DigestPar
     Ok(bytes)
 }
 
-fn write_hex(
-    bytes: &[u8; SHA256_DIGEST_BYTE_LENGTH],
-    f: &mut fmt::Formatter<'_>,
-) -> fmt::Result {
+fn write_hex(bytes: &[u8; SHA256_DIGEST_BYTE_LENGTH], f: &mut fmt::Formatter<'_>) -> fmt::Result {
     for byte in bytes {
         write!(f, "{byte:02x}")?;
     }
