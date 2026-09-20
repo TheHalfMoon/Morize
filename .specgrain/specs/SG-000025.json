@@ -107,6 +107,6 @@
     "Serde or other serialization-framework integration, persisted/wire schema, vault format, migration, configuration, APIs, MCP, retrieval, connectors, or domain memory records.",
     "Any runtime, build, dev, or test dependency."
   ],
-  "state": "SHAPED",
+  "state": "REFINING",
   "title": "Add SHA-256 content digest value primitive"
 }
