@@ -1,0 +1,49 @@
+{
+  "acceptance": [],
+  "change_surface": [],
+  "children": [],
+  "context": {},
+  "dependencies": [],
+  "evidence": {},
+  "id": "SG-000022",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "control": "Implementation is test-only inside the existing #[cfg(test)] modules of identity.rs, bounded.rs, and bounded_collection.rs. Production items before those test modules must remain byte-for-byte unchanged. No new API, runtime behavior, random generator, fuzz engine, dependency, serialization, persistence, or domain semantics are authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head for property-matrix fidelity, deterministic bounded execution, exact prerequisite identity, preservation of production code, absence of dependencies/randomness/fuzz-engine claims, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the test-only SG-000022 implementation commit. Production behavior and persisted/user data are unaffected because this Grain changes only existing test modules."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "026b2e5849759915975f8ae12b111d1185fda89f",
+          "record_digest": "sha256:13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079",
+          "spec_id": "SG-000012",
+          "spec_revision": "sha256:256a8c55a843f00798f3e8e3f0807ee38f676a7f50c9b9380b9d26167f4f7aa7"
+        },
+        {
+          "implementation_revision": "9db66a7b4225cd5d3eff9a65d910038352d29a59",
+          "record_digest": "sha256:ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c",
+          "spec_id": "SG-000013",
+          "spec_revision": "sha256:adf07a2ef558c801fcacbb3b1bb7ab627bdc0480fdec65e7fc2d1a2e86dafe8d"
+        },
+        {
+          "implementation_revision": "fac420fd87f86b97a5ee97397e0775d00795aaa3",
+          "record_digest": "sha256:95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977",
+          "spec_id": "SG-000014",
+          "spec_revision": "sha256:06df9fd48a398fb1b1af3e4a6c821efa9a0508d7e9e3a795c21edadf1045ef1e"
+        }
+      ]
+    }
+  },
+  "method": "quick",
+  "outcome": "morize-core strengthens the already-implemented durable-ID parser and bounded UTF-8/ordered-collection invariants with dependency-free deterministic property-style test matrices, without changing production API or behavior and without introducing a fuzz engine, randomness, serialization, persistence, or new dependencies.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 requires property and fuzz tests for parsers/invariants. SG-000012, SG-000013, and SG-000014 already define the deterministic ID, bounded UTF-8, and bounded ordered-collection contracts. This Grain adds a reproducible property-style matrix over those existing contracts as the smallest safe next verification slice while leaving a true fuzz harness to a later dedicated Grain.",
+  "risk": {},
+  "schema_version": 1,
+  "scope_in": [],
+  "scope_out": [],
+  "state": "DRAFT",
+  "title": "Add deterministic core property matrices"
+}
