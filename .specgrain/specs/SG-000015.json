@@ -97,6 +97,6 @@
     "RFC3339/ISO-8601 or other text parsing/formatting, timezone/calendar conversion, daylight-saving behavior, explicit leap-second representation, locale behavior, or human display policy.",
     "Serde or other serialization-framework integration, persisted/wire schemas, configuration formats, migrations, database mapping, domain record timestamps, policy, storage, retrieval, MCP, models, or any third-party dependency."
   ],
-  "state": "REFINING",
+  "state": "GRAIN",
   "title": "Add normalized Unix timestamp primitive"
 }
