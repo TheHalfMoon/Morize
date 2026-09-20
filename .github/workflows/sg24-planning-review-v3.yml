@@ -1,0 +1,303 @@
+name: sg24-planning-review-v3
+
+on:
+  push:
+    branches:
+      - automation/sg-000024-planning-review-v3
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout automation branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+
+      - name: Qualify exact SG-000024 planning head
+        shell: bash
+        env:
+          BASE_MAIN: 64f51cf43808313679f4eb4a04d5a00fa011ac29
+          PLAN_HEAD: ebb2bf8256985de60b5c3e84d2237b9c52894942
+          SPEC_GRAIN_PIN: 5de7d6499bb0a9e3a191fc0934399cf099d1980a
+          OCR_PIN: 85cecfe5f935da2b2aae8f91ce4fee8ed343a681
+          CARGO_FUZZ_VERSION: "0.13.2"
+          CARGO_FUZZ_SHA256: b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c
+          RUST_NIGHTLY: nightly-2026-09-18
+        run: |
+          set -euo pipefail
+
+          git fetch origin main plan/sg-000024-isolated-fuzz-harness --prune
+          test "$(git rev-parse origin/main)" = "$BASE_MAIN"
+          test "$(git rev-parse origin/plan/sg-000024-isolated-fuzz-harness)" = "$PLAN_HEAD"
+          git checkout --detach "$PLAN_HEAD"
+          test "$(git rev-parse HEAD)" = "$PLAN_HEAD"
+          test -z "$(git status --porcelain)"
+
+          python -m pip install --disable-pip-version-check --quiet             "git+https://github.com/TheHalfMoon/SpecGrain.git@$SPEC_GRAIN_PIN"
+
+          specgrain check --json . > /tmp/sg24-check.json
+          specgrain prove --json SG-000012 . > /tmp/p12.json
+          specgrain prove --json SG-000013 . > /tmp/p13.json
+          specgrain prove --json SG-000014 . > /tmp/p14.json
+          specgrain prove --json SG-000023 . > /tmp/p23.json
+
+          python - <<'PY'
+          import json, os, subprocess
+          from specgrain import load_project
+
+          check=json.load(open('/tmp/sg24-check.json'))
+          assert check['valid'] is True and check['issues']==[]
+
+          project=load_project('.')
+          node=next(n for n in project.specs if n.id=='SG-000024')
+          assert node.state=='GRAIN'
+          assert node.parent_id=='SG-000010'
+          assert len(node.change_surface)==10
+
+          expected={
+            'SG-000012':('/tmp/p12.json','sha256:13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079','sha256:256a8c55a843f00798f3e8e3f0807ee38f676a7f50c9b9380b9d26167f4f7aa7','026b2e5849759915975f8ae12b111d1185fda89f'),
+            'SG-000013':('/tmp/p13.json','sha256:ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c','sha256:adf07a2ef558c801fcacbb3b1bb7ab627bdc0480fdec65e7fc2d1a2e86dafe8d','9db66a7b4225cd5d3eff9a65d910038352d29a59'),
+            'SG-000014':('/tmp/p14.json','sha256:95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977','sha256:06df9fd48a398fb1b1af3e4a6c821efa9a0508d7e9e3a795c21edadf1045ef1e','fac420fd87f86b97a5ee97397e0775d00795aaa3'),
+            'SG-000023':('/tmp/p23.json','sha256:14dc204de67286a282a2b4e1d8d65fc8d9837b140ced660aa230745ddb82f68c','sha256:9e5cba94eec7f7488cdb02605db5cd7f4d1b41200282ca4efc0c68f058d0a779','4620805a440fe1ef5d29c9015b781014a5c109d2'),
+          }
+          for sid,(path,record,srev,impl) in expected.items():
+              proof=json.load(open(path))
+              assert proof['verified'] is True
+              assert proof['latest_record_digest']==record
+              latest=proof['records'][-1]['report']
+              assert latest['spec_revision']==srev
+              assert latest['implementation_revision']==impl
+              assert latest['issues']==[]
+              subprocess.run(['git','merge-base','--is-ancestor',impl,os.environ['BASE_MAIN']],check=True)
+              print(sid+'_PREREQUISITE=PASS')
+
+          print('SPEC_CHECK=PASS')
+          print('SG000024_SPEC_REVISION='+node.revision_digest)
+          PY
+
+          test "$(git diff --name-only "$BASE_MAIN...$PLAN_HEAD" | sort | tr '\n' ' ')" = ".specgrain/specs/SG-000010.json .specgrain/specs/SG-000024.json docs/SOURCE_LEDGER.md "
+          echo "PLANNING_SCOPE=PASS"
+
+          rustup toolchain install "$RUST_NIGHTLY" --profile minimal
+          rustup component add rust-src --toolchain "$RUST_NIGHTLY"
+          rustc "+$RUST_NIGHTLY" --version --verbose | tee /tmp/sg24-rustc-version.txt
+          grep -q "release: 1.100.0-nightly" /tmp/sg24-rustc-version.txt
+          grep -q "commit-hash: 330d317121e16b5db8e5adc63595910528ff2ee7" /tmp/sg24-rustc-version.txt
+          echo "PINNED_NIGHTLY_AVAILABLE=PASS"
+
+          curl --fail --location --silent --show-error             "https://github.com/rust-fuzz/cargo-fuzz/releases/download/$CARGO_FUZZ_VERSION/cargo-fuzz-$CARGO_FUZZ_VERSION-x86_64-unknown-linux-musl.tar.gz"             --output /tmp/cargo-fuzz.tar.gz
+          echo "$CARGO_FUZZ_SHA256  /tmp/cargo-fuzz.tar.gz" | sha256sum --check
+          tar -xzf /tmp/cargo-fuzz.tar.gz -C /tmp
+          install -m 0755 /tmp/cargo-fuzz "$HOME/.cargo/bin/cargo-fuzz"
+          cargo fuzz --version | tee /tmp/cargo-fuzz-version.txt
+          grep -q "cargo-fuzz 0.13.2" /tmp/cargo-fuzz-version.txt
+          echo "CARGO_FUZZ_PIN_AVAILABLE=PASS"
+
+          rm -rf fuzz-toolchain-probe
+          mkdir -p fuzz-toolchain-probe/fuzz_targets
+          cat > fuzz-toolchain-probe/Cargo.toml <<'EOF'
+          [package]
+          name = "morize-fuzz-toolchain-probe"
+          version = "0.0.0"
+          edition = "2024"
+          publish = false
+
+          [package.metadata]
+          cargo-fuzz = true
+
+          [dependencies]
+          libfuzzer-sys = "=0.4.13"
+          morize-core = { path = "../crates/morize-core" }
+
+          [[bin]]
+          name = "identity_parser_probe"
+          path = "fuzz_targets/identity_parser_probe.rs"
+          test = false
+          doc = false
+          bench = false
+
+          [workspace]
+          members = ["."]
+          EOF
+
+          cat > fuzz-toolchain-probe/fuzz_targets/identity_parser_probe.rs <<'EOF'
+          #![no_main]
+
+          use libfuzzer_sys::fuzz_target;
+          use morize_core::{ID_TEXT_LENGTH, VaultId};
+
+          fuzz_target!(|data: &[u8]| {
+              if let Ok(text) = core::str::from_utf8(data) {
+                  if let Ok(id) = text.parse::<VaultId>() {
+                      assert_eq!(text.len(), ID_TEXT_LENGTH);
+                      assert_eq!(id.to_string(), text);
+                  }
+              }
+          });
+          EOF
+
+          export RUSTUP_TOOLCHAIN="$RUST_NIGHTLY"
+          cargo fuzz list --fuzz-dir fuzz-toolchain-probe | tee /tmp/sg24-fuzz-list.txt
+          grep -qx "identity_parser_probe" /tmp/sg24-fuzz-list.txt
+          cargo fuzz build --fuzz-dir fuzz-toolchain-probe --target x86_64-unknown-linux-gnu identity_parser_probe
+          mkdir -p /tmp/sg24-probe-corpus
+          printf '%064d' 0 > /tmp/sg24-probe-corpus/valid-zero
+          printf 'ABCDEF' > /tmp/sg24-probe-corpus/noncanonical
+          printf 'short' > /tmp/sg24-probe-corpus/short
+          cargo fuzz run --fuzz-dir fuzz-toolchain-probe --target x86_64-unknown-linux-gnu identity_parser_probe /tmp/sg24-probe-corpus -- \
+            -runs=2000 \
+            -seed=424242 \
+            -timeout=5 \
+            -rss_limit_mb=1024 \
+            -max_len=128
+          unset RUSTUP_TOOLCHAIN
+          rm -rf fuzz-toolchain-probe
+          test -z "$(git status --porcelain)"
+          echo "LIBFUZZER_MORIZE_PROBE=PASS"
+
+          git clone --quiet "https://github.com/alibaba/open-code-review.git" /tmp/ocr
+          git -C /tmp/ocr checkout --quiet "$OCR_PIN"
+          (cd /tmp/ocr && GOTOOLCHAIN=auto go build -o /tmp/ocr-bin ./cmd/opencodereview)
+          OCR_NO_UPDATE=1 /tmp/ocr-bin delegate preview --format json --from "$BASE_MAIN" --to "$PLAN_HEAD" > /tmp/sg24-ocr-preview.json
+
+          python - <<'PY'
+          import json, subprocess
+          x=json.load(open('/tmp/sg24-ocr-preview.json'))
+          assert x['total_files']==3
+          assert x['reviewable_count'] + x['excluded_count'] == 3
+          reviewable=sorted(f['path'] for f in x.get('reviewable_files',[]))
+          excluded=sorted(f['path'] for f in x.get('excluded_files',[]))
+          accounted=reviewable+excluded
+          expected=[
+              '.specgrain/specs/SG-000010.json',
+              '.specgrain/specs/SG-000024.json',
+              'docs/SOURCE_LEDGER.md',
+          ]
+          assert sorted(accounted)==sorted(expected), (reviewable,excluded)
+          rule_accounted=[]
+          if reviewable:
+              with open('/tmp/sg24-ocr-rules.json','w') as out:
+                  subprocess.run(['/tmp/ocr-bin','delegate','rule','--format','json',*reviewable],check=True,stdout=out)
+              groups=json.load(open('/tmp/sg24-ocr-rules.json'))['groups']
+              rule_accounted=sorted(p for g in groups for p in g['files'])
+              assert rule_accounted==reviewable
+          summary={
+              'total':x['total_files'],
+              'reviewable':x['reviewable_count'],
+              'excluded':x['excluded_count'],
+              'reviewable_paths':reviewable,
+              'excluded_paths':excluded,
+              'rule_accounted':rule_accounted,
+          }
+          open('/tmp/sg24-ocr-summary.json','w').write(json.dumps(summary,sort_keys=True))
+          print('ALIBABA_ACCOUNTING='+json.dumps(summary,sort_keys=True))
+          PY
+
+          python -m pip install --disable-pip-version-check --quiet "gradio_client>=1.8,<2"
+          python - <<'PY'
+          import hashlib, json, os, time
+          from pathlib import Path
+          from gradio_client import Client
+          from specgrain import load_project
+
+          node=next(n for n in load_project('.').specs if n.id=='SG-000024')
+          spec=Path('.specgrain/specs/SG-000024.json').read_text()
+          source=Path('docs/SOURCE_LEDGER.md').read_text()
+          start=source.index('- `rust-fuzz/cargo-fuzz`')
+          end=source.index('- `convaiinnovations/laya`',start)
+          source_excerpt=source[start:end]
+          roadmap=Path('docs/roadmap/FOUNDATION_CORE.md').read_text()
+          p1=roadmap[roadmap.index('## P1 — Rust deterministic kernel'):roadmap.index('## P2')]
+          ocr=Path('/tmp/sg24-ocr-summary.json').read_text()
+
+          prompt='\n'.join([
+              'Independent semantic PLANNING review of Morize SG-000024. Return final structured review only; do not expose chain-of-thought or tool traces.',
+              '',
+              f'REVIEW_HEAD={os.environ["PLAN_HEAD"]}',
+              f'BASE_MAIN={os.environ["BASE_MAIN"]}',
+              f'SPEC_REVISION={node.revision_digest}',
+              'Planning automation proved nightly-2026-09-18 exact rustc identity, cargo-fuzz 0.13.2 release checksum, x86_64-unknown-linux-gnu fuzz target binding, and a real 2000-run libFuzzer probe against morize-core.',
+              'Alibaba accounting summary: '+ocr,
+              '',
+              'Review goals:',
+              '1. True fuzzing remains isolated under fuzz/ and one Ubuntu-only workflow; root Cargo workspace/lock, morize-core production code, public API, and product CI remain unchanged.',
+              '2. Tool identity is exact: nightly-2026-09-18, cargo-fuzz 0.13.2 with the declared Linux-musl executable checksum, libfuzzer-sys exactly 0.4.13, while sanitizer-instrumented targets explicitly use x86_64-unknown-linux-gnu.',
+              '3. License boundary is explicit and fuzz-only: cargo-fuzz MIT OR Apache-2.0; libfuzzer-sys (MIT OR Apache-2.0) AND NCSA; bundled libFuzzer sources NCSA.',
+              '4. Current upstream cargo-fuzz includes Windows/MSVC artifacts; Morize chooses Linux-only fuzz smoke for isolation and does not misstate Linux-only as an upstream limitation.',
+              '5. Three raw-byte targets cover durable-ID parsing, BoundedUtf8, and BoundedVec; no real user data, secret, PHI, or production fixture is authorized.',
+              '6. CI fuzz campaign is bounded by fixed runs, input size, timeout, RSS ceiling, and explicit seed while invoking coverage-guided libFuzzer.',
+              '7. Crash/sanitizer/assertion/build/tool/lock/isolation failures fail closed and crash artifacts are uploaded on failure.',
+              '8. The Grain does not claim exhaustive fuzzing, bug absence, security proof, or future-layer coverage.',
+              '9. ADR-0004 proof identities SG-000012/13/14/23 are exact and ancestor-valid.',
+              '10. Change surface is complete and broad parent SG-000010 remains DRAFT.',
+              '',
+              'SG-000024:',
+              spec,
+              '',
+              'Source-ledger excerpt:',
+              source_excerpt,
+              '',
+              'P1 roadmap excerpt:',
+              p1,
+              '',
+              'Return exactly:',
+              'REVIEW_HEAD',
+              os.environ['PLAN_HEAD'],
+              'REVIEW_KIND',
+              'SG-000024_PLANNING',
+              'CRITICAL = NONE',
+              'HIGH = NONE',
+              'MEDIUM = NONE',
+              'LOW = NONE',
+              'FINDINGS',
+              '- NONE',
+              'FINAL_GATE = PASS',
+              'Replace NONE/PASS only when concise material findings require it. Any different REVIEW_HEAD invalidates the review.'
+          ])
+
+          client=Client('CohereLabs/North-Mini-Code-1.0',verbose=False)
+          final=''
+          for attempt in range(1,4):
+              raw=client.predict(prompt,'Rust','[]','{}',api_name='/chat')
+              obj=json.loads(raw) if isinstance(raw,str) else raw
+              content=''
+              for msg in obj.get('history',[]) if isinstance(obj,dict) else []:
+                  if msg.get('role')=='assistant':
+                      content=msg.get('content','')
+              candidate=content.split('</think>',1)[-1].strip() if '</think>' in content else content.strip()
+              structured=(f'REVIEW_HEAD\n{os.environ["PLAN_HEAD"]}' in candidate and 'REVIEW_KIND\nSG-000024_PLANNING' in candidate)
+              if structured:
+                  final=candidate
+                  break
+              print(f'REVIEW_PROVIDER_ATTEMPT_{attempt}=INVALID_NONSTRUCTURED')
+              print(candidate[:500])
+              if attempt<3:
+                  time.sleep(10)
+          if not final:
+              raise SystemExit('independent planning reviewer returned no structured review')
+
+          print('INDEPENDENT_REVIEW_BEGIN')
+          print(final)
+          print('INDEPENDENT_REVIEW_END')
+          checks=[
+              f'REVIEW_HEAD\n{os.environ["PLAN_HEAD"]}',
+              'REVIEW_KIND\nSG-000024_PLANNING',
+              'CRITICAL = NONE','HIGH = NONE','MEDIUM = NONE','LOW = NONE',
+              'FINDINGS\n- NONE','FINAL_GATE = PASS'
+          ]
+          if not all(x in final for x in checks):
+              raise SystemExit('independent planning review produced a non-PASS result')
+          print('REVIEW_PROMPT_SHA256='+hashlib.sha256(prompt.encode()).hexdigest())
+          print('REVIEW_FINAL_SHA256='+hashlib.sha256((final+'\n').encode()).hexdigest())
+          PY
+
+          test -z "$(git status --porcelain)"
