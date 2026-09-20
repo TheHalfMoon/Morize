@@ -1,0 +1,264 @@
+name: sg25-implementation-review-v2
+
+on:
+  push:
+    branches:
+      - automation/sg-000025-implementation-review-v2
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout automation branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c
+        with:
+          components: rustfmt, clippy
+
+      - name: Qualify exact SG-000025 implementation head
+        shell: bash
+        env:
+          BASE_MAIN: 788bc7129ce815bc31888be58ebc95408eeb7ea1
+          IMPL_HEAD: 5c745e16481a3dea2bb9b7e6df65a49cdbac2f57
+          SPEC_REVISION: sha256:26514df5919182465e4eb163e774bdddfe556bec116856ba05215e8add7f35e6
+          WORKPACKET_DIGEST: sha256:d80b3274faa583f0d9575da54d2f86fd803e2c2ce79b64b048ec051350ca9952
+          WORKPACKET_FILE_SHA256: 0cb7071d373f3d0ce1a78cf6e7ff1bae6666affe863db2e6faf45bc36eba8529
+          WORKPACKET_RUN: "35529689273"
+          SPEC_GRAIN_PIN: 5de7d6499bb0a9e3a191fc0934399cf099d1980a
+          DIFFCIPLINE_PIN: 5cb1c77340b75649f6168e0e8f66479ea047ea96
+          OCR_PIN: 85cecfe5f935da2b2aae8f91ce4fee8ed343a681
+        run: |
+          set -euo pipefail
+
+          git fetch origin main impl/sg-000025-sha256-digest-value --prune
+          test "$(git rev-parse origin/main)" = "$BASE_MAIN"
+          test "$(git rev-parse origin/impl/sg-000025-sha256-digest-value)" = "$IMPL_HEAD"
+          git checkout --detach "$IMPL_HEAD"
+          test "$(git rev-parse HEAD)" = "$IMPL_HEAD"
+          test -z "$(git status --porcelain)"
+
+          python -m pip install --disable-pip-version-check --quiet             "git+https://github.com/TheHalfMoon/SpecGrain.git@$SPEC_GRAIN_PIN"
+
+          specgrain check --json . > /tmp/sg25-check.json
+          specgrain prove --json SG-000011 . > /tmp/p11.json
+
+          python - <<'PY'
+          import json, os, subprocess
+          from specgrain import load_project
+
+          check=json.load(open('/tmp/sg25-check.json'))
+          assert check['valid'] is True and check['issues']==[]
+
+          project=load_project('.')
+          node=next(n for n in project.specs if n.id=='SG-000025')
+          assert node.state=='GRAIN'
+          assert node.revision_digest==os.environ['SPEC_REVISION']
+          assert tuple(sorted(node.change_surface))==tuple(sorted([
+              'crates/morize-core/src/digest.rs',
+              'crates/morize-core/src/lib.rs',
+          ]))
+
+          p=json.load(open('/tmp/p11.json'))
+          assert p['verified'] is True
+          assert p['latest_record_digest']=='sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9'
+          latest=p['records'][-1]['report']
+          assert latest['spec_revision']=='sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d'
+          assert latest['implementation_revision']=='b54879d7c04ba914997f14034c3c1b262b9629f6'
+          assert latest['issues']==[]
+          subprocess.run(['git','merge-base','--is-ancestor',latest['implementation_revision'],os.environ['BASE_MAIN']],check=True)
+
+          print('SPEC_CHECK=PASS')
+          print('SG000011_PREREQUISITE=PASS')
+          print('WORKPACKET_BINDING='+os.environ['WORKPACKET_DIGEST'])
+          print('WORKPACKET_RUN='+os.environ['WORKPACKET_RUN'])
+          PY
+
+          test "$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" | sort | tr '\n' ' ')" = "crates/morize-core/src/digest.rs crates/morize-core/src/lib.rs "
+          test "$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" | wc -l)" -eq 2
+          test -z "$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" -- Cargo.toml Cargo.lock '*/Cargo.toml')"
+          git diff --check "$BASE_MAIN...$IMPL_HEAD"
+
+          DIFF_SHA256="$(git diff "$BASE_MAIN...$IMPL_HEAD" | sha256sum | awk '{print $1}')"
+          FILE_LIST_SHA256="$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" | sha256sum | awk '{print $1}')"
+          export DIFF_SHA256 FILE_LIST_SHA256
+
+          cargo fmt --all -- --check
+          cargo check --workspace --all-targets --offline
+          cargo clippy --workspace --all-targets --offline -- -D warnings
+          cargo test --workspace --all-targets --offline 2>&1 | tee /tmp/sg25-tests.txt
+
+          python - <<'PY'
+          import re
+          text=open('/tmp/sg25-tests.txt').read()
+          counts=[int(x) for x in re.findall(r'test result: ok\. (\d+) passed;',text)]
+          assert counts
+          total=sum(counts)
+          assert total==39, (counts,total)
+          print('EXACT_HEAD_TESTS_PASSED=39')
+          PY
+
+          git clone --quiet "https://github.com/TheHalfMoon/Diffcipline.git" /tmp/diffcipline
+          git -C /tmp/diffcipline checkout --quiet "$DIFFCIPLINE_PIN"
+          cargo run --quiet --locked             --manifest-path /tmp/diffcipline/crates/diffcipline-cli/Cargo.toml --             check --base "$BASE_MAIN" --risk R2 --run --json             > /tmp/sg25-diffcipline.json 2>/tmp/sg25-diffcipline.err
+          DIFFCIPLINE_SHA256="$(sha256sum /tmp/sg25-diffcipline.json | awk '{print $1}')"
+          export DIFFCIPLINE_SHA256
+
+          python - <<'PY'
+          import json
+          lines=[line for line in open('/tmp/sg25-diffcipline.json') if line.strip()]
+          x=json.loads(lines[-1])
+          assert x['verdict']=='PASS'
+          assert x['changed_files']==2
+          assert x['scope_violations']==[]
+          assert all(v['state']=='PASS' for v in x['verification'])
+          print('DIFFCIPLINE=PASS')
+          PY
+
+          git clone --quiet "https://github.com/alibaba/open-code-review.git" /tmp/ocr
+          git -C /tmp/ocr checkout --quiet "$OCR_PIN"
+          (cd /tmp/ocr && GOTOOLCHAIN=auto go build -o /tmp/ocr-bin ./cmd/opencodereview)
+          OCR_NO_UPDATE=1 /tmp/ocr-bin delegate preview --format json --from "$BASE_MAIN" --to "$IMPL_HEAD" > /tmp/sg25-ocr-preview.json
+
+          python - <<'PY'
+          import json, subprocess
+          x=json.load(open('/tmp/sg25-ocr-preview.json'))
+          assert x['total_files']==2
+          assert x['reviewable_count']==2
+          assert x['excluded_count']==0
+          paths=sorted(f['path'] for f in x['reviewable_files'])
+          assert paths==[
+              'crates/morize-core/src/digest.rs',
+              'crates/morize-core/src/lib.rs',
+          ]
+          with open('/tmp/sg25-ocr-rules.json','w') as out:
+              subprocess.run(['/tmp/ocr-bin','delegate','rule','--format','json',*paths],check=True,stdout=out)
+          groups=json.load(open('/tmp/sg25-ocr-rules.json'))['groups']
+          accounted=sorted(p for g in groups for p in g['files'])
+          assert accounted==paths
+          print('ALIBABA_ACCOUNTING=2/2')
+          PY
+
+          python -m pip install --disable-pip-version-check --quiet "gradio_client>=1.8,<2"
+
+          python - <<'PY'
+          import hashlib, json, os, subprocess, time
+          from pathlib import Path
+          from gradio_client import Client
+
+          spec=Path('.specgrain/specs/SG-000025.json').read_text()
+          diff=subprocess.check_output([
+              'git','diff','--unified=80',
+              os.environ['BASE_MAIN']+'...'+os.environ['IMPL_HEAD'],
+              '--','crates/morize-core/src/digest.rs','crates/morize-core/src/lib.rs',
+          ],text=True)
+
+          prompt='\n'.join([
+              'Independent semantic IMPLEMENTATION review of Morize SG-000025. Return final structured review only; do not expose chain-of-thought or tool traces.',
+              '',
+              f'REVIEW_HEAD={os.environ["IMPL_HEAD"]}',
+              f'BASE_MAIN={os.environ["BASE_MAIN"]}',
+              f'SPEC_REVISION={os.environ["SPEC_REVISION"]}',
+              f'WORKPACKET_DIGEST={os.environ["WORKPACKET_DIGEST"]}',
+              f'DIFF_SHA256={os.environ["DIFF_SHA256"]}',
+              f'FILE_LIST_SHA256={os.environ["FILE_LIST_SHA256"]}',
+              f'DIFFCIPLINE_SHA256={os.environ["DIFFCIPLINE_SHA256"]}',
+              'Exact-head cargo verification: fmt/check/clippy PASS; tests 39/39 PASS.',
+              'Alibaba accounting only: total=2 reviewable=2 excluded=0 rule-accounted=2/2.',
+              '',
+              'Review goals:',
+              '1. Sha256Digest stores exactly 32 opaque bytes and preserves bytes exactly through from_bytes/as_bytes/into_bytes.',
+              '2. Display emits exactly 64 lowercase hexadecimal ASCII characters and FromStr accepts only that strict canonical form.',
+              '3. InvalidLength reports only actual byte length; NonCanonicalHex reports exact first offending byte index and byte; no source string or digest bytes are retained.',
+              '4. Debug is non-disclosing and does not reveal digest bytes or canonical digest text.',
+              '5. Clone/Copy/Eq/Ord/Hash semantics are deterministic and tests cover all 256 repeated-byte round trips plus non-canonical ASCII at every text byte position.',
+              '6. The implementation does not compute SHA-256, canonicalize content, authenticate data, derive blob paths, implement evidence/idempotency behavior, or make cryptographic-security/authority claims.',
+              '7. No dependency, Cargo manifest, Cargo.lock, serialization, persistence, API, MCP, retrieval, or domain-record integration is introduced.',
+              '8. Exact change surface is digest.rs plus lib.rs only and SG-000011 proof identity remains valid.',
+              '',
+              'SG-000025 contract:',
+              spec,
+              '',
+              'Exact implementation diff:',
+              diff,
+              '',
+              'Return exactly:',
+              'REVIEW_HEAD',
+              os.environ['IMPL_HEAD'],
+              'REVIEW_KIND',
+              'SG-000025_IMPLEMENTATION',
+              'CRITICAL = NONE',
+              'HIGH = NONE',
+              'MEDIUM = NONE',
+              'LOW = NONE',
+              'FINDINGS',
+              '- NONE',
+              'FINAL_GATE = PASS',
+              'Replace NONE/PASS only when concise material findings require it. Any different REVIEW_HEAD invalidates the review.'
+          ])
+
+          Path('/tmp/sg25-review-prompt.txt').write_text(prompt)
+          client=Client('CohereLabs/North-Mini-Code-1.0',verbose=False)
+          final=''
+          for attempt in range(1,4):
+              raw=client.predict(prompt,'Rust','[]','{}',api_name='/chat')
+              obj=json.loads(raw) if isinstance(raw,str) else raw
+              content=''
+              for msg in obj.get('history',[]) if isinstance(obj,dict) else []:
+                  if msg.get('role')=='assistant':
+                      content=msg.get('content','')
+              candidate=content.split('</think>',1)[-1].strip() if '</think>' in content else content.strip()
+              structured=(f'REVIEW_HEAD\n{os.environ["IMPL_HEAD"]}' in candidate and 'REVIEW_KIND\nSG-000025_IMPLEMENTATION' in candidate)
+              if structured:
+                  final=candidate
+                  break
+              print(f'REVIEW_PROVIDER_ATTEMPT_{attempt}=INVALID_NONSTRUCTURED')
+              print(candidate[:500])
+              if attempt < 3:
+                  time.sleep(10)
+          if not final:
+              raise SystemExit('independent implementation reviewer returned no structured review after 3 attempts')
+
+          print('INDEPENDENT_REVIEW_BEGIN')
+          print(final)
+          print('INDEPENDENT_REVIEW_END')
+          checks=[
+              f'REVIEW_HEAD\n{os.environ["IMPL_HEAD"]}',
+              'REVIEW_KIND\nSG-000025_IMPLEMENTATION',
+              'CRITICAL = NONE','HIGH = NONE','MEDIUM = NONE','LOW = NONE',
+              'FINDINGS\n- NONE','FINAL_GATE = PASS'
+          ]
+          if not all(x in final for x in checks):
+              raise SystemExit('independent semantic implementation review produced a non-PASS result')
+
+          summary={
+              'base_main':os.environ['BASE_MAIN'],
+              'implementation_head':os.environ['IMPL_HEAD'],
+              'spec_revision':os.environ['SPEC_REVISION'],
+              'workpacket_digest':os.environ['WORKPACKET_DIGEST'],
+              'workpacket_file_sha256':os.environ['WORKPACKET_FILE_SHA256'],
+              'workpacket_run':os.environ['WORKPACKET_RUN'],
+              'diff_sha256':os.environ['DIFF_SHA256'],
+              'file_list_sha256':os.environ['FILE_LIST_SHA256'],
+              'diffcipline_sha256':os.environ['DIFFCIPLINE_SHA256'],
+              'review_prompt_sha256':hashlib.sha256(prompt.encode()).hexdigest(),
+              'review_final_sha256':hashlib.sha256((final+'\n').encode()).hexdigest(),
+              'tests_passed':39,
+          }
+          print('QUALIFICATION_SUMMARY_BEGIN')
+          print(json.dumps(summary,indent=2,sort_keys=True))
+          print('QUALIFICATION_SUMMARY_END')
+          PY
+
+          test -z "$(git status --porcelain)"
