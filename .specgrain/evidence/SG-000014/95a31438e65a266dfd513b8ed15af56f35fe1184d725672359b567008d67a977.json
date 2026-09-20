@@ -1,0 +1,215 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000011 proof prerequisite revalidated at exact packet baseline.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=7ab8edf7212ef2524cf41c4881ba08004591f85d",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for boundary correctness, lossless rejection, order/value preservation, no-bypass API surface, Debug non-disclosure, scope containment, and required evidence.",
+        "detail": "Independent Qwen semantic review covered exact implementation head and returned PASS.",
+        "evidence_ref": "independent-review:sha256:1f14259f0e2998624765ba124a33b8241bab668bc23f35caa5a07d95a3c96cf0;head=6c5ffd91572b4b04bd384946ca4423cfc357358c",
+        "passed": true
+      },
+      {
+        "check_id": "BoundedVec::<u8, 2> accepts empty, one-item, and two-item vectors while over-limit Vec construction fails with max_items=2 and actual_items=3 and returns the original Vec unchanged and in order.",
+        "detail": "Focused tests prove empty/one/exact-boundary acceptance and lossless over-limit build rejection.",
+        "evidence_ref": "git:fac420fd87f86b97a5ee97397e0775d00795aaa3:crates/morize-core/src/bounded_collection.rs;github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+        "detail": "Manifest and lockfile diff is empty; cargo metadata reports zero dependencies.",
+        "evidence_ref": "git-diff:7ab8edf7212ef2524cf41c4881ba08004591f85d...fac420fd87f86b97a5ee97397e0775d00795aaa3;cargo-metadata:workspace=1,dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "Debug for BoundedVec, BoundedVecBuildError, and BoundedVecPushError reports bounded metadata only and does not format or expose contained/rejected T values.",
+        "detail": "Collection/build/push Debug diagnostics expose metadata only and omit contained/rejected values.",
+        "evidence_ref": "git:fac420fd87f86b97a5ee97397e0775d00795aaa3:crates/morize-core/src/bounded_collection.rs;github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact PR head and canonical post-merge main passed all three OS matrix jobs.",
+        "evidence_ref": "github-actions:pr=35487715767;ubuntu=success;macos=success;windows=success;main=35487789967",
+        "passed": true
+      },
+      {
+        "check_id": "MAX_ITEMS=0 accepts only an empty collection; failed construction and failed push return rejected data without mutating, truncating, reordering, or dropping it.",
+        "detail": "Zero-limit build/push tests prove lossless rejection without mutation or truncation.",
+        "evidence_ref": "github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation changes no path outside crates/morize-core/src/bounded_collection.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Independent git diff observes exactly bounded_collection.rs and lib.rs.",
+        "evidence_ref": "git-diff:7ab8edf7212ef2524cf41c4881ba08004591f85d...fac420fd87f86b97a5ee97397e0775d00795aaa3;sha256=547e8bf58867753071777e29a84133250c7aac81d4c07f0725058cf5560217c9;paths=bounded_collection.rs,lib.rs",
+        "passed": true
+      },
+      {
+        "check_id": "The public API exposes no mutable Vec reference and implements no DerefMut, AsMut<Vec<T>>, IndexMut, unchecked push/extend/insert, or equivalent bound-bypass surface.",
+        "detail": "Source and independent review confirm no mutable-Vec or unchecked bound-bypass API.",
+        "evidence_ref": "git:fac420fd87f86b97a5ee97397e0775d00795aaa3:crates/morize-core/src/bounded_collection.rs;independent-review:sha256:1f14259f0e2998624765ba124a33b8241bab668bc23f35caa5a07d95a3c96cf0;head=6c5ffd91572b4b04bd384946ca4423cfc357358c",
+        "passed": true
+      },
+      {
+        "check_id": "as_slice and into_vec preserve element order and values exactly; equality, ordering, and hashing follow the underlying ordered values without hidden normalization.",
+        "detail": "Tests prove exact order/value preservation and deterministic value semantics.",
+        "evidence_ref": "git:fac420fd87f86b97a5ee97397e0775d00795aaa3:crates/morize-core/src/bounded_collection.rs;github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passed locally and cross-platform.",
+        "evidence_ref": "github-actions:pr=35487715767;ubuntu=success;macos=success;windows=success;main=35487789967",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passed locally and cross-platform.",
+        "evidence_ref": "github-actions:pr=35487715767;ubuntu=success;macos=success;windows=success;main=35487789967",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "Formatting check passed locally and cross-platform.",
+        "evidence_ref": "github-actions:pr=35487715767;ubuntu=success;macos=success;windows=success;main=35487789967",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and includes focused boundary, lossless rejection, preservation, value-semantics, and Debug non-disclosure tests.",
+        "detail": "Offline tests passed locally and cross-platform with all required bounded-collection cases.",
+        "evidence_ref": "github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core exports BoundedVec, CollectionBoundsError, BoundedVecBuildError, and BoundedVecPushError from one new bounded-collection module, with no additional domain behavior.",
+        "detail": "Source and independent review confirm only the planned bounded-collection public API.",
+        "evidence_ref": "git:fac420fd87f86b97a5ee97397e0775d00795aaa3:crates/morize-core/src/bounded_collection.rs;independent-review:sha256:1f14259f0e2998624765ba124a33b8241bab668bc23f35caa5a07d95a3c96cf0;head=6c5ffd91572b4b04bd384946ca4423cfc357358c",
+        "passed": true
+      },
+      {
+        "check_id": "try_push succeeds below capacity and, at capacity, leaves the existing collection unchanged while BoundedVecPushError returns the exact rejected value and bounded AtCapacity metadata.",
+        "detail": "Tests prove successful push below capacity and lossless unchanged rejection at capacity.",
+        "evidence_ref": "git:fac420fd87f86b97a5ee97397e0775d00795aaa3:crates/morize-core/src/bounded_collection.rs;github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-COLLECTION-BOUNDARY",
+        "detail": "Zero, below, exact, and over-limit collection boundaries passed.",
+        "evidence_ref": "github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "E-COLLECTION-BUILD-LOSSLESS",
+        "detail": "Over-limit construction returns original vector unchanged and ordered.",
+        "evidence_ref": "git:fac420fd87f86b97a5ee97397e0775d00795aaa3:crates/morize-core/src/bounded_collection.rs;github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "E-COLLECTION-DEBUG-NONDISCLOSURE",
+        "detail": "Collection/build/push diagnostics omit contained and rejected values.",
+        "evidence_ref": "git:fac420fd87f86b97a5ee97397e0775d00795aaa3:crates/morize-core/src/bounded_collection.rs;github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "E-COLLECTION-NO-BYPASS",
+        "detail": "No mutable Vec exposure or unchecked mutation/bypass API is implemented.",
+        "evidence_ref": "git:fac420fd87f86b97a5ee97397e0775d00795aaa3:crates/morize-core/src/bounded_collection.rs;independent-review:sha256:1f14259f0e2998624765ba124a33b8241bab668bc23f35caa5a07d95a3c96cf0;head=6c5ffd91572b4b04bd384946ca4423cfc357358c",
+        "passed": true
+      },
+      {
+        "check_id": "E-COLLECTION-NO-DEPENDENCIES",
+        "detail": "No manifest/lock change and zero dependencies.",
+        "evidence_ref": "git-diff:7ab8edf7212ef2524cf41c4881ba08004591f85d...fac420fd87f86b97a5ee97397e0775d00795aaa3;cargo-metadata:workspace=1,dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-COLLECTION-PRESERVATION",
+        "detail": "as_slice and into_vec preserve element order and values exactly.",
+        "evidence_ref": "github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "E-COLLECTION-PUSH-LOSSLESS",
+        "detail": "Push at capacity preserves existing collection and returns rejected item unchanged.",
+        "evidence_ref": "git:fac420fd87f86b97a5ee97397e0775d00795aaa3:crates/morize-core/src/bounded_collection.rs;github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "E-COLLECTION-VALUE-SEMANTICS",
+        "detail": "Conditional Eq/Ord/Hash semantics follow ordered underlying values.",
+        "evidence_ref": "git:fac420fd87f86b97a5ee97397e0775d00795aaa3:crates/morize-core/src/bounded_collection.rs;github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and canonical-main Ubuntu/macOS/Windows CI succeeded.",
+        "evidence_ref": "github-actions:pr=35487715767;ubuntu=success;macos=success;windows=success;main=35487789967",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000011",
+        "detail": "Canonical SG-000011 proof matched exact prerequisite metadata.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=7ab8edf7212ef2524cf41c4881ba08004591f85d",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passed.",
+        "evidence_ref": "github-actions:pr=35487715767;ubuntu=success;macos=success;windows=success;main=35487789967",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with warnings denied passed.",
+        "evidence_ref": "github-actions:pr=35487715767;ubuntu=success;macos=success;windows=success;main=35487789967",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt --check passed.",
+        "evidence_ref": "github-actions:pr=35487715767;ubuntu=success;macos=success;windows=success;main=35487789967",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline cargo test passed.",
+        "evidence_ref": "github-actions:pr=35487715767;main=35487789967;local-workspace-tests=11/11",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Independent semantic review PASS with C/H/M/L NONE.",
+        "evidence_ref": "independent-review:sha256:1f14259f0e2998624765ba124a33b8241bab668bc23f35caa5a07d95a3c96cf0;head=6c5ffd91572b4b04bd384946ca4423cfc357358c",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "Bounded two-file implementation can be reverted without persistent data migration.",
+        "evidence_ref": "git-history:base=7ab8edf7212ef2524cf41c4881ba08004591f85d;merge=fac420fd87f86b97a5ee97397e0775d00795aaa3;no-persisted-format-or-user-data",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "fac420fd87f86b97a5ee97397e0775d00795aaa3",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/bounded_collection.rs",
+      "crates/morize-core/src/lib.rs"
+    ],
+    "packet_digest": "sha256:24095f6841a27bd6c396187458e655605b78a615d208c659c311ea55514a4eb9",
+    "result_digest": "sha256:6f8ae02c141aea5d93aa541ee96beb4848e7efbe076ba640bc8fbce59d416448",
+    "spec_id": "SG-000014",
+    "spec_revision": "sha256:06df9fd48a398fb1b1af3e4a6c821efa9a0508d7e9e3a795c21edadf1045ef1e",
+    "verification_version": 1,
+    "verified": true
+  }
+}
