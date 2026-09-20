@@ -97,6 +97,6 @@
     "Display/FromStr, parsers, unknown-action wire validation, serde or other serialization integration, numeric repr/discriminants, persisted or wire encoding, configuration formats, migrations, storage, retrieval, or domain-record integration.",
     "Any third-party runtime, build, or test dependency."
   ],
-  "state": "SHAPED",
+  "state": "REFINING",
   "title": "Add closed durable memory action vocabulary"
 }
