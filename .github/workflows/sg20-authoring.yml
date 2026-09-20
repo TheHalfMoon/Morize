@@ -94,7 +94,7 @@ jobs:
                section('docs/DATA_MODEL.md','## 12. MemoryRelation','## 13. DecisionEnvelope'),
                'Canonical MemoryRelation section fixing relation_type and edge_class = explicit | inferred.',90),
               ('requirements-provenance','docs/REQUIREMENTS.md',
-               section('docs/REQUIREMENTS.md','### MZ-PROV-005','### MZ-PROV-006'),
+               section('docs/REQUIREMENTS.md','### MZ-PROV-005','## E. Memory lifecycle'),
                'Canonical MZ-PROV-005 requirement for explainable inferred relation class.',85),
               ('proof-prerequisites','docs/adr/0004-verified-proof-prerequisites.md',
                Path('docs/adr/0004-verified-proof-prerequisites.md').read_text(),
