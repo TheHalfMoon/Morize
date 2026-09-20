@@ -1,0 +1,162 @@
+{
+  "acceptance": [
+    "The exact implementation changes only fuzz/Cargo.toml, fuzz/Cargo.lock, fuzz/rust-toolchain.toml, fuzz/README.md, fuzz/THIRD_PARTY.md, fuzz/.gitignore, fuzz/fuzz_targets/durable_id.rs, fuzz/fuzz_targets/bounded_utf8.rs, fuzz/fuzz_targets/bounded_vec.rs, and .github/workflows/fuzz-smoke.yml.",
+    "The root Cargo.toml, root Cargo.lock, every crates/morize-core production source file, public API, and the existing .github/workflows/ci.yml remain byte-for-byte unchanged.",
+    "fuzz/Cargo.toml is an independent nested workspace, publish=false, depends on morize-core only by local path, pins libfuzzer-sys exactly to 0.4.13, and adds no dependency to the root workspace graph.",
+    "fuzz/Cargo.lock is committed and cargo metadata --manifest-path fuzz/Cargo.toml --locked succeeds; the root Cargo.lock remains unchanged.",
+    "fuzz/rust-toolchain.toml pins nightly-2026-09-18 with a minimal profile, and the fuzz workflow verifies the resolved rustc toolchain before running targets.",
+    "The fuzz workflow downloads cargo-fuzz exactly at version 0.13.2, verifies the pinned Linux x86_64 musl release asset SHA-256 b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c, treats that musl artifact only as the cargo-fuzz executable, and explicitly builds/runs fuzz targets for x86_64-unknown-linux-gnu so AddressSanitizer is not combined with statically linked musl libc.",
+    "fuzz/THIRD_PARTY.md records cargo-fuzz as MIT OR Apache-2.0 and libfuzzer-sys 0.4.13 as (MIT OR Apache-2.0) AND NCSA, states that bundled libFuzzer sources carry NCSA, and confines all such code/dependencies to fuzz-only verification.",
+    "durable_id fuzz target consumes arbitrary raw bytes without unsafe code; whenever an input is valid UTF-8 and a durable-ID parser succeeds, the result must round-trip through canonical lowercase text and exact bytes for every durable identifier type without panic.",
+    "bounded_utf8 fuzz target consumes arbitrary raw bytes, considers only valid UTF-8, exercises multiple fixed const byte limits, and asserts acceptance iff encoded length is within the limit, exact byte preservation on success, and exact TooLong metadata on rejection.",
+    "bounded_vec fuzz target consumes arbitrary raw bytes, exercises multiple fixed const item limits, and asserts exact construction/push acceptance, preserved order/values, lossless rejected-value recovery, and no mutation after rejected push.",
+    "All fuzz targets are pure invariant harnesses: they perform no network, filesystem fixture, environment-variable, wall-clock, model, persistence, serialization, or mutation-authority operation and introduce no unsafe block in Morize-authored target code.",
+    "A dedicated fuzz-smoke workflow runs only on Ubuntu/Linux, leaves the existing Ubuntu/macOS/Windows product CI unchanged, and never makes Windows support depend on libFuzzer.",
+    "The fuzz-smoke workflow explicitly uses target triple x86_64-unknown-linux-gnu and bounds each target with fixed run count, input-size limit, timeout, RSS ceiling, and explicit seed while still executing coverage-guided libFuzzer rather than deterministic property loops.",
+    "The fuzz-smoke workflow runs all three targets and fails on any crash, sanitizer finding, timeout/crash artifact, assertion failure, build failure, lock drift, toolchain/version mismatch, or dependency/license-isolation violation.",
+    "On fuzz failure, the workflow uploads fuzz crash/artifact output using a commit-pinned artifact action; absence of a crash artifact on success is not treated as missing evidence.",
+    "The fuzz workspace and smoke workflow do not claim exhaustive fuzzing, bug absence, coverage completeness, or security proof; bounded smoke evidence is explicitly scoped to the executed run budget.",
+    "cargo fmt --all -- --check, cargo check --workspace --all-targets --offline, cargo clippy --workspace --all-targets --offline -- -D warnings, and cargo test --workspace --all-targets --offline continue to pass for the root workspace.",
+    "The dedicated fuzz workspace builds all three fuzz targets with the pinned nightly/tool/dependency graph and completes the bounded fuzz-smoke campaign on Linux.",
+    "The standard GitHub Actions matrix continues to pass Ubuntu, macOS, and Windows on the exact implementation head, and the dedicated Linux fuzz-smoke workflow passes on that same implementation head.",
+    "Diffcipline verifies the exact implementation head with no scope violation; Alibaba Open Code Review accounts for every changed file; an independent semantic reviewer separately reviews isolation, target invariants, toolchain/tool identity, bounded campaign semantics, license closure, failure-artifact behavior, and non-claims.",
+    "ADR-0004 proof prerequisites SG-000012, SG-000013, SG-000014, and SG-000023 revalidate against the exact WorkPacket baseline before execution."
+  ],
+  "change_surface": [
+    "fuzz/Cargo.toml",
+    "fuzz/Cargo.lock",
+    "fuzz/rust-toolchain.toml",
+    "fuzz/README.md",
+    "fuzz/THIRD_PARTY.md",
+    "fuzz/.gitignore",
+    "fuzz/fuzz_targets/durable_id.rs",
+    "fuzz/fuzz_targets/bounded_utf8.rs",
+    "fuzz/fuzz_targets/bounded_vec.rs",
+    ".github/workflows/fuzz-smoke.yml"
+  ],
+  "children": [],
+  "context": {
+    "budget_tokens": 14000,
+    "estimated_tokens": 9000
+  },
+  "dependencies": [],
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000012",
+      "E-PROOF-PREREQUISITE-SG000013",
+      "E-PROOF-PREREQUISITE-SG000014",
+      "E-PROOF-PREREQUISITE-SG000023",
+      "E-FUZZ-WORKSPACE-ISOLATION",
+      "E-FUZZ-LOCK-CLOSURE",
+      "E-FUZZ-TOOLCHAIN-PIN",
+      "E-CARGO-FUZZ-PIN",
+      "E-FUZZ-TARGET-TRIPLE",
+      "E-FUZZ-LICENSE-CLOSURE",
+      "E-FUZZ-DURABLE-ID",
+      "E-FUZZ-BOUNDED-UTF8",
+      "E-FUZZ-BOUNDED-VEC",
+      "E-FUZZ-BOUNDED-CAMPAIGN",
+      "E-FUZZ-FAILURE-ARTIFACTS",
+      "E-FUZZ-NONCLAIMS",
+      "E-ROOT-RUST-FMT",
+      "E-ROOT-RUST-CHECK-OFFLINE",
+      "E-ROOT-RUST-CLIPPY-OFFLINE",
+      "E-ROOT-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI",
+      "E-LINUX-FUZZ-SMOKE"
+    ]
+  },
+  "id": "SG-000024",
+  "labels": [
+    "p1",
+    "rust",
+    "fuzzing",
+    "verification"
+  ],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to an isolated fuzz workspace, three raw-byte fuzz targets, fuzz-only license/provenance documentation, and one Linux-only bounded fuzz-smoke workflow. The root Cargo workspace, root Cargo.lock, morize-core production source, public APIs, standard cross-platform CI, runtime behavior, persistence, serialization, and domain semantics must remain unchanged.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head for isolation from the root workspace/runtime graph, target invariant fidelity, bounded true-libFuzzer execution, pinned toolchain/tool identity, license handling, failure artifact behavior, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the SG-000024 fuzz workspace/workflow commit. Root runtime code, root lockfile, persisted data, public APIs, and user data are unaffected."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "spec_id": "SG-000012",
+          "record_digest": "sha256:13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079",
+          "spec_revision": "sha256:256a8c55a843f00798f3e8e3f0807ee38f676a7f50c9b9380b9d26167f4f7aa7",
+          "implementation_revision": "026b2e5849759915975f8ae12b111d1185fda89f"
+        },
+        {
+          "spec_id": "SG-000013",
+          "record_digest": "sha256:ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c",
+          "spec_revision": "sha256:adf07a2ef558c801fcacbb3b1bb7ab627bdc0480fdec65e7fc2d1a2e86dafe8d",
+          "implementation_revision": "9db66a7b4225cd5d3eff9a65d910038352d29a59"
+        },
+        {
+          "spec_id": "SG-000014",
+          "record_digest": "sha256:95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977",
+          "spec_revision": "sha256:06df9fd48a398fb1b1af3e4a6c821efa9a0508d7e9e3a795c21edadf1045ef1e",
+          "implementation_revision": "fac420fd87f86b97a5ee97397e0775d00795aaa3"
+        },
+        {
+          "spec_id": "SG-000023",
+          "record_digest": "sha256:14dc204de67286a282a2b4e1d8d65fc8d9837b140ced660aa230745ddb82f68c",
+          "spec_revision": "sha256:9e5cba94eec7f7488cdb02605db5cd7f4d1b41200282ca4efc0c68f058d0a779",
+          "implementation_revision": "4620805a440fe1ef5d29c9015b781014a5c109d2"
+        }
+      ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "isolated-native-harness",
+        "rationale": "An independent fuzz workspace with raw-byte targets and one Linux-only smoke lane is the narrowest true-libFuzzer increment that satisfies the remaining P1 fuzz requirement without adding any root/runtime dependency or changing product CI portability."
+      },
+      "safety": {
+        "requirements": [
+          "Fuzz tooling and its NCSA component must remain dev/fuzz-only and must not link into Morize runtime artifacts.",
+          "The bounded CI campaign must fail closed on crashes, assertions, sanitizer findings, tool/version drift, lock drift, or isolation violations, while avoiding claims of exhaustive fuzzing or bug absence.",
+          "Crash inputs may contain arbitrary generated bytes and must not include real user data, secrets, PHI, repository credentials, or copied production fixtures."
+        ],
+        "status": "requirements-defined"
+      },
+      "toolchain": {
+        "rust": "nightly-2026-09-18",
+        "cargo_fuzz_version": "0.13.2",
+        "cargo_fuzz_linux_asset_sha256": "b5b704018b63e0f151c17a057ac53b5111e1db545d1b9f72fee79f08a545931c",
+        "libfuzzer_sys_version": "0.4.13",
+        "cargo_fuzz_release_commit": "984c861c8dfea28055254c5f1d2659ab2cd63f76",
+        "libfuzzer_sys_release_commit": "719e4efb9b8857ebaa782ae59376c8cbb78fed0f",
+        "fuzz_target_triple": "x86_64-unknown-linux-gnu"
+      },
+      "unresolved_decisions": [],
+      "version": 1
+    }
+  },
+  "method": "controlled",
+  "outcome": "Morize has an isolated, reproducible, zero-runtime-impact libFuzzer harness for the durable-ID parser and bounded UTF-8/ordered-collection primitives, with pinned fuzz tooling, bounded Linux smoke execution, independent fuzz-only dependency/license closure, and no coupling to the root workspace or production artifacts.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 explicitly requires property and fuzz tests for parsers/invariants. SG-000023 closed the deterministic property-matrix portion while explicitly deferring a true fuzz campaign. The official rust-fuzz cargo-fuzz/libfuzzer-sys path provides coverage-guided libFuzzer execution but requires nightly and sanitizer support and is not a Windows production concern, so the smallest safe next slice is an isolated fuzz workspace plus a Linux-only bounded smoke gate. The published cargo-fuzz Linux binary used by CI is musl-linked, so the workflow must distinguish tool artifact identity from fuzz target identity and pass --target x86_64-unknown-linux-gnu to avoid AddressSanitizer/static-libc incompatibility.",
+  "risk": {
+    "level": "high",
+    "recovery": "Revert the isolated fuzz workspace/workflow implementation. Root runtime code, standard product CI contract, root lockfile, persisted data, public APIs, and user data are unaffected."
+  },
+  "schema_version": 1,
+  "scope_in": [
+    "Create an independent fuzz Cargo workspace rooted at fuzz/ with its own lockfile and toolchain pin; keep it outside the root workspace graph without modifying root Cargo.toml or root Cargo.lock.",
+    "Pin libfuzzer-sys exactly to 0.4.13 and cargo-fuzz exactly to 0.13.2; verify the published Linux x86_64 musl cargo-fuzz executable checksum before use, and explicitly compile/run fuzz targets for x86_64-unknown-linux-gnu.",
+    "Implement three raw-byte libFuzzer targets covering durable-ID parser canonicalization, BoundedUtf8 byte-bound invariants, and BoundedVec item-bound/lossless-rejection invariants.",
+    "Add one Ubuntu-only fuzz-smoke workflow that executes bounded coverage-guided runs for every target and uploads crash artifacts on failure.",
+    "Document fuzz-only dependency licensing/provenance, local reproduction commands, bounded-smoke semantics, and explicit non-claims."
+  ],
+  "scope_out": [
+    "Any root Cargo workspace member/exclude change, root Cargo.lock change, morize-core production source/public API change, runtime dependency, build dependency, production packaging linkage, or user-facing runtime behavior.",
+    "Windows libFuzzer support, replacing the existing cross-platform product CI, making product correctness depend on fuzz infrastructure, or requiring nightly for normal Morize builds.",
+    "Long-running scheduled campaigns, distributed fuzzing, OSS-Fuzz enrollment, persistent corpus governance, coverage thresholds, mutation dictionaries, custom mutators, structure-aware Arbitrary inputs, Miri, sanitizers beyond cargo-fuzz defaults, or fuzzing later persistence/network/policy layers.",
+    "Any claim of exhaustive fuzzing, proof of bug absence, complete security coverage, or completion of future fuzz targets outside the three authorized P1 primitives."
+  ],
+  "state": "GRAIN",
+  "title": "Add isolated true-fuzz harness for core invariants"
+}
