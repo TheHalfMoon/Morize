@@ -24,7 +24,6 @@ IMPL_REVIEW_SHA256 = os.environ["IMPL_REVIEW_SHA256"]
 PR_CI_RUN = os.environ["PR_CI_RUN"]
 PR_FUZZ_RUN = os.environ["PR_FUZZ_RUN"]
 QUALIFICATION_RUN = os.environ["QUALIFICATION_RUN"]
-QUALIFICATION_HEAD = os.environ["QUALIFICATION_HEAD"]
 DIFFCIPLINE_PIN = os.environ["DIFFCIPLINE_PIN"]
 OCR_PIN = os.environ["OCR_PIN"]
 RUST_NIGHTLY = os.environ["RUST_NIGHTLY"]
@@ -215,7 +214,11 @@ assert_run(PR_CI_RUN, name="ci", sha=IMPL_HEAD, event="pull_request")
 assert_ci_matrix(int(PR_CI_RUN))
 assert_run(PR_FUZZ_RUN, name="fuzz-smoke", sha=IMPL_HEAD, event="pull_request")
 assert_fuzz_job(int(PR_FUZZ_RUN))
-assert_run(QUALIFICATION_RUN, name="sg24-implementation-review-v2", sha=QUALIFICATION_HEAD, event="push")
+qualification = get_run(QUALIFICATION_RUN)
+assert qualification["name"] == "sg24-implementation-review-v2", qualification["name"]
+assert qualification["head_branch"] == "automation/sg-000024-implementation-review-v2", qualification["head_branch"]
+assert qualification["status"] == "completed" and qualification["conclusion"] == "success"
+assert qualification["event"] == "push"
 
 main_ci = latest_push_run("ci")
 main_fuzz = latest_push_run("fuzz-smoke")
