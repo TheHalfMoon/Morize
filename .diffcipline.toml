@@ -6,7 +6,7 @@ max_added_lines = 500
 dependency_manifest_changes = "allow"
 lockfile_changes = "allow"
 untracked_files = "fail"
-expected_files = ["Cargo.toml", "Cargo.lock", ".gitignore", ".diffcipline.toml", ".github/workflows/**", "CONTRIBUTING.md", "crates/**", ".specgrain/**", "docs/**", "*.md"]
+expected_files = ["Cargo.toml", "Cargo.lock", ".gitignore", ".diffcipline.toml", ".github/workflows/**", "CONTRIBUTING.md", "crates/**", "fuzz/**", ".specgrain/**", "docs/**", "*.md"]
 forbidden_surfaces = ["secrets/**", ".env"]
 
 [verification]
