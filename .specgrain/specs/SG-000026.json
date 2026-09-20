@@ -1,0 +1,108 @@
+{
+  "acceptance": [
+    "The exact implementation changes only crates/morize-core/src/decision.rs and crates/morize-core/src/lib.rs.",
+    "morize-core publicly exports MemoryActionSetVersion alongside the existing MemoryAction without changing the existing 11-action vocabulary.",
+    "MemoryActionSetVersion is a non-exhaustive in-memory enum with exactly one current variant, V1, and no numeric representation, discriminant contract, textual parser, or wire encoding.",
+    "V1 is documented and tested as the version identifier for exactly the existing Store, Update, Merge, Supersede, Contradict, Expire, Forget, Redact, Quarantine, Ignore, and RequireReview MemoryAction vocabulary; no additional action is introduced.",
+    "The version value grants no authorization, target selection, threshold, policy decision, mutation authority, execution, side effect, or storage behavior.",
+    "MemoryActionSetVersion supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests prove V1 value semantics and exact binding to the current action vocabulary without defining ordering.",
+    "The implementation defines no DecisionEnvelope, candidate reference, action scores, confidence, abstention, reason codes, evidence references, engine identity, policy revision binding, replay semantics, serialization, persistence, API, MCP, or domain-record integration.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and executes the focused action-set-version tests.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain adds no runtime, build, dev, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for V1-to-current-vocabulary fidelity, future-extensible non-exhaustive version semantics, absence of wire/numeric/authority semantics, scope containment, prerequisite identity, and required evidence.",
+    "ADR-0004 proof prerequisite SG-000018 revalidates against the exact WorkPacket baseline before execution."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/decision.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
+  "children": [],
+  "context": {
+    "budget_tokens": 12000,
+    "estimated_tokens": 6500
+  },
+  "dependencies": [],
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000018",
+      "E-ACTION-SET-V1",
+      "E-ACTION-SET-V1-VOCABULARY-BINDING",
+      "E-ACTION-SET-FUTURE-EXTENSIBLE",
+      "E-ACTION-SET-NO-WIRE-NUMERIC",
+      "E-ACTION-SET-NO-AUTHORITY",
+      "E-ACTION-SET-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
+  "id": "SG-000026",
+  "labels": [
+    "p1",
+    "rust",
+    "typed-decisions"
+  ],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free in-memory MemoryActionSetVersion enum in the existing decision module, focused tests, and morize-core re-export. V1 binds only the existing 11-action MemoryAction vocabulary. No numeric/text/wire encoding, DecisionEnvelope, authority, execution, policy, serialization, persistence, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head for V1 binding to the exact current 11-action vocabulary, non-exhaustive future-version semantics, absence of numeric/text/wire and authority semantics, exact prerequisite identity, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the SG-000026 action-set-version implementation commits; no persisted format, serialized decision, authorization rule, mutation side effect, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "78c6bda86906a84e9511edd7e19e303cfeb53f4a",
+          "record_digest": "sha256:6ed74d50664d885d932b0859fa4acded3826a8a67840afc992d277b0027f6053",
+          "spec_id": "SG-000018",
+          "spec_revision": "sha256:9a8926e557a54ae9f3eed4218a43fd4e14c8aac5f9320f70a1a9b008d4c45e7b"
+        }
+      ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "The typed DecisionEnvelope requires an action-set version, while the current MemoryAction vocabulary is already independently proven. A one-variant non-exhaustive in-memory version enum is the narrowest next contract: it binds V1 to the existing vocabulary without prematurely fixing serialized version numbers, parsing, envelopes, authority, thresholds, or persistence."
+      },
+      "safety": {
+        "requirements": [
+          "The version identifier is descriptive compatibility metadata only and must never grant mutation authority or bypass policy.",
+          "No numeric or textual encoding is fixed in this Grain because the exact serialized DecisionEnvelope schema is explicitly deferred by the planning documents."
+        ],
+        "status": "requirements-defined"
+      },
+      "unresolved_decisions": [],
+      "version": 1
+    }
+  },
+  "method": "quick",
+  "outcome": "morize-core exposes one dependency-free non-exhaustive MemoryActionSetVersion with V1 bound to the already-proven closed 11-action MemoryAction vocabulary, without defining serialized version encoding, DecisionEnvelope fields, authority, policy, persistence, or side effects.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 requires a typed DecisionEnvelope, docs/TYPED_DECISION_MODEL.md states that the closed action vocabulary is versioned, and SG-000018 deliberately deferred action-set version binding. This Grain closes only that in-memory compatibility identity so later DecisionEnvelope work can bind an explicit action vocabulary version without inventing wire encoding or authority semantics.",
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the SG-000026 action-set-version implementation commits; no persisted format, serialized decision, authorization rule, mutation side effect, or user data has been written by this Grain."
+  },
+  "schema_version": 1,
+  "scope_in": [
+    "Define public non-exhaustive MemoryActionSetVersion with exactly V1 as the sole current in-memory version identifier.",
+    "Bind V1 semantically to exactly the existing 11 MemoryAction variants proven by SG-000018, without adding or renaming any action.",
+    "Derive Clone, Copy, Debug, PartialEq, Eq, and Hash and add focused standard-library-only tests for V1 value semantics and exact current-vocabulary binding.",
+    "Keep the version contract future-extensible while leaving numeric/text/wire encoding to a later serialized DecisionEnvelope Grain."
+  ],
+  "scope_out": [
+    "Any numeric repr/discriminant contract, Display/FromStr parser, serde or other serialization integration, persisted/wire encoding, schema field name, migration, storage, API, MCP, or configuration format.",
+    "DecisionEnvelope construction, candidate references, action scores, confidence, abstention, reason codes, evidence references, engine identity, policy revision binding, replay semantics, or threshold behavior.",
+    "Authorization, target selection, mutation execution, side effects, FORGET/REDACT behavior, policy evaluation, or any authority-bearing interpretation of a version value.",
+    "Any third-party runtime, build, dev, or test dependency."
+  ],
+  "state": "DRAFT",
+  "title": "Add memory action-set version primitive"
+}
