@@ -1,4 +1,4 @@
-name: sg20-authoring
+name: sg20-implementation
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  author:
+  implement:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout automation branch
@@ -27,11 +27,12 @@ jobs:
         with:
           components: rustfmt, clippy
 
-      - name: Author and qualify SG-000020 planning branch
+      - name: Implement and qualify SG-000020
         shell: bash
         env:
-          PLAN_BRANCH: plan/sg-000020-relation-edge-class
-          BASE_MAIN: 7551ef18458470db2d5bbfbcb76adb17315a057e
+          IMPL_BRANCH: impl/sg-000020-relation-edge-class
+          BASE_MAIN: 2f84412f65a4d3a3b07d884bc1870f70135b19ff
+          SPEC_REVISION: sha256:fd7230363b32044967180106592bc371dd688ddad7c9182a45b8fbe78aedaab1
           SPEC_GRAIN_PIN: 5de7d6499bb0a9e3a191fc0934399cf099d1980a
           DIFFCIPLINE_PIN: 5cb1c77340b75649f6168e0e8f66479ea047ea96
           OCR_PIN: 85cecfe5f935da2b2aae8f91ce4fee8ed343a681
@@ -40,202 +41,341 @@ jobs:
 
           git fetch origin main --prune
           test "$(git rev-parse origin/main)" = "$BASE_MAIN"
-          if git ls-remote --exit-code origin "refs/heads/$PLAN_BRANCH" >/dev/null 2>&1; then
-            echo "Refusing to overwrite existing $PLAN_BRANCH" >&2
+          if git ls-remote --exit-code origin "refs/heads/$IMPL_BRANCH" >/dev/null 2>&1; then
+            echo "Refusing to overwrite existing $IMPL_BRANCH" >&2
             exit 2
           fi
 
-          git switch -C "$PLAN_BRANCH" origin/main
+          git switch -C "$IMPL_BRANCH" origin/main
           git config user.name "Gocceri"
           git config user.email "azialshehri@gmail.com"
 
           python -m pip install --disable-pip-version-check --quiet             "git+https://github.com/TheHalfMoon/SpecGrain.git@$SPEC_GRAIN_PIN"
 
-          specgrain check --json . | tee /tmp/sg20-base-check.json
-          specgrain prove --json SG-000011 . | tee /tmp/sg20-sg11-proof.json
-          specgrain prove --json SG-000019 . | tee /tmp/sg20-sg19-proof.json
+          specgrain check --json . > /tmp/sg20-impl-base-check.json
+          specgrain prove --json SG-000011 . > /tmp/sg20-impl-sg11-proof.json
+          specgrain prove --json SG-000019 . > /tmp/sg20-impl-sg19-proof.json
+
           python - <<'PY'
           import json, subprocess
-          p11=json.load(open('/tmp/sg20-sg11-proof.json'))
-          p19=json.load(open('/tmp/sg20-sg19-proof.json'))
+          check=json.load(open('/tmp/sg20-impl-base-check.json'))
+          p11=json.load(open('/tmp/sg20-impl-sg11-proof.json'))
+          p19=json.load(open('/tmp/sg20-impl-sg19-proof.json'))
+          assert check['valid'] is True and check['issues']==[]
           assert p11['verified'] is True
           assert p11['latest_record_digest']=='sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9'
           assert p19['verified'] is True
           assert p19['latest_record_digest']=='sha256:5f162f7283d2dd29ab35c8de2c79fd27af10b943fe8ba7e1c8f3e81ee2261e1f'
-          subprocess.run(['git','merge-base','--is-ancestor','b54879d7c04ba914997f14034c3c1b262b9629f6','7551ef18458470db2d5bbfbcb76adb17315a057e'],check=True)
-          subprocess.run(['git','merge-base','--is-ancestor','32e9783f9297e7f1c6f907d89aa78dda0ff02353','7551ef18458470db2d5bbfbcb76adb17315a057e'],check=True)
+          subprocess.run(['git','merge-base','--is-ancestor','b54879d7c04ba914997f14034c3c1b262b9629f6','2f84412f65a4d3a3b07d884bc1870f70135b19ff'],check=True)
+          subprocess.run(['git','merge-base','--is-ancestor','32e9783f9297e7f1c6f907d89aa78dda0ff02353','2f84412f65a4d3a3b07d884bc1870f70135b19ff'],check=True)
           print('SG-000011 prerequisite: PASS')
           print('SG-000019 prerequisite: PASS')
           PY
 
-          specgrain draft             --title "Add relation edge class primitive"             --outcome "morize-core exposes one dependency-free closed RelationEdgeClass enum with exactly Explicit and Inferred as fixed by docs/DATA_MODEL.md, without defining relation endpoints, evidence sufficiency, inference thresholds, graph behavior, authorization, serialization, persistence, or policy effects."             --rationale "docs/DATA_MODEL.md fixes every MemoryRelation edge_class as explicit or inferred, and MZ-PROV-005 requires inferred graph relationships to identify their inference/evidence class. This Grain adds only the typed edge-class distinction so later relation structure and inference-policy Grains can build on a bounded primitive without inventing thresholds or graph semantics."             --parent SG-000010             --json . | tee /tmp/sg20-draft.json
-
           python - <<'PY'
-          import json
+          import json, subprocess
           from pathlib import Path
-          path=Path('.specgrain/specs/SG-000020.json')
-          data=json.loads(path.read_text())
-          data['metadata'] = {
-            'method': {
-              'control': 'Implementation is limited to one dependency-free closed in-memory RelationEdgeClass enum, focused tests, and morize-core re-exports. No relation endpoints, evidence references, engine identity, confidence, inference thresholds, graph behavior, authorization, serialization, persistence, or third-party dependency is authorized.',
-              'review_separation': 'An independent semantic reviewer must review the exact implementation head, exact Explicit/Inferred fidelity, closed-vocabulary correctness, absence of inference-policy/authority/graph/wire semantics, scope containment, and required evidence separately from the implementing agent before acceptance.',
-              'rollback': 'Revert the relation-edge-class implementation commits; no persisted format, graph state, inference policy, authorization rule, or user data depends on this Grain.'
-            },
-            'morize': {
-              'proof_prerequisites': [
-                {
-                  'implementation_revision': 'b54879d7c04ba914997f14034c3c1b262b9629f6',
-                  'record_digest': 'sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9',
-                  'spec_id': 'SG-000011',
-                  'spec_revision': 'sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d'
-                },
-                {
-                  'implementation_revision': '32e9783f9297e7f1c6f907d89aa78dda0ff02353',
-                  'record_digest': 'sha256:5f162f7283d2dd29ab35c8de2c79fd27af10b943fe8ba7e1c8f3e81ee2261e1f',
-                  'spec_id': 'SG-000019',
-                  'spec_revision': 'sha256:0628d10f31cef46fd9e0c11fcd9fe530112d617c164d573c9171e7f5f92ae04a'
-                }
-              ]
-            }
-          }
-          path.write_text(json.dumps(data,indent=2,sort_keys=True,ensure_ascii=False)+'\n')
+
+          base='2f84412f65a4d3a3b07d884bc1870f70135b19ff'
+
+          def blob(path):
+              return subprocess.check_output(['git','rev-parse',f'HEAD:{path}'],text=True).strip()
+
+          def section(path,start,end):
+              text=Path(path).read_text()
+              a=text.index(start)
+              b=text.index(end,a) if end else len(text)
+              return text[a:b]
+
+          selections=[
+              ('sg20-grain','.specgrain/specs/SG-000020.json',Path('.specgrain/specs/SG-000020.json').read_text(),
+               'Exact GRAIN contract, acceptance criteria, proof prerequisites, change surface, and evidence requirements.',100),
+              ('data-model-memory-relation','docs/DATA_MODEL.md',
+               section('docs/DATA_MODEL.md','## 12. MemoryRelation','## 13. DecisionEnvelope'),
+               'Canonical MemoryRelation section fixing relation_type and edge_class = explicit | inferred.',90),
+              ('requirements-provenance','docs/REQUIREMENTS.md',
+               section('docs/REQUIREMENTS.md','### MZ-PROV-005','### MZ-PROV-006'),
+               'Canonical MZ-PROV-005 requirement for explainable inferred relation class.',85),
+              ('proof-prerequisites','docs/adr/0004-verified-proof-prerequisites.md',
+               Path('docs/adr/0004-verified-proof-prerequisites.md').read_text(),
+               'Canonical proof-prerequisite policy used by this Grain.',80),
+              ('relation-module','crates/morize-core/src/relation.rs',
+               Path('crates/morize-core/src/relation.rs').read_text(),
+               'Exact current relation vocabulary module that the authorized implementation extends.',70),
+              ('core-export-surface','crates/morize-core/src/lib.rs',
+               Path('crates/morize-core/src/lib.rs').read_text(),
+               'Exact current morize-core export surface that the authorized implementation may extend.',60),
+          ]
+
+          records=[]
+          for source_id,path,data,reason,priority in selections:
+              encoded=data.encode()
+              records.append({
+                  'source_id':source_id,
+                  'provenance':f'git:{base}:{path}',
+                  'selection_reason':reason,
+                  'revision':f'git:{blob(path)}',
+                  'size_bytes':len(encoded),
+                  'token_cost':(len(encoded)+3)//4,
+                  'requirement':'required',
+                  'priority':priority,
+              })
+          total=sum(r['token_cost'] for r in records)
+          assert total <= 11000
+          Path('/tmp/sg20-context-sources.json').write_text(
+              json.dumps(records,indent=2,sort_keys=True,ensure_ascii=False)+'\n'
+          )
+          print('CONTEXT_SOURCE_COUNT='+str(len(records)))
+          print('CONTEXT_TOKEN_TOTAL='+str(total))
           PY
 
-          git add .specgrain/specs/SG-000010.json .specgrain/specs/SG-000020.json
-          git diff --cached --check
-          git commit -s -m "specgrain: draft relation edge class Grain"
-
-          specgrain shape SG-000020             --scope-in "Define public closed RelationEdgeClass with exactly Explicit and Inferred, matching docs/DATA_MODEL.md edge_class = explicit | inferred."             --scope-in "Keep both variants fieldless and derive only Clone, Copy, Debug, PartialEq, Eq, and Hash so edge class is typed without defining ordering, textual/numeric encoding, evidence sufficiency, confidence, or policy semantics."             --scope-in "Treat Explicit and Inferred as descriptive provenance classification only; neither value itself grants authority, proves truth, establishes evidence sufficiency, authorizes mutation, or triggers graph behavior."             --scope-in "Add standard-library-only focused tests covering both values, distinct equality/hash semantics, and Copy behavior without serialization or parser contracts."             --scope-out "A MemoryRelation struct, RelationId composition, from_ref/to_ref endpoints, evidence_refs, engine identity, confidence, policy revision binding, or inference/evidence thresholds."             --scope-out "Graph traversal or mutation, relationship discovery, inference engines, conflict/supersession policy, truth/authority semantics, authorization, or any behavior inferred merely from RelationEdgeClass."             --scope-out "Display/FromStr, parsers, serde or other serialization integration, numeric repr/discriminants, persisted or wire encoding, configuration formats, migrations, storage, retrieval, or domain-record integration."             --scope-out "Any third-party runtime, build, or test dependency."             --acceptance "morize-core exports RelationEdgeClass from the existing relation module with exactly Explicit and Inferred as current variants and no additional current edge class."             --acceptance "RelationEdgeClass is a closed vocabulary for this Grain and is not marked non_exhaustive; future edge-class expansion requires a separate compatibility-governed Grain."             --acceptance "Both RelationEdgeClass variants are fieldless, and neither Explicit nor Inferred defines evidence sufficiency, truth, authority, graph mutation, memory mutation, or authorization behavior."             --acceptance "RelationEdgeClass supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests exercise both variants and confirm distinct value semantics without defining an ordering contract."             --acceptance "The implementation defines no relation endpoints, evidence references, engine identity, confidence, inference/evidence thresholds, graph behavior, Display, FromStr, parser, serde integration, numeric repr/discriminants, or wire/persistence format."             --acceptance "cargo fmt --all -- --check passes on the exact implementation head."             --acceptance "cargo check --workspace --all-targets --offline passes on the exact implementation head."             --acceptance "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head."             --acceptance "cargo test --workspace --all-targets --offline passes and includes focused tests for both relation edge classes and required value semantics."             --acceptance "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency."             --acceptance "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance."             --acceptance "An independent semantic reviewer reviews the exact implementation head for exact Explicit/Inferred fidelity, closed-vocabulary correctness, absence of inference-policy/authority/graph/wire semantics, scope containment, and required evidence."             --acceptance "ADR-0004 proof prerequisites for SG-000011 and SG-000019 revalidate against the exact WorkPacket baseline before execution."             --acceptance "The implementation changes no path outside crates/morize-core/src/relation.rs and crates/morize-core/src/lib.rs."             --risk-level medium             --recovery "Revert the relation-edge-class implementation commits; no persisted format, graph state, inference policy, authorization rule, or user data has been written by this Grain."             --context-budget 11000             --context-estimate 6200             --change-surface "crates/morize-core/src/relation.rs"             --change-surface "crates/morize-core/src/lib.rs"             --evidence rollback             --evidence independent-review             --evidence E-PROOF-PREREQUISITE-SG000011             --evidence E-PROOF-PREREQUISITE-SG000019             --evidence E-EDGE-CLASS-BASELINE             --evidence E-EDGE-CLASS-CLOSED             --evidence E-EDGE-CLASS-FIELDLESS             --evidence E-EDGE-CLASS-NO-INFERENCE-POLICY             --evidence E-EDGE-CLASS-VALUE-SEMANTICS             --evidence E-EDGE-CLASS-NO-DEPENDENCIES             --evidence E-RUST-FMT             --evidence E-RUST-CHECK-OFFLINE             --evidence E-RUST-CLIPPY-OFFLINE             --evidence E-RUST-TEST-OFFLINE             --evidence E-CROSS-PLATFORM-CI             --minimality-choice native             --minimality-rationale "One standard-library-only two-variant enum in the existing relation module is the narrowest implementation of the already-fixed explicit/inferred distinction while deferring relation structure, thresholds, inference behavior, serialization, and persistence."             --safety-status requirements-defined             --safety-requirement "RelationEdgeClass is descriptive provenance classification only; Inferred must not itself imply evidence sufficiency, truth, authority, authorization, or permission to mutate memory or graph state."             --json . | tee /tmp/sg20-shape.json
-
-          git add .specgrain/specs/SG-000020.json
-          git diff --cached --check
-          git commit -s -m "specgrain: shape relation edge class contract"
-
-          specgrain refine SG-000020 --json . | tee /tmp/sg20-refine.json
-          git add .specgrain/specs/SG-000020.json
-          git diff --cached --check
-          git commit -s -m "specgrain: refine relation edge class Grain"
-
-          specgrain grain SG-000020 --json . | tee /tmp/sg20-grain.json
-          rm -rf .specgrain/tmp
-          git add .specgrain/specs/SG-000020.json
-          git diff --cached --check
-          git commit -s -m "specgrain: promote relation edge class contract to Grain"
-
-          PLAN_HEAD="$(git rev-parse HEAD)"
-          test -z "$(git status --porcelain)"
-          specgrain check --json . | tee /tmp/sg20-check.json
-          specgrain next --json . | tee /tmp/sg20-next.json
+          specgrain packet SG-000020 .             --context-sources /tmp/sg20-context-sources.json             --json > /tmp/sg20-workpacket.json
 
           python - <<'PY'
-          import json
-          check=json.load(open('/tmp/sg20-check.json'))
-          nxt=json.load(open('/tmp/sg20-next.json'))
-          assert check['valid'] is True and check['issues']==[]
-          assert 'SG-000020' in nxt['eligible']
-          print('SpecGrain final qualification: PASS')
+          import hashlib,json
+          from pathlib import Path
+          p=Path('/tmp/sg20-workpacket.json')
+          x=json.loads(p.read_text())
+          assert x['spec_id']=='SG-000020'
+          assert x['spec_revision']=='sha256:fd7230363b32044967180106592bc371dd688ddad7c9182a45b8fbe78aedaab1'
+          assert x['method']=='quick'
+          assert sorted(x['authorized_change_surface'])==[
+              'crates/morize-core/src/lib.rs',
+              'crates/morize-core/src/relation.rs',
+          ]
+          assert len(x['context_sources'])==6
+          total=sum(s['token_cost'] for s in x['context_sources'])
+          assert total <= 11000
+          print('PACKET_DIGEST='+x['packet_digest'])
+          print('WORKPACKET_FILE_SHA256='+hashlib.sha256(p.read_bytes()).hexdigest())
+          print('CONTEXT_SOURCE_COUNT='+str(len(x['context_sources'])))
+          print('CONTEXT_TOKEN_TOTAL='+str(total))
           PY
 
-          SPEC_REVISION="$(python - <<'PY'
-          import json
-          print(json.load(open('/tmp/sg20-grain.json'))['revision_digest'])
+          python - <<'PY'
+          from pathlib import Path
+
+          relation=Path('crates/morize-core/src/relation.rs')
+          text=relation.read_text()
+
+          old_module='''//! This module defines only the initial in-memory relation vocabulary fixed by
+          //! docs/DATA_MODEL.md. It does not define relation endpoints, explicit/inferred
+          //! edge class, evidence sufficiency, truth, authority, graph traversal or
+          //! mutation, memory mutation, serialization, persistence, or transport behavior.
+          '''
+          new_module='''//! This module defines only the initial in-memory relation vocabulary and
+          //! explicit/inferred edge-class distinction fixed by docs/DATA_MODEL.md. It does
+          //! not define relation endpoints, evidence sufficiency, inference thresholds,
+          //! truth, authority, graph traversal or mutation, memory mutation, serialization,
+          //! persistence, or transport behavior.
+          '''
+          assert old_module in text
+          text=text.replace(old_module,new_module)
+
+          marker='''#[cfg(test)]
+          mod tests {
+          '''
+          edge='''/// Whether a memory relation was recorded explicitly or inferred.
+          ///
+          /// Edge class is descriptive provenance classification only. In particular,
+          /// `Inferred` does not establish evidence sufficiency, truth, authority,
+          /// authorization, or permission to mutate memory or graph state.
+          #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+          pub enum RelationEdgeClass {
+              /// The relation was recorded explicitly.
+              Explicit,
+              /// The relation was inferred.
+              Inferred,
+          }
+
+          '''
+          assert marker in text
+          text=text.replace(marker,edge+marker)
+
+          text=text.replace(
+              '    use super::MemoryRelationType;\n',
+              '    use super::{MemoryRelationType, RelationEdgeClass};\n'
+          )
+
+          insert='''
+
+              #[test]
+              fn relation_edge_classes_are_distinct_hashable_values() {
+                  let classes = [RelationEdgeClass::Explicit, RelationEdgeClass::Inferred];
+
+                  assert_ne!(classes[0], classes[1]);
+
+                  let unique: HashSet<_> = classes.into_iter().collect();
+                  assert_eq!(unique.len(), 2);
+              }
+
+              #[test]
+              fn relation_edge_class_is_copy() {
+                  let original = RelationEdgeClass::Inferred;
+                  let copied = original;
+
+                  assert_eq!(original, copied);
+              }
+          '''
+          end='''    fn memory_relation_type_is_copy() {
+                  let original = MemoryRelationType::RelatedTo;
+                  let copied = original;
+
+                  assert_eq!(original, copied);
+              }
+          }
+          '''
+          assert end in text
+          replacement='''    fn memory_relation_type_is_copy() {
+                  let original = MemoryRelationType::RelatedTo;
+                  let copied = original;
+
+                  assert_eq!(original, copied);
+              }'''+insert+'''}
+          '''
+          text=text.replace(end,replacement)
+          relation.write_text(text)
+
+          lib=Path('crates/morize-core/src/lib.rs')
+          lib_text=lib.read_text()
+          assert 'pub use relation::MemoryRelationType;' in lib_text
+          lib_text=lib_text.replace(
+              'pub use relation::MemoryRelationType;',
+              'pub use relation::{MemoryRelationType, RelationEdgeClass};'
+          )
+          lib.write_text(lib_text)
           PY
-          )"
-          DIFF_SHA256="$(git diff "$BASE_MAIN...$PLAN_HEAD" | sha256sum | awk '{print $1}')"
-          FILE_LIST_SHA256="$(git diff --name-only "$BASE_MAIN...$PLAN_HEAD" | sha256sum | awk '{print $1}')"
-          test "$(git diff --name-only "$BASE_MAIN...$PLAN_HEAD" | sort | tr '\n' ' ')" = ".specgrain/specs/SG-000010.json .specgrain/specs/SG-000020.json "
+
+          test "$(git diff --name-only | sort | tr '\n' ' ')" = "crates/morize-core/src/lib.rs crates/morize-core/src/relation.rs "
+          test -z "$(git ls-files --others --exclude-standard)"
+          git diff --check
+
+          cargo fmt --all -- --check
+          cargo check --workspace --all-targets --offline
+          cargo clippy --workspace --all-targets --offline -- -D warnings
+          cargo test --workspace --all-targets --offline 2>&1 | tee /tmp/sg20-tests.txt
+          python - <<'PY'
+          import re
+          text=open('/tmp/sg20-tests.txt').read()
+          counts=[int(x) for x in re.findall(r'test result: ok\. (\d+) passed;',text)]
+          assert counts
+          total=sum(counts)
+          print('LOCAL_TESTS_PASSED='+str(total))
+          PY
+
+          git add crates/morize-core/src/relation.rs crates/morize-core/src/lib.rs
+          git diff --cached --check
+          git commit -s -m "feat: add relation edge class primitive"
+
+          IMPL_HEAD="$(git rev-parse HEAD)"
+          IMPL_TREE="$(git rev-parse HEAD^{tree})"
+          DIFF_SHA256="$(git diff "$BASE_MAIN...$IMPL_HEAD" | sha256sum | awk '{print $1}')"
+          FILE_LIST_SHA256="$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" | sha256sum | awk '{print $1}')"
+          test "$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" | sort | tr '\n' ' ')" = "crates/morize-core/src/lib.rs crates/morize-core/src/relation.rs "
+          test "$(git diff --name-only "$BASE_MAIN...$IMPL_HEAD" -- Cargo.toml Cargo.lock '*/Cargo.toml' | wc -l | tr -d ' ')" = "0"
+          test -z "$(git status --porcelain)"
 
           git clone --quiet "https://github.com/TheHalfMoon/Diffcipline.git" /tmp/diffcipline
           git -C /tmp/diffcipline checkout --quiet "$DIFFCIPLINE_PIN"
-          cargo run --quiet --locked             --manifest-path /tmp/diffcipline/crates/diffcipline-cli/Cargo.toml --             check --base "$BASE_MAIN" --risk R2 --run --json             > /tmp/sg20-plan-diffcipline.json 2>/tmp/sg20-plan-diffcipline.err
-          DIFFCIPLINE_SHA256="$(sha256sum /tmp/sg20-plan-diffcipline.json | awk '{print $1}')"
+          cargo run --quiet --locked             --manifest-path /tmp/diffcipline/crates/diffcipline-cli/Cargo.toml --             check --base "$BASE_MAIN" --risk R2 --run --json             > /tmp/sg20-impl-diffcipline.json 2>/tmp/sg20-impl-diffcipline.err
+          DIFFCIPLINE_SHA256="$(sha256sum /tmp/sg20-impl-diffcipline.json | awk '{print $1}')"
+          export DIFFCIPLINE_SHA256
           python - <<'PY'
           import json
-          lines=[line for line in open('/tmp/sg20-plan-diffcipline.json') if line.strip()]
+          lines=[line for line in open('/tmp/sg20-impl-diffcipline.json') if line.strip()]
           x=json.loads(lines[-1])
           assert x['verdict']=='PASS'
           assert x['changed_files']==2
           assert x['scope_violations']==[]
           assert all(v['state']=='PASS' for v in x['verification'])
-          print('Diffcipline exact-head: PASS')
+          print('Diffcipline exact committed head: PASS')
           PY
 
           git clone --quiet "https://github.com/alibaba/open-code-review.git" /tmp/ocr
           git -C /tmp/ocr checkout --quiet "$OCR_PIN"
           (cd /tmp/ocr && GOTOOLCHAIN=auto go build -o /tmp/ocr-bin ./cmd/opencodereview)
-          OCR_NO_UPDATE=1 /tmp/ocr-bin delegate preview --format json --from "$BASE_MAIN" --to "$PLAN_HEAD"             > /tmp/sg20-plan-ocr-preview.json
+          OCR_NO_UPDATE=1 /tmp/ocr-bin delegate preview --format json --from "$BASE_MAIN" --to "$IMPL_HEAD"             > /tmp/sg20-impl-ocr-preview.json
           python - <<'PY'
           import json,subprocess
-          x=json.load(open('/tmp/sg20-plan-ocr-preview.json'))
+          x=json.load(open('/tmp/sg20-impl-ocr-preview.json'))
           assert x['total_files']==2
           assert x['reviewable_count']==2
           assert x['excluded_count']==0
           paths=[f['path'] for f in x['reviewable_files']]
-          assert sorted(paths)==['.specgrain/specs/SG-000010.json','.specgrain/specs/SG-000020.json']
-          with open('/tmp/sg20-plan-ocr-rules.json','w') as out:
+          assert sorted(paths)==['crates/morize-core/src/lib.rs','crates/morize-core/src/relation.rs']
+          with open('/tmp/sg20-impl-ocr-rules.json','w') as out:
               subprocess.run(['/tmp/ocr-bin','delegate','rule','--format','json',*paths],check=True,stdout=out)
-          groups=json.load(open('/tmp/sg20-plan-ocr-rules.json'))['groups']
+          groups=json.load(open('/tmp/sg20-impl-ocr-rules.json'))['groups']
           accounted=sorted(p for g in groups for p in g['files'])
           assert accounted==sorted(paths)
           print('Alibaba accounting: 2/2')
           PY
 
           python -m pip install --disable-pip-version-check --quiet "gradio_client>=1.8,<2"
-          export PLAN_HEAD SPEC_REVISION DIFF_SHA256 FILE_LIST_SHA256 DIFFCIPLINE_SHA256 BASE_MAIN
+          export IMPL_HEAD IMPL_TREE DIFF_SHA256 FILE_LIST_SHA256 BASE_MAIN SPEC_REVISION
           python - <<'PY'
-          import hashlib,json,os
+          import hashlib,json,os,re
           from pathlib import Path
           from gradio_client import Client
-          spec=Path('.specgrain/specs/SG-000020.json').read_text()
-          head=os.environ['PLAN_HEAD']; base=os.environ['BASE_MAIN']
-          prompt=f"""Independent semantic PLANNING review of Morize SG-000020. Return final structured review only; do not expose chain-of-thought or tool traces.
-          
-          REVIEW_HEAD={head}
-          BASE_MAIN={base}
-          SPEC_REVISION={os.environ['SPEC_REVISION']}
-          DIFF_SHA256={os.environ['DIFF_SHA256']}
-          FILE_LIST_SHA256={os.environ['FILE_LIST_SHA256']}
-          DIFFCIPLINE_SHA256={os.environ['DIFFCIPLINE_SHA256']}
-          Alibaba accounting only: total=2 reviewable=2 excluded=0 rule-accounted=2/2.
-          Exact changed paths: .specgrain/specs/SG-000010.json and .specgrain/specs/SG-000020.json.
-          SpecGrain check valid=true issues=[]; SG-000020 eligible=true.
-          SG-000011 prerequisite: verified=true, record=sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9.
-          SG-000019 prerequisite: verified=true, record=sha256:5f162f7283d2dd29ab35c8de2c79fd27af10b943fe8ba7e1c8f3e81ee2261e1f.
-          
-          Repository planning authority:
-          - docs/DATA_MODEL.md fixes MemoryRelation edge_class = explicit | inferred.
-          - MZ-PROV-005 requires inferred graph relationships to identify their inference/evidence class.
-          - SG-000019 intentionally excluded edge class, so this Grain fills exactly that deferred primitive.
-          - This Grain must not define relation endpoints, inference thresholds, evidence sufficiency, graph behavior, authority, serialization, or persistence.
-          
-          Review goals:
-          1. Exact Explicit/Inferred fidelity with no third current edge class.
-          2. Closed-vocabulary choice is coherent with edge_class = explicit | inferred.
-          3. Both variants fieldless and descriptive only.
-          4. Inferred must not imply evidence sufficiency, truth, authority, authorization, graph mutation, or memory mutation.
-          5. No endpoints, evidence refs, engine identity, confidence, thresholds, graph traversal/mutation, parser, serialization, numeric, wire, or persistence semantics.
-          6. Derives limited to Clone, Copy, Debug, PartialEq, Eq, Hash; no ordering.
-          7. Exact two-file planning scope, rollback, both proof prerequisites, and acceptance/evidence coherence.
-          8. No third-party implementation dependency.
-          
-          SG-000020 Grain:
-          {spec}
-          
-          Return exactly:
-          REVIEW_HEAD
-          {head}
-          REVIEW_KIND
-          SG-000020_PLANNING
-          CRITICAL = NONE
-          HIGH = NONE
-          MEDIUM = NONE
-          LOW = NONE
-          FINDINGS
-          - NONE
-          FINAL_GATE = PASS
-          Replace NONE/PASS only when concise material findings require it. Any different REVIEW_HEAD invalidates the review.
-          """
-          Path('/tmp/sg20-plan-north-prompt.txt').write_text(prompt)
+
+          packet=json.loads(Path('/tmp/sg20-workpacket.json').read_text())
+          src=Path('crates/morize-core/src/relation.rs').read_text()
+          lib=Path('crates/morize-core/src/lib.rs').read_text()
+          test_text=Path('/tmp/sg20-tests.txt').read_text()
+          counts=[int(x) for x in re.findall(r'test result: ok\. (\d+) passed;',test_text)]
+          test_total=sum(counts)
+          head=os.environ['IMPL_HEAD']
+
+          prompt='\n'.join([
+              'Independent semantic IMPLEMENTATION review of Morize SG-000020. Return final structured review only; do not expose chain-of-thought or tool traces.',
+              '',
+              f'REVIEW_HEAD={head}',
+              f'BASE_MAIN={os.environ["BASE_MAIN"]}',
+              f'SPEC_REVISION={os.environ["SPEC_REVISION"]}',
+              f'PACKET_DIGEST={packet["packet_digest"]}',
+              f'DIFF_SHA256={os.environ["DIFF_SHA256"]}',
+              f'FILE_LIST_SHA256={os.environ["FILE_LIST_SHA256"]}',
+              f'DIFFCIPLINE_SHA256={os.environ["DIFFCIPLINE_SHA256"]}',
+              'Alibaba accounting only: total=2 reviewable=2 excluded=0 rule-accounted=2/2.',
+              'Exact changed paths: crates/morize-core/src/relation.rs and crates/morize-core/src/lib.rs.',
+              'Cargo manifests and Cargo.lock unchanged.',
+              f'Local exact-head workspace tests: {test_total} passed.',
+              'Exact committed-head Diffcipline PASS: changed_files=2, scope_violations=[], all configured verification commands PASS.',
+              '',
+              'Canonical contract:',
+              '- RelationEdgeClass must contain exactly Explicit and Inferred.',
+              '- The enum is closed for this Grain and must NOT be #[non_exhaustive].',
+              '- Both variants are fieldless descriptive provenance classification only.',
+              '- Inferred must not establish evidence sufficiency, truth, authority, authorization, graph mutation, or memory mutation.',
+              '- Derives are limited to Clone, Copy, Debug, PartialEq, Eq, Hash; no ordering.',
+              '- No endpoints, evidence refs, engine identity, confidence, inference/evidence thresholds, graph behavior, parser, serialization, numeric repr/discriminants, wire/persistence, storage/retrieval, or third-party dependency.',
+              '- Authorized implementation scope is only relation.rs and lib.rs.',
+              '- SG-000011 and SG-000019 proof prerequisites are verified at the exact WorkPacket baseline.',
+              '',
+              'Review for exact contract fidelity, meaningful focused tests, preservation of MemoryRelationType semantics, scope containment, and absence of invented inference-policy/authority/graph/wire semantics.',
+              '',
+              'relation.rs:',
+              src,
+              '',
+              'lib.rs:',
+              lib,
+              '',
+              'Return exactly:',
+              'REVIEW_HEAD',
+              head,
+              'REVIEW_KIND',
+              'SG-000020_IMPLEMENTATION',
+              'CRITICAL = NONE',
+              'HIGH = NONE',
+              'MEDIUM = NONE',
+              'LOW = NONE',
+              'FINDINGS',
+              '- NONE',
+              'FINAL_GATE = PASS',
+              'Replace NONE/PASS only when concise material findings require it. Any different REVIEW_HEAD invalidates the review.',
+          ])
+
+          Path('/tmp/sg20-impl-north-prompt.txt').write_text(prompt)
           raw=Client('CohereLabs/North-Mini-Code-1.0',verbose=False).predict(prompt,'Rust','[]','{}',api_name='/chat')
           obj=json.loads(raw) if isinstance(raw,str) else raw
           content=''
@@ -245,38 +385,49 @@ jobs:
           final=content.split('</think>',1)[-1].strip() if '</think>' in content else content.strip()
           checks=[
               f'REVIEW_HEAD\n{head}',
-              'REVIEW_KIND\nSG-000020_PLANNING',
+              'REVIEW_KIND\nSG-000020_IMPLEMENTATION',
               'CRITICAL = NONE','HIGH = NONE','MEDIUM = NONE','LOW = NONE',
               'FINDINGS\n- NONE','FINAL_GATE = PASS'
           ]
           if not all(x in final for x in checks):
               print(final)
-              raise SystemExit('independent semantic review did not qualify')
-          Path('/tmp/sg20-plan-north-final.md').write_text(final+'\n')
+              raise SystemExit('independent semantic implementation review did not qualify')
+          Path('/tmp/sg20-impl-north-final.md').write_text(final+'\n')
+
           summary={
-              'base_main':base,
-              'planning_head':head,
+              'base_main':os.environ['BASE_MAIN'],
+              'implementation_head':head,
+              'implementation_tree':os.environ['IMPL_TREE'],
               'spec_revision':os.environ['SPEC_REVISION'],
+              'packet_digest':packet['packet_digest'],
+              'workpacket_file_sha256':hashlib.sha256(Path('/tmp/sg20-workpacket.json').read_bytes()).hexdigest(),
+              'context_source_count':len(packet['context_sources']),
+              'context_token_total':sum(s['token_cost'] for s in packet['context_sources']),
+              'local_tests_passed':test_total,
               'diff_sha256':os.environ['DIFF_SHA256'],
               'file_list_sha256':os.environ['FILE_LIST_SHA256'],
               'diffcipline_sha256':os.environ['DIFFCIPLINE_SHA256'],
               'review_prompt_sha256':hashlib.sha256(prompt.encode()).hexdigest(),
               'review_final_sha256':hashlib.sha256((final+'\n').encode()).hexdigest(),
           }
-          Path('/tmp/sg20-authoring-summary.json').write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n')
+          Path('/tmp/sg20-implementation-summary.json').write_text(
+              json.dumps(summary,indent=2,sort_keys=True)+'\n'
+          )
           print(json.dumps(summary,indent=2,sort_keys=True))
           PY
 
-          git push origin "HEAD:refs/heads/$PLAN_BRANCH"
+          test -z "$(git status --porcelain)"
+          git push origin "HEAD:refs/heads/$IMPL_BRANCH"
 
           {
-            echo "## SG-000020 authoring qualification"
+            echo "## SG-000020 implementation qualification"
             echo
-            cat /tmp/sg20-authoring-summary.json
+            cat /tmp/sg20-implementation-summary.json
             echo
-            echo "SpecGrain: PASS"
-            echo "Diffcipline: PASS"
+            echo "SG-000011 prerequisite: PASS"
+            echo "SG-000019 prerequisite: PASS"
+            echo "Exact committed-head Diffcipline: PASS"
             echo "Alibaba accounting: 2/2"
-            echo "Independent semantic planning review: PASS"
-            echo "Pushed clean branch: $PLAN_BRANCH"
+            echo "Independent semantic implementation review: PASS"
+            echo "Pushed clean branch: $IMPL_BRANCH"
           } >> "$GITHUB_STEP_SUMMARY"
