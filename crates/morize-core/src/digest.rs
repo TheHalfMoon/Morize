@@ -212,7 +212,7 @@ mod tests {
 
     #[test]
     fn parser_rejects_noncanonical_ascii_at_every_text_position() {
-        const NON_CANONICAL_ASCII: [u8; 4] = [b'A', b'G', b'/', b':'];
+        const NON_CANONICAL_ASCII: [u8; 4] = *b"AG/:";
 
         for index in 0..SHA256_DIGEST_TEXT_LENGTH {
             for byte in NON_CANONICAL_ASCII {
