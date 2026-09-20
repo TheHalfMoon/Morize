@@ -1,0 +1,179 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000011 proof and exact ADR-0004 identity binding revalidated at packet baseline.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=6067e75cd3871235b56ee8d34943b9db3a8f618e",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for identity-type separation, canonical-form strictness, scope containment, and required evidence.",
+        "detail": "Independent CohereLabs North Mini Code review covered exact implementation head and returned PASS.",
+        "evidence_ref": "independent-review:sha256:8f241ee4d269090511acd1b20810c267cf0c25ad7e954e8682b85c4a5e54e70e;head=0389f9c0cb0653232203b6036b83ebdde66dd339",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+        "detail": "Manifest and lockfile diff is empty; cargo metadata reports zero dependencies.",
+        "evidence_ref": "git-diff:6067e75cd3871235b56ee8d34943b9db3a8f618e...026b2e5849759915975f8ae12b111d1185fda89f;cargo-metadata:workspace=1,dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "Every identifier has a canonical text length of 32 ASCII characters and Display emits lowercase hexadecimal only.",
+        "detail": "Display implementation and all-ID test contract prove exact 32 lowercase hex text.",
+        "evidence_ref": "git:026b2e5849759915975f8ae12b111d1185fda89f:crates/morize-core/src/identity.rs;github-actions:pr=35484913735;main=35485311510;local-tests=2/2",
+        "passed": true
+      },
+      {
+        "check_id": "Fixed known byte values round-trip through every identifier type without changing bytes or canonical text.",
+        "detail": "All 18 identifier types round-trip the same known 16-byte value and canonical text.",
+        "evidence_ref": "github-actions:pr=35484913735;main=35485311510;local-tests=2/2",
+        "passed": true
+      },
+      {
+        "check_id": "FromStr accepts exactly canonical lowercase 32-character hexadecimal input and rejects wrong length, uppercase input, and non-hexadecimal characters deterministically.",
+        "detail": "Tests prove canonical parse plus wrong-length, uppercase, and invalid-hex rejection.",
+        "evidence_ref": "github-actions:pr=35484913735;main=35485311510;local-tests=2/2",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact PR head passed Ubuntu, macOS, and Windows; canonical main post-merge run also passed all three.",
+        "evidence_ref": "github-actions:pr=35484913735;ubuntu=success;macos=success;windows=success;main=35485311510",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation changes no path outside crates/morize-core/src/identity.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Independent git diff observes exactly the two authorized paths.",
+        "evidence_ref": "git-diff:6067e75cd3871235b56ee8d34943b9db3a8f618e...026b2e5849759915975f8ae12b111d1185fda89f;sha256=472c6e7528a82ba230298b0c68fb21f8fa98399b040c0fc937c77d30d13a125d;paths=identity.rs,lib.rs",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passed locally and in all exact-head CI matrix legs.",
+        "evidence_ref": "github-actions:pr=35484913735;ubuntu=success;macos=success;windows=success;main=35485311510",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passed locally and in all exact-head CI matrix legs.",
+        "evidence_ref": "github-actions:pr=35484913735;ubuntu=success;macos=success;windows=success;main=35485311510",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "Formatting check passed locally and in all exact-head CI matrix legs.",
+        "evidence_ref": "github-actions:pr=35484913735;ubuntu=success;macos=success;windows=success;main=35485311510",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and includes focused identity tests for all planned identifier classes and rejection cases.",
+        "detail": "Offline tests passed locally and cross-platform, with all planned ID classes and rejection cases exercised.",
+        "evidence_ref": "github-actions:pr=35484913735;main=35485311510;local-tests=2/2",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core exports exactly the planned durable identifier classes as distinct Rust types; no implicit cross-type conversion is implemented.",
+        "detail": "Source and independent review confirm 18 distinct private-storage types and no implicit cross-type conversion.",
+        "evidence_ref": "git:026b2e5849759915975f8ae12b111d1185fda89f:crates/morize-core/src/identity.rs;independent-review:sha256:8f241ee4d269090511acd1b20810c267cf0c25ad7e954e8682b85c4a5e54e70e;head=0389f9c0cb0653232203b6036b83ebdde66dd339",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and canonical-main Ubuntu/macOS/Windows CI succeeded.",
+        "evidence_ref": "github-actions:pr=35484913735;ubuntu=success;macos=success;windows=success;main=35485311510",
+        "passed": true
+      },
+      {
+        "check_id": "E-ID-CANONICAL-TEXT",
+        "detail": "Canonical text implementation and tests passed.",
+        "evidence_ref": "git:026b2e5849759915975f8ae12b111d1185fda89f:crates/morize-core/src/identity.rs;github-actions:pr=35484913735;main=35485311510;local-tests=2/2",
+        "passed": true
+      },
+      {
+        "check_id": "E-ID-NO-DEPENDENCIES",
+        "detail": "No manifest/lockfile change; zero package dependencies.",
+        "evidence_ref": "git-diff:6067e75cd3871235b56ee8d34943b9db3a8f618e...026b2e5849759915975f8ae12b111d1185fda89f;cargo-metadata:workspace=1,dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-ID-ROUNDTRIP-TESTS",
+        "detail": "All 18 typed IDs passed known-byte and canonical-text round trips.",
+        "evidence_ref": "github-actions:pr=35484913735;main=35485311510;local-tests=2/2",
+        "passed": true
+      },
+      {
+        "check_id": "E-ID-STRICT-PARSE",
+        "detail": "Strict parse rejection cases passed.",
+        "evidence_ref": "github-actions:pr=35484913735;main=35485311510;local-tests=2/2",
+        "passed": true
+      },
+      {
+        "check_id": "E-ID-TYPE-SEPARATION",
+        "detail": "Distinct private newtypes and no cross-type conversions confirmed.",
+        "evidence_ref": "git:026b2e5849759915975f8ae12b111d1185fda89f:crates/morize-core/src/identity.rs;independent-review:sha256:8f241ee4d269090511acd1b20810c267cf0c25ad7e954e8682b85c4a5e54e70e;head=0389f9c0cb0653232203b6036b83ebdde66dd339",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000011",
+        "detail": "Canonical SG-000011 verified proof matched exact prerequisite metadata.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=6067e75cd3871235b56ee8d34943b9db3a8f618e",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passed.",
+        "evidence_ref": "github-actions:pr=35484913735;ubuntu=success;macos=success;windows=success;main=35485311510",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with -D warnings passed.",
+        "evidence_ref": "github-actions:pr=35484913735;ubuntu=success;macos=success;windows=success;main=35485311510",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt --check passed.",
+        "evidence_ref": "github-actions:pr=35484913735;ubuntu=success;macos=success;windows=success;main=35485311510",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline cargo test passed.",
+        "evidence_ref": "github-actions:pr=35484913735;main=35485311510;local-tests=2/2",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Independent semantic review PASS with C/H/M/L NONE.",
+        "evidence_ref": "independent-review:sha256:8f241ee4d269090511acd1b20810c267cf0c25ad7e954e8682b85c4a5e54e70e;head=0389f9c0cb0653232203b6036b83ebdde66dd339",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "Bounded two-file implementation can be reverted without persistent data migration.",
+        "evidence_ref": "git-history:base=6067e75cd3871235b56ee8d34943b9db3a8f618e;merge=026b2e5849759915975f8ae12b111d1185fda89f;no-persisted-format-or-user-data",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "026b2e5849759915975f8ae12b111d1185fda89f",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/identity.rs",
+      "crates/morize-core/src/lib.rs"
+    ],
+    "packet_digest": "sha256:f9197057db6eb880d9d170bcf2c051fd9f19473d35c06cfc1ceae129ad92f9eb",
+    "result_digest": "sha256:aad66b24409610b199e59e1c2e95803fcbe91ca5f0a6dd99f924e35365c46b18",
+    "spec_id": "SG-000012",
+    "spec_revision": "sha256:256a8c55a843f00798f3e8e3f0807ee38f676a7f50c9b9380b9d26167f4f7aa7",
+    "verification_version": 1,
+    "verified": true
+  }
+}
