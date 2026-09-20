@@ -1,0 +1,43 @@
+{
+  "acceptance": [],
+  "change_surface": [],
+  "children": [],
+  "context": {},
+  "dependencies": [],
+  "evidence": {},
+  "id": "SG-000020",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free closed in-memory RelationEdgeClass enum, focused tests, and morize-core re-exports. No relation endpoints, evidence references, engine identity, confidence, inference thresholds, graph behavior, authorization, serialization, persistence, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head, exact Explicit/Inferred fidelity, closed-vocabulary correctness, absence of inference-policy/authority/graph/wire semantics, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the relation-edge-class implementation commits; no persisted format, graph state, inference policy, authorization rule, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
+        },
+        {
+          "implementation_revision": "32e9783f9297e7f1c6f907d89aa78dda0ff02353",
+          "record_digest": "sha256:5f162f7283d2dd29ab35c8de2c79fd27af10b943fe8ba7e1c8f3e81ee2261e1f",
+          "spec_id": "SG-000019",
+          "spec_revision": "sha256:0628d10f31cef46fd9e0c11fcd9fe530112d617c164d573c9171e7f5f92ae04a"
+        }
+      ]
+    }
+  },
+  "method": "quick",
+  "outcome": "morize-core exposes one dependency-free closed RelationEdgeClass enum with exactly Explicit and Inferred as fixed by docs/DATA_MODEL.md, without defining relation endpoints, evidence sufficiency, inference thresholds, graph behavior, authorization, serialization, persistence, or policy effects.",
+  "parent_id": "SG-000010",
+  "rationale": "docs/DATA_MODEL.md fixes every MemoryRelation edge_class as explicit or inferred, and MZ-PROV-005 requires inferred graph relationships to identify their inference/evidence class. This Grain adds only the typed edge-class distinction so later relation structure and inference-policy Grains can build on a bounded primitive without inventing thresholds or graph semantics.",
+  "risk": {},
+  "schema_version": 1,
+  "scope_in": [],
+  "scope_out": [],
+  "state": "DRAFT",
+  "title": "Add relation edge class primitive"
+}
