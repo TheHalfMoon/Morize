@@ -1,0 +1,191 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:8e6ed51ba1e20c17f1734eb6be8bac19543898a0ffa81e80504def227f7280fc",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000011 proof prerequisite matched the exact WorkPacket baseline before execution.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=0aeba5b80afaec81a356ffb46f9b36c884cece42",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for baseline-category fidelity, non-exhaustive extensibility, fieldless/no-leak shape, absence of invented payload/transport/wire semantics, scope containment, and required evidence.",
+        "detail": "Independent North Mini Code review is bound exactly to the implementation head and returned PASS with no findings.",
+        "evidence_ref": "independent-review:sha256:646c05d3eefa5a6301d67a9ce9a03c1049786c849fbb816a9d6c141b60e5dea8;head=0f9b20cff52fd3059cc4e6e6db4cd0f2470caa32",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+        "detail": "Cargo manifests and Cargo.lock are unchanged; the workspace remains dependency-free.",
+        "evidence_ref": "git-diff:0aeba5b80afaec81a356ffb46f9b36c884cece42...0f9b20cff52fd3059cc4e6e6db4cd0f2470caa32;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "ErrorCategory is marked non_exhaustive so the policy wording at least does not become an accidental closed future taxonomy; the current implementation adds no category beyond the 13 documented baseline categories.",
+        "detail": "Source and independent review confirm #[non_exhaustive] extensibility with no additional current categories.",
+        "evidence_ref": "git:2115b43fff72735f52b7e4a86af8357da1f6c1b5:crates/morize-core/src/error.rs;independent-review:sha256:646c05d3eefa5a6301d67a9ce9a03c1049786c849fbb816a9d6c141b60e5dea8",
+        "passed": true
+      },
+      {
+        "check_id": "ErrorCategory supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests exercise all 13 variants and confirm distinct value semantics without defining an ordering contract.",
+        "detail": "Focused tests exercise all 13 values, equality/hash distinctness, and Copy behavior; no ordering trait is implemented.",
+        "evidence_ref": "github-actions:pr=35492334399;main=35492477061;local-tests=15/15",
+        "passed": true
+      },
+      {
+        "check_id": "Every baseline variant is fieldless, including NotFound, so this Grain does not introduce protected-existence detail or other diagnostic payload.",
+        "detail": "Every current variant is fieldless; NotFound carries no protected-existence detail or diagnostic payload.",
+        "evidence_ref": "git:2115b43fff72735f52b7e4a86af8357da1f6c1b5:crates/morize-core/src/error.rs;notfound=fieldless;independent-review:sha256:646c05d3eefa5a6301d67a9ce9a03c1049786c849fbb816a9d6c141b60e5dea8",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact PR-head CI run completed successfully on Ubuntu, macOS, and Windows before merge.",
+        "evidence_ref": "github-actions:pr=35492334399;head=0f9b20cff52fd3059cc4e6e6db4cd0f2470caa32;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation changes no path outside crates/morize-core/src/error.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Independent diff observation contains exactly error.rs and lib.rs, both within the authorized change surface.",
+        "evidence_ref": "git-diff:0aeba5b80afaec81a356ffb46f9b36c884cece42...0f9b20cff52fd3059cc4e6e6db4cd0f2470caa32;sha256=c4350911e7d084dd78b29a5c4775d4c2fb39745ca13b1e2ec8c01d603eb031bf;paths=error.rs,lib.rs",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation defines no Display, FromStr, std::error::Error implementation, concrete error payload/message/source, retryability flag, transport/status/exit-code mapping, serde integration, numeric repr/discriminants, or wire/persistence format.",
+        "detail": "Source and independent review confirm no concrete payload/message/source, retry, transport/status/exit-code, serde, numeric, wire, persistence, or std::error::Error semantics were introduced.",
+        "evidence_ref": "independent-review:sha256:646c05d3eefa5a6301d67a9ce9a03c1049786c849fbb816a9d6c141b60e5dea8;head=0f9b20cff52fd3059cc4e6e6db4cd0f2470caa32",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passed locally, on the exact PR head, and on canonical main.",
+        "evidence_ref": "github-actions:pr=35492334399;main=35492477061;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passed locally, on the exact PR head, and on canonical main.",
+        "evidence_ref": "github-actions:pr=35492334399;main=35492477061;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "Formatting passed locally, on the exact PR head, and on canonical main.",
+        "evidence_ref": "github-actions:pr=35492334399;main=35492477061;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and includes focused tests for all baseline error categories and required value semantics.",
+        "detail": "Offline workspace tests passed locally with 15/15 tests and passed on the exact PR head and canonical main.",
+        "evidence_ref": "github-actions:pr=35492334399;main=35492477061;local-tests=15/15",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core exports ErrorCategory from one new error module with all 13 baseline public error categories documented by docs/API_COMPATIBILITY.md and no concrete error payload behavior.",
+        "detail": "Canonical merge exports the planned ErrorCategory primitive with exactly the 13 current baseline variants.",
+        "evidence_ref": "git:2115b43fff72735f52b7e4a86af8357da1f6c1b5:crates/morize-core/src/error.rs;review-head=0f9b20cff52fd3059cc4e6e6db4cd0f2470caa32",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and canonical-main CI both passed Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35492334399;main=35492477061;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-ERROR-BASELINE-CATEGORIES",
+        "detail": "Exactly the 13 documented current baseline public error categories are implemented.",
+        "evidence_ref": "git:2115b43fff72735f52b7e4a86af8357da1f6c1b5:crates/morize-core/src/error.rs;github-actions:pr=35492334399;main=35492477061",
+        "passed": true
+      },
+      {
+        "check_id": "E-ERROR-FIELDLESS",
+        "detail": "All 13 current baseline variants are fieldless, including NotFound.",
+        "evidence_ref": "git:2115b43fff72735f52b7e4a86af8357da1f6c1b5:crates/morize-core/src/error.rs;notfound=fieldless",
+        "passed": true
+      },
+      {
+        "check_id": "E-ERROR-NO-DEPENDENCIES",
+        "detail": "No Cargo manifest or lockfile change; no runtime, build, or test dependency was added.",
+        "evidence_ref": "git-diff:0aeba5b80afaec81a356ffb46f9b36c884cece42...0f9b20cff52fd3059cc4e6e6db4cd0f2470caa32;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-ERROR-NO-TRANSPORT-WIRE",
+        "detail": "Source and independent review confirm no payload, retry, transport/status/exit-code, serialization, numeric, wire, or persistence semantics.",
+        "evidence_ref": "git:2115b43fff72735f52b7e4a86af8357da1f6c1b5:crates/morize-core/src/error.rs;independent-review:sha256:646c05d3eefa5a6301d67a9ce9a03c1049786c849fbb816a9d6c141b60e5dea8",
+        "passed": true
+      },
+      {
+        "check_id": "E-ERROR-NONEXHAUSTIVE",
+        "detail": "ErrorCategory is non-exhaustive while defining no current category beyond the documented baseline.",
+        "evidence_ref": "git:2115b43fff72735f52b7e4a86af8357da1f6c1b5:crates/morize-core/src/error.rs;independent-review:sha256:646c05d3eefa5a6301d67a9ce9a03c1049786c849fbb816a9d6c141b60e5dea8",
+        "passed": true
+      },
+      {
+        "check_id": "E-ERROR-VALUE-SEMANTICS",
+        "detail": "Focused tests prove distinct equality/hash values and Copy behavior without ordering semantics.",
+        "evidence_ref": "github-actions:pr=35492334399;main=35492477061;local-tests=15/15",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000011",
+        "detail": "Canonical SG-000011 verified proof and ancestry revalidated at the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=0aeba5b80afaec81a356ffb46f9b36c884cece42",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passed locally and in exact-head/post-merge CI.",
+        "evidence_ref": "github-actions:pr=35492334399;main=35492477061;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with -D warnings passed locally and in exact-head/post-merge CI.",
+        "evidence_ref": "github-actions:pr=35492334399;main=35492477061;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt --all -- --check passed locally and in exact-head/post-merge CI.",
+        "evidence_ref": "github-actions:pr=35492334399;main=35492477061;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline workspace tests passed locally and cross-platform.",
+        "evidence_ref": "github-actions:pr=35492334399;main=35492477061;local-tests=15/15",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Exact-head independent semantic review returned PASS with C/H/M/L NONE.",
+        "evidence_ref": "independent-review:sha256:646c05d3eefa5a6301d67a9ce9a03c1049786c849fbb816a9d6c141b60e5dea8;head=0f9b20cff52fd3059cc4e6e6db4cd0f2470caa32",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "A normal forward revert removes the primitive; no persisted representation, migration, transport contract, or user data depends on it.",
+        "evidence_ref": "git-history:base=0aeba5b80afaec81a356ffb46f9b36c884cece42;merge=2115b43fff72735f52b7e4a86af8357da1f6c1b5;no-persisted-format-migration-transport-or-user-data",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "2115b43fff72735f52b7e4a86af8357da1f6c1b5",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/error.rs",
+      "crates/morize-core/src/lib.rs"
+    ],
+    "packet_digest": "sha256:df30b3b39d9e27ded48959c9537040a7ce7954f43079d543efff3819685ac2f6",
+    "result_digest": "sha256:2da8203b29909c65e9bd77261ccf27f9b8da2829267734b7da4f351c0e231530",
+    "spec_id": "SG-000016",
+    "spec_revision": "sha256:de2f50782424f7cb013a6a924031f06c6f87a426843d364a4a703f55c0e6cd91",
+    "verification_version": 1,
+    "verified": true
+  }
+}
