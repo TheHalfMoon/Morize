@@ -4,6 +4,7 @@
 pub mod bounded;
 pub mod bounded_collection;
 pub mod compatibility;
+pub mod error;
 pub mod identity;
 
 pub use bounded::{BoundedUtf8, Utf8BoundsError};
@@ -11,6 +12,7 @@ pub use bounded_collection::{
     BoundedVec, BoundedVecBuildError, BoundedVecPushError, CollectionBoundsError,
 };
 pub use compatibility::CompatibilityClass;
+pub use error::ErrorCategory;
 pub use identity::{
     BranchId, ConnectorBindingId, ContextBundleId, DecisionId, EvidenceId, ID_BYTE_LENGTH,
     ID_TEXT_LENGTH, IdParseError, MemoryId, MemoryVersionId, MutationId, ObservationId,
