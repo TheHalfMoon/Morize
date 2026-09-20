@@ -1,0 +1,173 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:a4e70079894d903032fcf4e5cd29694f8b382d5f510eaadcbf79d2e802d2f7dc",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000011 proof prerequisite matched the exact WorkPacket baseline before execution.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=e7a5288dec1f6ea689d8eeb78a1239874fa25583",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for policy fidelity, closed-vocabulary correctness, absence of invented serialization/ordering semantics, scope containment, and required evidence.",
+        "detail": "Independent North Mini Code review is bound exactly to the implementation head and returned PASS with no findings.",
+        "evidence_ref": "independent-review:sha256:3fea77908182730aac02eafd4a4aeee4e3e1e390aaddd81f7b461165e1687a74;head=66f5f61d67d933d57119871523d75b15ea016a35",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+        "detail": "Cargo manifests and Cargo.lock are unchanged; the workspace remains dependency-free.",
+        "evidence_ref": "git-diff:e7a5288dec1f6ea689d8eeb78a1239874fa25583...66f5f61d67d933d57119871523d75b15ea016a35;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "CompatibilityClass supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests exercise all five variants and confirm distinct value semantics without defining an ordering contract.",
+        "detail": "Focused tests exercise all five values, equality/hash distinctness, and Copy behavior; no ordering trait is implemented.",
+        "evidence_ref": "github-actions:pr=35490485470;main=35490585996;local-tests=13/13",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact PR-head CI run completed successfully on Ubuntu, macOS, and Windows before merge.",
+        "evidence_ref": "github-actions:pr=35490485470;head=66f5f61d67d933d57119871523d75b15ea016a35;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "The enum is a closed vocabulary for this Grain: it is not marked non_exhaustive and defines no additional variants.",
+        "detail": "Source and independent review confirm a closed five-variant enum with no non_exhaustive marker or extra variants.",
+        "evidence_ref": "git:1b67e7af6159bd0f3a8dde1a346bed78fb3135f2:crates/morize-core/src/compatibility.rs;independent-review:sha256:3fea77908182730aac02eafd4a4aeee4e3e1e390aaddd81f7b461165e1687a74",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation changes no path outside crates/morize-core/src/compatibility.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Independent diff observation contains exactly compatibility.rs and lib.rs, both within the authorized change surface.",
+        "evidence_ref": "git-diff:e7a5288dec1f6ea689d8eeb78a1239874fa25583...66f5f61d67d933d57119871523d75b15ea016a35;sha256=8d8b765079c09d4714663bc8589d6dc7d52a53448f3c0c5fdcec4d963eb1e304;paths=compatibility.rs,lib.rs",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation defines no Display, FromStr, serde integration, numeric repr/discriminants, wire/persistence format, version-negotiation behavior, deprecation timing, or public error taxonomy.",
+        "detail": "Source and independent review confirm no textual/numeric encoding, serde, persistence, negotiation, deprecation timing, or error taxonomy was introduced.",
+        "evidence_ref": "independent-review:sha256:3fea77908182730aac02eafd4a4aeee4e3e1e390aaddd81f7b461165e1687a74;head=66f5f61d67d933d57119871523d75b15ea016a35",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passed locally, on the exact PR head, and on canonical main.",
+        "evidence_ref": "github-actions:pr=35490485470;main=35490585996;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passed locally, on the exact PR head, and on canonical main.",
+        "evidence_ref": "github-actions:pr=35490485470;main=35490585996;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "Formatting passed locally, on the exact PR head, and on canonical main.",
+        "evidence_ref": "github-actions:pr=35490485470;main=35490585996;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and includes focused tests for the five compatibility variants and required value semantics.",
+        "detail": "Offline workspace tests passed locally with 13/13 tests and passed on the exact PR head and canonical main.",
+        "evidence_ref": "github-actions:pr=35490485470;main=35490585996;local-tests=13/13",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core exports CompatibilityClass from one new compatibility module with exactly Internal, Experimental, Stable, Deprecated, and Removed variants and no additional public compatibility behavior.",
+        "detail": "Canonical merge exports exactly the five planned compatibility variants and no additional compatibility behavior.",
+        "evidence_ref": "git:1b67e7af6159bd0f3a8dde1a346bed78fb3135f2:crates/morize-core/src/compatibility.rs;review-head=66f5f61d67d933d57119871523d75b15ea016a35",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-COMPAT-NO-DEPENDENCIES",
+        "detail": "No Cargo manifest or lockfile change; no runtime, build, or test dependency was added.",
+        "evidence_ref": "git-diff:e7a5288dec1f6ea689d8eeb78a1239874fa25583...66f5f61d67d933d57119871523d75b15ea016a35;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-COMPAT-NO-WIRE-SEMANTICS",
+        "detail": "Source and independent review confirm no wire, serialization, numeric representation, parsing, or persistence semantics.",
+        "evidence_ref": "git:1b67e7af6159bd0f3a8dde1a346bed78fb3135f2:crates/morize-core/src/compatibility.rs;independent-review:sha256:3fea77908182730aac02eafd4a4aeee4e3e1e390aaddd81f7b461165e1687a74",
+        "passed": true
+      },
+      {
+        "check_id": "E-COMPAT-VALUE-SEMANTICS",
+        "detail": "Focused tests prove distinct equality/hash values and Copy behavior without ordering semantics.",
+        "evidence_ref": "github-actions:pr=35490485470;main=35490585996;local-tests=13/13",
+        "passed": true
+      },
+      {
+        "check_id": "E-COMPAT-VARIANTS",
+        "detail": "Exactly Internal, Experimental, Stable, Deprecated, and Removed are implemented.",
+        "evidence_ref": "git:1b67e7af6159bd0f3a8dde1a346bed78fb3135f2:crates/morize-core/src/compatibility.rs;github-actions:pr=35490485470;main=35490585996",
+        "passed": true
+      },
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and canonical-main CI both passed Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35490485470;main=35490585996;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000011",
+        "detail": "Canonical SG-000011 verified proof and ancestry revalidated at the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000011:sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9;packet-baseline=e7a5288dec1f6ea689d8eeb78a1239874fa25583",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passed locally and in exact-head/post-merge CI.",
+        "evidence_ref": "github-actions:pr=35490485470;main=35490585996;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with -D warnings passed locally and in exact-head/post-merge CI.",
+        "evidence_ref": "github-actions:pr=35490485470;main=35490585996;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt --all -- --check passed locally and in exact-head/post-merge CI.",
+        "evidence_ref": "github-actions:pr=35490485470;main=35490585996;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline workspace tests passed locally and cross-platform.",
+        "evidence_ref": "github-actions:pr=35490485470;main=35490585996;local-tests=13/13",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Exact-head independent semantic review returned PASS with C/H/M/L NONE.",
+        "evidence_ref": "independent-review:sha256:3fea77908182730aac02eafd4a4aeee4e3e1e390aaddd81f7b461165e1687a74;head=66f5f61d67d933d57119871523d75b15ea016a35",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "A normal forward revert removes the primitive; no persisted representation or user data depends on it.",
+        "evidence_ref": "git-history:base=e7a5288dec1f6ea689d8eeb78a1239874fa25583;merge=1b67e7af6159bd0f3a8dde1a346bed78fb3135f2;no-persisted-format-or-user-data",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "1b67e7af6159bd0f3a8dde1a346bed78fb3135f2",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/compatibility.rs",
+      "crates/morize-core/src/lib.rs"
+    ],
+    "packet_digest": "sha256:886b365e7daa65d2b5c0b9c7c79bdf26eae72b306860db4c133c364defd2d51b",
+    "result_digest": "sha256:907b1fcb0106908404cd4661a88b9ca1408f2f5ba081e8921ebc56e4dee7f588",
+    "spec_id": "SG-000015",
+    "spec_revision": "sha256:24174508f6301a0fa9683d6f3ef3c88e0d1a55c78019eac22b3b56f4e91254ba",
+    "verification_version": 1,
+    "verified": true
+  }
+}
