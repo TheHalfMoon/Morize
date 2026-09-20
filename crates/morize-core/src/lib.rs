@@ -5,6 +5,7 @@ pub mod bounded;
 pub mod bounded_collection;
 pub mod compatibility;
 pub mod decision;
+pub mod digest;
 pub mod error;
 pub mod identity;
 pub mod mutation;
@@ -18,6 +19,9 @@ pub use bounded_collection::{
 };
 pub use compatibility::CompatibilityClass;
 pub use decision::MemoryAction;
+pub use digest::{
+    DigestParseError, SHA256_DIGEST_BYTE_LENGTH, SHA256_DIGEST_TEXT_LENGTH, Sha256Digest,
+};
 pub use error::ErrorCategory;
 pub use identity::{
     BranchId, ConnectorBindingId, ContextBundleId, DecisionId, EvidenceId, ID_BYTE_LENGTH,
