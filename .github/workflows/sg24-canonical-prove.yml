@@ -1,0 +1,71 @@
+name: sg24-canonical-prove
+
+on:
+  push:
+    branches:
+      - automation/sg-000024-canonical-prove
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout automation branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+
+      - name: Prove canonical SG-000024 and inspect next frontier
+        shell: bash
+        env:
+          CANONICAL_MAIN: 39a5c0d157db948519a8bf2f8101a91662eee679
+          SPEC_GRAIN_PIN: 5de7d6499bb0a9e3a191fc0934399cf099d1980a
+          EXPECTED_RECORD: sha256:dcb3063fc9d7de05fba38f4ec21bfd21727694e443187fc5a91621bdb439bc25
+          EXPECTED_SPEC_REVISION: sha256:71afd4f7e9a9d16438fdda6181a0a6774c731e87737711f5f6d8e38e350b7e96
+          EXPECTED_IMPL_REVISION: 8cf97145d081f256c18232f2737fbfe1db161baf
+        run: |
+          set -euo pipefail
+          git fetch origin main --prune
+          test "$(git rev-parse origin/main)" = "$CANONICAL_MAIN"
+          git checkout --detach "$CANONICAL_MAIN"
+
+          python -m pip install --disable-pip-version-check --quiet \
+            "git+https://github.com/TheHalfMoon/SpecGrain.git@$SPEC_GRAIN_PIN"
+
+          specgrain check --json . > /tmp/check.json
+          specgrain prove --json SG-000024 . > /tmp/prove.json
+          specgrain next --json . > /tmp/next.json
+
+          python - <<'PY'
+          import json, os
+
+          check=json.load(open('/tmp/check.json'))
+          prove=json.load(open('/tmp/prove.json'))
+          nxt=json.load(open('/tmp/next.json'))
+
+          assert check['valid'] is True and check['issues']==[]
+          assert prove['verified'] is True
+          assert prove['latest_record_digest']==os.environ['EXPECTED_RECORD']
+          assert prove['record_count']==1
+          latest=prove['records'][-1]['report']
+          assert latest['spec_revision']==os.environ['EXPECTED_SPEC_REVISION']
+          assert latest['implementation_revision']==os.environ['EXPECTED_IMPL_REVISION']
+          assert latest['issues']==[]
+          assert latest['verified'] is True
+
+          print('CANONICAL_MAIN='+os.environ['CANONICAL_MAIN'])
+          print('SPEC_CHECK_VALID=true')
+          print('SG000024_VERIFIED=true')
+          print('SG000024_RECORD_COUNT=1')
+          print('SG000024_RECORD_DIGEST='+prove['latest_record_digest'])
+          print('SG000024_SPEC_REVISION='+latest['spec_revision'])
+          print('SG000024_IMPLEMENTATION_REVISION='+latest['implementation_revision'])
+          print('NEXT_JSON='+json.dumps(nxt,sort_keys=True,separators=(',',':')))
+          PY
