@@ -1,0 +1,101 @@
+{
+  "acceptance": [
+    "morize-core exports ErrorCategory from one new error module with all 13 baseline public error categories documented by docs/API_COMPATIBILITY.md and no concrete error payload behavior.",
+    "ErrorCategory is marked non_exhaustive so the policy wording at least does not become an accidental closed future taxonomy; the current implementation adds no category beyond the 13 documented baseline categories.",
+    "Every baseline variant is fieldless, including NotFound, so this Grain does not introduce protected-existence detail or other diagnostic payload.",
+    "ErrorCategory supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests exercise all 13 variants and confirm distinct value semantics without defining an ordering contract.",
+    "The implementation defines no Display, FromStr, std::error::Error implementation, concrete error payload/message/source, retryability flag, transport/status/exit-code mapping, serde integration, numeric repr/discriminants, or wire/persistence format.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and includes focused tests for all baseline error categories and required value semantics.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for baseline-category fidelity, non-exhaustive extensibility, fieldless/no-leak shape, absence of invented payload/transport/wire semantics, scope containment, and required evidence.",
+    "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+    "The implementation changes no path outside crates/morize-core/src/error.rs and crates/morize-core/src/lib.rs."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/error.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
+  "children": [],
+  "context": {
+    "budget_tokens": 12000,
+    "estimated_tokens": 7200
+  },
+  "dependencies": [],
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000011",
+      "E-ERROR-BASELINE-CATEGORIES",
+      "E-ERROR-NONEXHAUSTIVE",
+      "E-ERROR-FIELDLESS",
+      "E-ERROR-VALUE-SEMANTICS",
+      "E-ERROR-NO-TRANSPORT-WIRE",
+      "E-ERROR-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
+  "id": "SG-000016",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free non-exhaustive in-memory error-category enum, focused tests, and morize-core re-exports. No concrete error payload, message text, source chaining, retryability flag, transport/status/exit-code mapping, serialization, persistence, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head, baseline-category fidelity, non-exhaustive extensibility, absence of transport/wire semantics, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the baseline error-category implementation commits; no persisted format, migration, transport contract, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
+        }
+      ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "A single standard-library-only non-exhaustive enum inside existing morize-core is the narrowest implementation of the already-documented baseline public error taxonomy. It preserves future extension while deferring payloads, messages, retry policy, transport mappings, serialization, and persistence."
+      },
+      "safety": {
+        "requirements": [
+          "The NotFound baseline category must remain fieldless in this Grain and must not introduce protected-existence disclosure detail or payload."
+        ],
+        "status": "requirements-defined"
+      },
+      "unresolved_decisions": [],
+      "version": 1
+    }
+  },
+  "method": "controlled",
+  "outcome": "morize-core exposes one dependency-free non-exhaustive ErrorCategory enum covering every baseline public error category already fixed by docs/API_COMPATIBILITY.md, without defining error payloads, messages, transport mappings, retry policy, serialization, persistence, or third-party dependencies.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 requires a stable public error taxonomy, and docs/API_COMPATIBILITY.md already fixes the baseline categories while explicitly saying public APIs should distinguish at least those categories. This Grain adds only the typed in-memory category vocabulary and preserves future extension without deciding concrete error payload or wire behavior.",
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the baseline error-category implementation commits; no persisted format, migration, transport contract, or user data has been written by this Grain."
+  },
+  "schema_version": 1,
+  "scope_in": [
+    "Define public non-exhaustive ErrorCategory with the 13 baseline categories fixed by docs/API_COMPATIBILITY.md: InvalidInput, UnsupportedVersion, AuthenticationFailure, AuthorizationDenial, ConflictOrStalePrecondition, ReviewRequired, Quarantine, NotFound, ResourceOrBudgetExceeded, TransientProviderFailure, PermanentConnectorFailure, UnresolvedOrUnknownWriteOutcome, and InternalCorruptionOrRecoveryRequired.",
+    "Keep every baseline category fieldless and derive only Clone, Copy, Debug, PartialEq, Eq, and Hash so the vocabulary is typed without defining payload, ordering, text, retry, transport, or persistence semantics.",
+    "Document that NotFound is the category used where protected existence must not be leaked, without defining a diagnostic payload or disclosure mechanism in this Grain.",
+    "Add standard-library-only focused tests that exercise all 13 baseline variants, prove they are distinct hashable values, and prove Copy behavior without textual or numeric encoding."
+  ],
+  "scope_out": [
+    "Concrete error structs/enums carrying payloads, diagnostic message text, source/error chaining, backtraces, retryability flags, error codes, HTTP/IPC/MCP status mappings, CLI exit codes, or authorization disclosure behavior.",
+    "Display/FromStr, serde or other serialization integration, numeric repr/discriminants, persisted or wire encoding, configuration formats, migrations, storage, retrieval, or domain-record integration.",
+    "Any third-party runtime, build, or test dependency."
+  ],
+  "state": "GRAIN",
+  "title": "Add baseline public error categories"
+}
