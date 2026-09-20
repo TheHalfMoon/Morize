@@ -405,13 +405,27 @@ jobs:
           ])
 
           Path('/tmp/sg20-evidence-north-prompt.txt').write_text(prompt)
-          raw=Client('CohereLabs/North-Mini-Code-1.0',verbose=False).predict(prompt,'Rust','[]','{}',api_name='/chat')
-          obj=json.loads(raw) if isinstance(raw,str) else raw
-          content=''
-          for msg in obj.get('history',[]) if isinstance(obj,dict) else []:
-              if msg.get('role')=='assistant':
-                  content=msg.get('content','')
-          final=content.split('</think>',1)[-1].strip() if '</think>' in content else content.strip()
+          import time
+          client=Client('CohereLabs/North-Mini-Code-1.0',verbose=False)
+          final=''
+          for attempt in range(1,4):
+              raw=client.predict(prompt,'Rust','[]','{}',api_name='/chat')
+              obj=json.loads(raw) if isinstance(raw,str) else raw
+              content=''
+              for msg in obj.get('history',[]) if isinstance(obj,dict) else []:
+                  if msg.get('role')=='assistant':
+                      content=msg.get('content','')
+              candidate=content.split('</think>',1)[-1].strip() if '</think>' in content else content.strip()
+              structured=(f'REVIEW_HEAD\n{head}' in candidate and 'REVIEW_KIND\nSG-000020_EVIDENCE' in candidate)
+              if structured:
+                  final=candidate
+                  break
+              print(f'REVIEW_PROVIDER_ATTEMPT_{attempt}=INVALID_NONSTRUCTURED')
+              print(candidate[:500])
+              if attempt < 3:
+                  time.sleep(10)
+          if not final:
+              raise SystemExit('independent semantic evidence reviewer returned no structured review after 3 provider attempts')
           checks=[
               f'REVIEW_HEAD\n{head}',
               'REVIEW_KIND\nSG-000020_EVIDENCE',
@@ -420,7 +434,7 @@ jobs:
           ]
           if not all(x in final for x in checks):
               print(final)
-              raise SystemExit('independent semantic evidence review did not qualify')
+              raise SystemExit('independent semantic evidence review produced a structured non-PASS result')
           Path('/tmp/sg20-evidence-north-final.md').write_text(final+'\n')
 
           summary=json.loads(Path('/tmp/sg20-evidence-native-summary.json').read_text())
