@@ -1,4 +1,4 @@
-name: sg19-evidence
+name: sg19-canonical-proof
 
 on:
   push:
@@ -6,10 +6,10 @@ on:
       - automation/sg-000019-authoring
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  evidence:
+  prove:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout automation branch
@@ -22,446 +22,40 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c
-        with:
-          components: rustfmt, clippy
-
-      - name: Generate and qualify SG-000019 native evidence
+      - name: Prove SG-000019 on exact canonical main
         shell: bash
         env:
-          EVIDENCE_BRANCH: evidence/sg-000019-verification
-          IMPL_BASE_MAIN: 92d9f348274574af0b8b7acd99fac4bfbaa36e78
-          IMPL_HEAD: c3d6fea4a493ce2f62d52f116d277aba7e357098
-          IMPL_MERGE: 32e9783f9297e7f1c6f907d89aa78dda0ff02353
-          IMPL_DIFF_SHA256: 3c13e23804fe1b50e69a3a6a2eee4ac9b342ca1f6d61c93e592305318174618b
-          SPEC_REVISION: sha256:0628d10f31cef46fd9e0c11fcd9fe530112d617c164d573c9171e7f5f92ae04a
-          PACKET_DIGEST: sha256:e231d31aeb4223150e207f90cbd8099716c600cc2d5e0f21c4d5be7f50d33bf0
-          WORKPACKET_FILE_SHA256: aabc9c43b92f9950d8cefc7659094878e8063ad8227d15d1b1c3eb74b20ac50a
-          IMPL_REVIEW_SHA256: 6767c033dee6b18c6e3d3ff147b83bdb24c4d3627a3f20c3e9f18d9478986b16
-          PR_CI_RUN: "35497251443"
-          MAIN_CI_RUN: "35497302281"
-          SG11_RECORD: sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9
+          CANONICAL_MAIN: 7551ef18458470db2d5bbfbcb76adb17315a057e
+          EXPECTED_RECORD: sha256:5f162f7283d2dd29ab35c8de2c79fd27af10b943fe8ba7e1c8f3e81ee2261e1f
           SPEC_GRAIN_PIN: 5de7d6499bb0a9e3a191fc0934399cf099d1980a
-          DIFFCIPLINE_PIN: 5cb1c77340b75649f6168e0e8f66479ea047ea96
-          OCR_PIN: 85cecfe5f935da2b2aae8f91ce4fee8ed343a681
         run: |
           set -euo pipefail
-
           git fetch origin main --prune
-          test "$(git rev-parse origin/main)" = "$IMPL_MERGE"
-          if git ls-remote --exit-code origin "refs/heads/$EVIDENCE_BRANCH" >/dev/null 2>&1; then
-            echo "Refusing to overwrite existing $EVIDENCE_BRANCH" >&2
-            exit 2
-          fi
-
-          git config user.name "Gocceri"
-          git config user.email "azialshehri@gmail.com"
+          test "$(git rev-parse origin/main)" = "$CANONICAL_MAIN"
+          git checkout --detach origin/main
+          test -z "$(git status --porcelain)"
 
           python -m pip install --disable-pip-version-check --quiet \
             "git+https://github.com/TheHalfMoon/SpecGrain.git@$SPEC_GRAIN_PIN"
 
-          rm -rf /tmp/sg19-packet-baseline
-          git worktree add --detach /tmp/sg19-packet-baseline "$IMPL_BASE_MAIN"
+          specgrain check --json . > /tmp/sg19-canonical-check.json
+          specgrain prove --json SG-000019 . > /tmp/sg19-canonical-proof.json
+
           python - <<'PY'
-          import json, subprocess
+          import json,os
           from pathlib import Path
-
-          root=Path('/tmp/sg19-packet-baseline')
-          base='92d9f348274574af0b8b7acd99fac4bfbaa36e78'
-          sources = [
-              ('sg19-grain','.specgrain/specs/SG-000019.json',
-               'Exact GRAIN contract, acceptance criteria, change surface, and evidence requirements.',100),
-              ('data-model','docs/DATA_MODEL.md',
-               'Canonical source for the initial MemoryRelation relation vocabulary and data-model boundary.',90),
-              ('requirements','docs/REQUIREMENTS.md',
-               'Canonical P1 and provenance requirements constraining graph and inference semantics.',80),
-              ('proof-prerequisites','docs/adr/0004-verified-proof-prerequisites.md',
-               'Canonical proof-prerequisite policy used by this Grain.',70),
-              ('morize-core-lib','crates/morize-core/src/lib.rs',
-               'Exact current export surface that the authorized implementation may extend.',60),
-          ]
-          records=[]
-          for source_id,path,reason,priority in sources:
-              data=(root/path).read_bytes()
-              blob=subprocess.check_output(
-                  ['git','-C',str(root),'rev-parse',f'HEAD:{path}'], text=True
-              ).strip()
-              records.append({
-                  'source_id': source_id,
-                  'provenance': f'git:{base}:{path}',
-                  'selection_reason': reason,
-                  'revision': f'git:{blob}',
-                  'size_bytes': len(data),
-                  'token_cost': (len(data)+3)//4,
-                  'requirement': 'required',
-                  'priority': priority,
-              })
-          Path('/tmp/sg19-context-sources-evidence.json').write_text(
-              json.dumps(records,indent=2,sort_keys=True,ensure_ascii=False)+'\n'
-          )
+          check=json.load(open('/tmp/sg19-canonical-check.json'))
+          proof=json.load(open('/tmp/sg19-canonical-proof.json'))
+          spec=json.loads(Path('.specgrain/specs/SG-000019.json').read_text())
+          assert check['valid'] is True and check['issues']==[]
+          assert proof['verified'] is True
+          assert proof['record_count']==1
+          assert proof['latest_record_digest']==os.environ['EXPECTED_RECORD']
+          assert spec['state']=='GRAIN'
+          print('CANONICAL_MAIN='+os.environ['CANONICAL_MAIN'])
+          print('SG19_VERIFIED=true')
+          print('SG19_RECORD_COUNT=1')
+          print('SG19_LATEST_RECORD='+proof['latest_record_digest'])
+          print('SG19_SPEC_STATE=GRAIN')
+          print('SPEC_GRAIN_CHECK=PASS')
           PY
-
-          specgrain packet SG-000019 /tmp/sg19-packet-baseline \
-            --context-sources /tmp/sg19-context-sources-evidence.json \
-            --json > /tmp/sg19-workpacket-evidence.json
-
-          python - <<'PY'
-          import hashlib,json,os
-          from pathlib import Path
-          p=Path('/tmp/sg19-workpacket-evidence.json')
-          x=json.loads(p.read_text())
-          assert x['packet_digest']==os.environ['PACKET_DIGEST']
-          assert hashlib.sha256(p.read_bytes()).hexdigest()==os.environ['WORKPACKET_FILE_SHA256']
-          assert x['spec_revision']==os.environ['SPEC_REVISION']
-          assert len(x['context_sources'])==5
-          assert sum(s['token_cost'] for s in x['context_sources'])==11187
-          print('WorkPacket reproduction: PASS')
-          PY
-
-          git worktree remove /tmp/sg19-packet-baseline
-          git switch -C "$EVIDENCE_BRANCH" origin/main
-          test "$(git rev-parse HEAD)" = "$IMPL_MERGE"
-          test -z "$(git status --porcelain)"
-
-          python - <<'PY'
-          from pathlib import Path
-          import hashlib,json,os
-          from specgrain import (
-              WorkPacket, ExecutionResult, CheckEvidence, load_project,
-              verify_execution, append_verification_report,
-          )
-
-          root=Path('.')
-          project=load_project(root)
-          node=next(n for n in project.specs if n.id=='SG-000019')
-          packet=WorkPacket.from_dict(json.loads(Path('/tmp/sg19-workpacket-evidence.json').read_text()))
-
-          base=os.environ['IMPL_BASE_MAIN']
-          head=os.environ['IMPL_HEAD']
-          merge=os.environ['IMPL_MERGE']
-          pr_run=os.environ['PR_CI_RUN']
-          main_run=os.environ['MAIN_CI_RUN']
-          review=os.environ['IMPL_REVIEW_SHA256']
-          diff=os.environ['IMPL_DIFF_SHA256']
-          proof_record=os.environ['SG11_RECORD']
-          paths=('crates/morize-core/src/relation.rs','crates/morize-core/src/lib.rs')
-
-          result=ExecutionResult(
-              packet_digest=packet.packet_digest,
-              status='succeeded',
-              summary='Implemented and canonically merged the bounded SG-000019 baseline memory-relation-type vocabulary with exact-head and post-merge verification.',
-              changed_paths=paths,
-              reported_evidence=tuple(packet.required_evidence),
-          )
-
-          refs=[
-              f'git:{merge}:crates/morize-core/src/relation.rs;review-head={head}',
-              f'git:{merge}:crates/morize-core/src/relation.rs;non-exhaustive;independent-review:sha256:{review}',
-              f'git:{merge}:crates/morize-core/src/relation.rs;fieldless-descriptive-only;independent-review:sha256:{review}',
-              f'github-actions:pr={pr_run};main={main_run};local-tests=21/21',
-              f'independent-review:sha256:{review};head={head}',
-              f'github-actions:pr={pr_run};main={main_run};check=fmt',
-              f'github-actions:pr={pr_run};main={main_run};check=cargo-check',
-              f'github-actions:pr={pr_run};main={main_run};check=clippy',
-              f'github-actions:pr={pr_run};main={main_run};local-tests=21/21',
-              f'git-diff:{base}...{head};manifest-lock=unchanged;dependencies=0',
-              f'github-actions:pr={pr_run};head={head};ubuntu=success;macos=success;windows=success',
-              f'independent-review:sha256:{review};head={head}',
-              f'specgrain:SG-000011:{proof_record};packet-baseline={base}',
-              f'git-diff:{base}...{head};sha256={diff};paths=relation.rs,lib.rs',
-          ]
-          details=[
-              'Canonical merge exports exactly the 11 planned current MemoryRelationType variants and no additional current relation type.',
-              'Source and independent review confirm non-exhaustive extensibility for the repository-defined initial vocabulary.',
-              'Every current variant is fieldless descriptive classification only; no value establishes endpoints, edge class, evidence sufficiency, truth, authority, graph mutation, or memory mutation.',
-              'Focused tests exercise all 11 values, equality/hash distinctness, and Copy behavior; no ordering trait is implemented.',
-              'Source and independent review confirm no MemoryRelation struct, endpoints, edge class, evidence/inference thresholds, graph traversal/mutation, authorization, parser, serialization, numeric, wire, or persistence semantics were introduced.',
-              'Formatting passed in isolated qualification, on the exact PR head, and on canonical main.',
-              'Offline cargo check passed in isolated qualification, on the exact PR head, and on canonical main.',
-              'Offline clippy with warnings denied passed in isolated qualification, on the exact PR head, and on canonical main.',
-              'Offline workspace tests passed with 21/21 tests and passed on the exact PR head and canonical main.',
-              'Cargo manifests and Cargo.lock are unchanged; no runtime, build, or test dependency was added.',
-              'Exact PR-head CI completed successfully on Ubuntu, macOS, and Windows before merge.',
-              'Independent North Mini Code review is bound exactly to the implementation head and returned PASS with no findings.',
-              'Canonical SG-000011 proof prerequisite matched the exact WorkPacket baseline before execution.',
-              'Independent diff observation contains exactly relation.rs and lib.rs, both within the authorized change surface.',
-          ]
-          assert len(node.acceptance)==14
-          acceptance=[CheckEvidence(a,True,r,d) for a,r,d in zip(node.acceptance,refs,details)]
-
-          evidence_map={
-              'rollback': (
-                  f'git-history:base={base};merge={merge};no-persisted-format-graph-state-policy-or-user-data',
-                  'A normal forward revert removes the vocabulary; no persisted representation, graph state, inference policy, authorization rule, or user data depends on it.',
-              ),
-              'independent-review': (
-                  f'independent-review:sha256:{review};head={head}',
-                  'Exact-head independent semantic implementation review returned PASS with C/H/M/L NONE.',
-              ),
-              'E-PROOF-PREREQUISITE-SG000011': (
-                  f'specgrain:SG-000011:{proof_record};packet-baseline={base}',
-                  'Canonical SG-000011 verified proof and ancestry revalidated at the exact WorkPacket baseline.',
-              ),
-              'E-RELATION-BASELINE-VOCABULARY': (
-                  f'git:{merge}:crates/morize-core/src/relation.rs;github-actions:pr={pr_run};main={main_run}',
-                  'Exactly the 11 repository-fixed current memory relation types are implemented.',
-              ),
-              'E-RELATION-NONEXHAUSTIVE': (
-                  f'git:{merge}:crates/morize-core/src/relation.rs;independent-review:sha256:{review}',
-                  'MemoryRelationType is non-exhaustive while defining no current type beyond the documented initial vocabulary.',
-              ),
-              'E-RELATION-FIELDLESS': (
-                  f'git:{merge}:crates/morize-core/src/relation.rs;fieldless',
-                  'All 11 current relation-type variants are fieldless.',
-              ),
-              'E-RELATION-NO-GRAPH-SEMANTICS': (
-                  f'git:{merge}:crates/morize-core/src/relation.rs;independent-review:sha256:{review}',
-                  'Source and independent review confirm no endpoints, edge class, inference/evidence threshold, truth/authority, graph traversal/mutation, memory mutation, or authorization semantics.',
-              ),
-              'E-RELATION-VALUE-SEMANTICS': (
-                  f'github-actions:pr={pr_run};main={main_run};local-tests=21/21',
-                  'Focused tests prove distinct equality/hash values and Copy behavior without ordering semantics.',
-              ),
-              'E-RELATION-NO-DEPENDENCIES': (
-                  f'git-diff:{base}...{head};manifest-lock=unchanged;dependencies=0',
-                  'No Cargo manifest or lockfile change; no runtime, build, or test dependency was added.',
-              ),
-              'E-RUST-FMT': (
-                  f'github-actions:pr={pr_run};main={main_run};check=fmt',
-                  'cargo fmt --all -- --check passed in isolated qualification and exact-head/post-merge CI.',
-              ),
-              'E-RUST-CHECK-OFFLINE': (
-                  f'github-actions:pr={pr_run};main={main_run};check=cargo-check',
-                  'Offline cargo check passed in isolated qualification and exact-head/post-merge CI.',
-              ),
-              'E-RUST-CLIPPY-OFFLINE': (
-                  f'github-actions:pr={pr_run};main={main_run};check=clippy',
-                  'Offline clippy with -D warnings passed in isolated qualification and exact-head/post-merge CI.',
-              ),
-              'E-RUST-TEST-OFFLINE': (
-                  f'github-actions:pr={pr_run};main={main_run};local-tests=21/21',
-                  'Offline workspace tests passed with 21/21 tests and cross-platform.',
-              ),
-              'E-CROSS-PLATFORM-CI': (
-                  f'github-actions:pr={pr_run};main={main_run};ubuntu=success;macos=success;windows=success',
-                  'Exact-head and canonical-main CI both passed Ubuntu, macOS, and Windows.',
-              ),
-          }
-          assert len(node.evidence['required'])==14
-          evidence=[CheckEvidence(e,True,*evidence_map[e]) for e in node.evidence['required']]
-
-          report=verify_execution(
-              node,packet,result,
-              implementation_revision=merge,
-              observed_changed_paths=paths,
-              acceptance_checks=acceptance,
-              evidence_checks=evidence,
-          )
-          print('RESULT_DIGEST='+result.result_digest)
-          print('VERIFIED='+str(report.verified).lower())
-          print('ACCEPTANCE_PASS=%d/%d' % (
-              sum(c.passed for c in report.acceptance_checks),len(report.acceptance_checks)
-          ))
-          print('EVIDENCE_PASS=%d/%d' % (
-              sum(c.passed for c in report.evidence_checks),len(report.evidence_checks)
-          ))
-          print('ISSUES='+json.dumps([i.to_dict() for i in report.issues]))
-          if not report.verified:
-              raise SystemExit(2)
-
-          record=append_verification_report(root,report)
-          path=root/'.specgrain'/'evidence'/'SG-000019'/(record.record_digest[7:]+'.json')
-          print('RECORD_DIGEST='+record.record_digest)
-          print('EVIDENCE_PATH='+path.as_posix())
-          print('EVIDENCE_FILE_SHA256='+hashlib.sha256(path.read_bytes()).hexdigest())
-          PY
-
-          EVIDENCE_FILE="$(find .specgrain/evidence/SG-000019 -maxdepth 1 -type f -name '*.json' -print -quit)"
-          test -n "$EVIDENCE_FILE"
-          test "$(git status --porcelain | wc -l | tr -d ' ')" = "1"
-          git add "$EVIDENCE_FILE"
-          git diff --cached --check
-          git commit -s -m "evidence: record SG-000019 verification proof"
-
-          EVIDENCE_HEAD="$(git rev-parse HEAD)"
-          EVIDENCE_TREE="$(git rev-parse HEAD^{tree})"
-          DIFF_SHA256="$(git diff "$IMPL_MERGE...$EVIDENCE_HEAD" | sha256sum | awk '{print $1}')"
-          FILE_LIST_SHA256="$(git diff --name-only "$IMPL_MERGE...$EVIDENCE_HEAD" | sha256sum | awk '{print $1}')"
-          EVIDENCE_FILE_SHA256="$(sha256sum "$EVIDENCE_FILE" | awk '{print $1}')"
-          test "$(git diff --name-only "$IMPL_MERGE...$EVIDENCE_HEAD" | wc -l | tr -d ' ')" = "1"
-          test "$(git diff --name-only "$IMPL_MERGE...$EVIDENCE_HEAD")" = "$EVIDENCE_FILE"
-          test -z "$(git status --porcelain)"
-
-          git clone --quiet "https://github.com/TheHalfMoon/Diffcipline.git" /tmp/diffcipline
-          git -C /tmp/diffcipline checkout --quiet "$DIFFCIPLINE_PIN"
-          cargo run --quiet --locked \
-            --manifest-path /tmp/diffcipline/crates/diffcipline-cli/Cargo.toml -- \
-            check --base "$IMPL_MERGE" --risk R2 --run --json \
-            > /tmp/sg19-evidence-diffcipline.json 2>/tmp/sg19-evidence-diffcipline.err
-          DIFFCIPLINE_SHA256="$(sha256sum /tmp/sg19-evidence-diffcipline.json | awk '{print $1}')"
-          export DIFFCIPLINE_SHA256
-          python - <<'PY'
-          import json
-          lines=[line for line in open('/tmp/sg19-evidence-diffcipline.json') if line.strip()]
-          x=json.loads(lines[-1])
-          assert x['verdict']=='PASS'
-          assert x['changed_files']==1
-          assert x['scope_violations']==[]
-          assert all(v['state']=='PASS' for v in x['verification'])
-          print('Diffcipline exact evidence head: PASS')
-          PY
-
-          git clone --quiet "https://github.com/alibaba/open-code-review.git" /tmp/ocr
-          git -C /tmp/ocr checkout --quiet "$OCR_PIN"
-          (cd /tmp/ocr && GOTOOLCHAIN=auto go build -o /tmp/ocr-bin ./cmd/opencodereview)
-          OCR_NO_UPDATE=1 /tmp/ocr-bin delegate preview --format json --from "$IMPL_MERGE" --to "$EVIDENCE_HEAD" \
-            > /tmp/sg19-evidence-ocr-preview.json
-          python - <<'PY'
-          import json,subprocess
-          x=json.load(open('/tmp/sg19-evidence-ocr-preview.json'))
-          assert x['total_files']==1
-          assert x['reviewable_count']==1
-          assert x['excluded_count']==0
-          paths=[f['path'] for f in x['reviewable_files']]
-          assert len(paths)==1 and paths[0].startswith('.specgrain/evidence/SG-000019/')
-          with open('/tmp/sg19-evidence-ocr-rules.json','w') as out:
-              subprocess.run(
-                  ['/tmp/ocr-bin','delegate','rule','--format','json',*paths],
-                  check=True, stdout=out
-              )
-          groups=json.load(open('/tmp/sg19-evidence-ocr-rules.json'))['groups']
-          accounted=sorted(p for g in groups for p in g['files'])
-          assert accounted==sorted(paths)
-          print('Alibaba evidence accounting: 1/1')
-          PY
-
-          python -m pip install --disable-pip-version-check --quiet "gradio_client>=1.8,<2"
-          export EVIDENCE_HEAD EVIDENCE_TREE DIFF_SHA256 FILE_LIST_SHA256 EVIDENCE_FILE_SHA256
-          python - <<'PY'
-          import hashlib,json,os
-          from pathlib import Path
-          from gradio_client import Client
-
-          record_path=next(Path('.specgrain/evidence/SG-000019').glob('*.json'))
-          x=json.loads(record_path.read_text())
-          r=x['report']
-          accept='\n'.join(f'- {c["check_id"]}: {c["passed"]}' for c in r['acceptance_checks'])
-          evid='\n'.join(f'- {c["check_id"]}: {c["passed"]}' for c in r['evidence_checks'])
-          head=os.environ['EVIDENCE_HEAD']
-          prompt=f"""Independent semantic review of one evidence-only Morize commit. Return final structured review only; no chain-of-thought or tool traces.
-
-          REVIEW_HEAD={head}
-          BASE_MAIN={os.environ['IMPL_MERGE']}
-          Only changed path={record_path.as_posix()}
-          Evidence record={x['record_digest']}
-          Evidence file sha256={os.environ['EVIDENCE_FILE_SHA256']}
-          Evidence diff sha256={os.environ['DIFF_SHA256']}
-          File-list sha256={os.environ['FILE_LIST_SHA256']}
-          Diffcipline exact evidence-head PASS; changed_files=1; scope_violations=[]; all commands PASS; artifact sha256={os.environ['DIFFCIPLINE_SHA256']}.
-          Alibaba accounting only: total=1 reviewable=1 excluded=0 rule-accounted=1/1.
-
-          EvidenceRecord:
-          record_version={x['record_version']}
-          previous_record_digest={x['previous_record_digest']}
-          spec_id={r['spec_id']}
-          spec_revision={r['spec_revision']}
-          packet_digest={r['packet_digest']}
-          result_digest={r['result_digest']}
-          implementation_revision={r['implementation_revision']}
-          observed_changed_paths={r['observed_changed_paths']}
-          verification_version={r['verification_version']}
-          verified={r['verified']}
-          issues={r['issues']}
-
-          Canonical facts:
-          - Required SG-000019 spec revision {os.environ['SPEC_REVISION']}.
-          - Required WorkPacket {os.environ['PACKET_DIGEST']}.
-          - Reviewed implementation head {os.environ['IMPL_HEAD']}; canonical merge {os.environ['IMPL_MERGE']}; tree identity PASS.
-          - Implementation diff sha256 {os.environ['IMPL_DIFF_SHA256']}.
-          - Independent implementation review sha256 {os.environ['IMPL_REVIEW_SHA256']}; exact-head PASS C/H/M/L NONE.
-          - Exact-head PR CI run {os.environ['PR_CI_RUN']} and post-merge main run {os.environ['MAIN_CI_RUN']} both passed Ubuntu/macOS/Windows.
-          - SG-000011 prerequisite record {os.environ['SG11_RECORD']} at packet baseline {os.environ['IMPL_BASE_MAIN']}.
-          - Native verification reports 14/14 acceptance PASS, 14/14 required evidence PASS, issues=[], verified=true.
-          - SG-000019 SpecNode must remain state=GRAIN; this evidence-only commit may add evidence only and must not claim lifecycle state VERIFIED or CONTROLLED.
-          - MemoryRelationType remains descriptive vocabulary only and must not imply endpoints, edge class, inferred truth, evidence sufficiency, authority, graph/memory mutation, authorization, serialization, wire, or persistence semantics.
-
-          Acceptance checks ({len(r['acceptance_checks'])}):
-          {accept}
-
-          Required evidence checks ({len(r['evidence_checks'])}):
-          {evid}
-
-          Review for identity mismatches, wrong-head evidence, missing/failed required checks, fabricated lifecycle transition, unsupported graph/inference/authority/wire claims, or evidence-chain inconsistency.
-
-          Return exactly:
-          REVIEW_HEAD
-          {head}
-          REVIEW_KIND
-          SG-000019_EVIDENCE
-          CRITICAL = NONE
-          HIGH = NONE
-          MEDIUM = NONE
-          LOW = NONE
-          FINDINGS
-          - NONE
-          FINAL_GATE = PASS
-          Replace NONE/PASS only if a material finding requires it. Any different REVIEW_HEAD invalidates the review.
-          """
-          Path('/tmp/sg19-evidence-north-prompt.txt').write_text(prompt)
-          raw=Client('CohereLabs/North-Mini-Code-1.0',verbose=False).predict(
-              prompt,'Rust','[]','{}',api_name='/chat'
-          )
-          obj=json.loads(raw) if isinstance(raw,str) else raw
-          content=''
-          for msg in obj.get('history',[]) if isinstance(obj,dict) else []:
-              if msg.get('role')=='assistant':
-                  content=msg.get('content','')
-          final=content.split('</think>',1)[-1].strip() if '</think>' in content else content.strip()
-          checks=[
-              f'REVIEW_HEAD\n{head}',
-              'REVIEW_KIND\nSG-000019_EVIDENCE',
-              'CRITICAL = NONE','HIGH = NONE','MEDIUM = NONE','LOW = NONE',
-              'FINDINGS\n- NONE','FINAL_GATE = PASS'
-          ]
-          if not all(v in final for v in checks):
-              print(final)
-              raise SystemExit('independent semantic evidence review did not qualify')
-          Path('/tmp/sg19-evidence-north-final.md').write_text(final+'\n')
-          summary={
-              'base_main':os.environ['IMPL_MERGE'],
-              'evidence_head':head,
-              'evidence_tree':os.environ['EVIDENCE_TREE'],
-              'spec_revision':os.environ['SPEC_REVISION'],
-              'packet_digest':os.environ['PACKET_DIGEST'],
-              'result_digest':r['result_digest'],
-              'record_digest':x['record_digest'],
-              'evidence_file':record_path.as_posix(),
-              'evidence_file_sha256':os.environ['EVIDENCE_FILE_SHA256'],
-              'diff_sha256':os.environ['DIFF_SHA256'],
-              'file_list_sha256':os.environ['FILE_LIST_SHA256'],
-              'diffcipline_sha256':os.environ['DIFFCIPLINE_SHA256'],
-              'review_prompt_sha256':hashlib.sha256(prompt.encode()).hexdigest(),
-              'review_final_sha256':hashlib.sha256((final+'\n').encode()).hexdigest(),
-          }
-          Path('/tmp/sg19-evidence-summary.json').write_text(
-              json.dumps(summary,indent=2,sort_keys=True)+'\n'
-          )
-          print(json.dumps(summary,indent=2,sort_keys=True))
-          PY
-
-          test -z "$(git status --porcelain)"
-          git push origin "HEAD:refs/heads/$EVIDENCE_BRANCH"
-
-          {
-            echo "## SG-000019 evidence qualification"
-            echo
-            cat /tmp/sg19-evidence-summary.json
-            echo
-            echo "WorkPacket reproduction: PASS"
-            echo "Native verification: 14/14 acceptance, 14/14 evidence, no issues"
-            echo "Diffcipline evidence head: PASS"
-            echo "Alibaba evidence accounting: 1/1"
-            echo "Independent semantic evidence review: PASS"
-            echo "Pushed clean branch: $EVIDENCE_BRANCH"
-          } >> "$GITHUB_STEP_SUMMARY"
