@@ -1,0 +1,112 @@
+{
+  "acceptance": [
+    "The exact implementation changes only crates/morize-core/src/digest.rs and crates/morize-core/src/lib.rs.",
+    "morize-core exports public Sha256Digest and DigestParseError values plus SHA256_DIGEST_BYTE_LENGTH = 32 and SHA256_DIGEST_TEXT_LENGTH = 64.",
+    "Sha256Digest stores exactly 32 opaque bytes and provides const from_bytes, as_bytes, and into_bytes operations that preserve those bytes exactly.",
+    "Display emits exactly 64 lowercase hexadecimal ASCII characters with no prefix, separators, normalization, truncation, or alternate representation.",
+    "FromStr accepts exactly the canonical 64-byte lowercase hexadecimal representation and reconstructs the exact original 32 bytes.",
+    "Parsing rejects any input whose UTF-8 byte length is not exactly 64 with DigestParseError::InvalidLength { actual }.",
+    "Parsing rejects uppercase hexadecimal and every other non-canonical byte with DigestParseError::NonCanonicalHex { index, byte } at the exact offending byte position.",
+    "DigestParseError is bounded metadata-only and never carries the source string or digest bytes.",
+    "Sha256Digest supports Clone, Copy, Eq, PartialEq, Ord, PartialOrd, and Hash value semantics; Debug does not disclose the digest bytes or canonical digest text.",
+    "Focused deterministic tests cover all 256 repeated-byte patterns for bytes -> canonical text -> parse -> bytes round trips and representative non-canonical ASCII at every canonical text position.",
+    "This Grain defines only an algorithm-specific SHA-256 digest value representation; it does not compute SHA-256, canonicalize content bytes, authenticate content, prove authority, or establish collision/preimage/security claims.",
+    "The implementation defines no blob store, content-addressed path builder, evidence-chain logic, idempotency behavior, serialization framework integration, persisted/wire schema, migration, storage, API, MCP, retrieval, or domain-record integration.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and executes the focused SHA-256 digest value/parser tests.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain adds no runtime, build, dev, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for SHA-256 value-width semantics, strict canonical text parsing, metadata-only errors, non-disclosing Debug behavior, no hashing/security overclaim, scope containment, prerequisite identity, and required evidence.",
+    "ADR-0004 proof prerequisite SG-000011 revalidates against the exact WorkPacket baseline before execution."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/digest.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
+  "children": [],
+  "context": {
+    "budget_tokens": 12000,
+    "estimated_tokens": 7000
+  },
+  "dependencies": [],
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000011",
+      "E-SHA256-DIGEST-WIDTH",
+      "E-SHA256-DIGEST-CANONICAL-TEXT",
+      "E-SHA256-DIGEST-STRICT-PARSER",
+      "E-SHA256-DIGEST-METADATA-ONLY-ERRORS",
+      "E-SHA256-DIGEST-NONDISCLOSING-DEBUG",
+      "E-SHA256-DIGEST-PROPERTY-MATRIX",
+      "E-SHA256-DIGEST-NO-HASHING-OR-SECURITY-CLAIM",
+      "E-SHA256-DIGEST-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
+  "id": "SG-000025",
+  "labels": [],
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free SHA-256 digest value/parser module, focused deterministic tests, and morize-core re-exports. No SHA-256 computation, canonical-content encoder, blob addressing, persistence, serialization, authority semantics, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head for exact 32-byte SHA-256 value semantics, strict lowercase canonical parser behavior, metadata-only errors, non-disclosing Debug behavior, absence of hashing/security overclaims, prerequisite identity, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the SG-000025 digest value implementation commits; no persisted format, hash computation, blob path, migration, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "implementation_revision": "b54879d7c04ba914997f14034c3c1b262b9629f6",
+          "record_digest": "sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9",
+          "spec_id": "SG-000011",
+          "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
+        }
+      ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "The narrowest P1 content-identity increment is an algorithm-specific value type for the SHA-256 bytes and canonical text already implied by the architecture's blobs/sha256 layout. Separating representation from hash computation avoids prematurely coupling the core to a cryptographic dependency or canonical-content encoding before those contracts receive their own Grains."
+      },
+      "safety": {
+        "requirements": [
+          "Parsing must fail closed on non-canonical length, uppercase hexadecimal, or any other non-lowercase-hex byte; no normalization or truncation is permitted.",
+          "Debug and parse errors must not disclose digest bytes or source text because content fingerprints can become sensitive metadata.",
+          "The type must not imply that arbitrary bytes supplied through from_bytes were actually produced by SHA-256 or that digest equality establishes authority, trust, authenticity, or operation identity."
+        ],
+        "status": "requirements-defined"
+      },
+      "unresolved_decisions": [],
+      "version": 1
+    }
+  },
+  "method": "quick",
+  "outcome": "morize-core exposes one dependency-free Sha256Digest value with exact 32-byte semantics and one strict lowercase 64-character canonical text representation, without yet computing hashes, canonicalizing content, adding persistence/serialization, or introducing dependencies.",
+  "parent_id": "SG-000010",
+  "rationale": "P1 requires stable content digests; docs/DATA_MODEL.md says exact content identity uses a cryptographic digest over canonical bytes, while docs/ARCHITECTURE.md fixes the v1 blob namespace as blobs/sha256. This Grain defines only the SHA-256 digest value/text contract so later hashing and canonical-byte Grains can depend on an explicit typed representation without conflating digest bytes with authority, operation identity, or persistence semantics.",
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the SG-000025 digest value implementation commits; no persisted format, hash computation, blob path, migration, or user data has been written by this Grain."
+  },
+  "schema_version": 1,
+  "scope_in": [
+    "Define public Sha256Digest as exactly 32 opaque bytes with const from_bytes, as_bytes, and into_bytes accessors.",
+    "Define strict canonical lowercase hexadecimal Display and FromStr behavior over exactly 64 ASCII bytes with bounded DigestParseError variants for invalid length and the first non-canonical byte.",
+    "Provide deterministic Clone/Copy/Eq/Ord/Hash value semantics while ensuring Debug does not reveal the digest bytes or canonical digest text.",
+    "Add dependency-free focused tests including all 256 repeated-byte round trips and representative non-canonical ASCII rejection at every canonical text byte position."
+  ],
+  "scope_out": [
+    "Computing SHA-256 from raw or canonical content bytes, incremental hashing, streaming readers, hardware acceleration, digest verification helpers, collision/preimage claims, digital signatures, MACs, authentication, trust, or authority semantics.",
+    "Canonical serialization/content-byte definition, Unicode normalization, domain-record encoding, blob path derivation, content-addressed storage, evidence-ledger chaining, idempotency keys, mutation compare-and-swap, or operation identity.",
+    "Serde or other serialization-framework integration, persisted/wire schema, vault format, migration, configuration, APIs, MCP, retrieval, connectors, or domain memory records.",
+    "Any runtime, build, dev, or test dependency."
+  ],
+  "state": "GRAIN",
+  "title": "Add SHA-256 content digest value primitive"
+}
