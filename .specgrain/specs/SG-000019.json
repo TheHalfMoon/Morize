@@ -1,10 +1,48 @@
 {
-  "acceptance": [],
-  "change_surface": [],
+  "acceptance": [
+    "morize-core exports MemoryRelationType from one new relation module with exactly Supports, Contradicts, Supersedes, DerivedFrom, DependsOn, CausedBy, LedTo, MemberOf, About, RelatedTo, and SourceOf as the current baseline variants.",
+    "MemoryRelationType is marked non_exhaustive because docs/DATA_MODEL.md calls these the initial relation vocabulary; the current implementation adds no twelfth relation type.",
+    "Every current MemoryRelationType variant is fieldless, and no relation-type value defines endpoints, explicit/inferred edge class, evidence sufficiency, truth, authority, graph mutation, or memory mutation.",
+    "MemoryRelationType supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests exercise all 11 variants and confirm distinct value semantics without defining an ordering contract.",
+    "The implementation defines no MemoryRelation struct, relation endpoints, edge class, evidence or inference thresholds, graph traversal/mutation, authorization behavior, Display, FromStr, parser, serde integration, numeric repr/discriminants, or wire/persistence format.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and includes focused tests for all 11 memory relation types and required value semantics.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for exact initial-relation fidelity, non-exhaustive extensibility, absence of endpoint/edge-class/inference/authority/graph/wire semantics, scope containment, and required evidence.",
+    "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+    "The implementation changes no path outside crates/morize-core/src/relation.rs and crates/morize-core/src/lib.rs."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/relation.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
   "children": [],
-  "context": {},
+  "context": {
+    "budget_tokens": 12000,
+    "estimated_tokens": 6800
+  },
   "dependencies": [],
-  "evidence": {},
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000011",
+      "E-RELATION-BASELINE-VOCABULARY",
+      "E-RELATION-NONEXHAUSTIVE",
+      "E-RELATION-FIELDLESS",
+      "E-RELATION-NO-GRAPH-SEMANTICS",
+      "E-RELATION-VALUE-SEMANTICS",
+      "E-RELATION-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
   "id": "SG-000019",
   "labels": [],
   "metadata": {
@@ -22,16 +60,43 @@
           "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
         }
       ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "A single standard-library-only non-exhaustive enum inside existing morize-core is the narrowest implementation of the already-documented initial relation vocabulary. It preserves future extension while deferring endpoints, edge class, inference policy, graph behavior, serialization, and persistence."
+      },
+      "safety": {
+        "requirements": [
+          "MemoryRelationType values are descriptive classification only in this Grain; no variant, including Contradicts, Supersedes, or DerivedFrom, may itself establish authority, inferred truth, evidence sufficiency, graph mutation, or memory mutation."
+        ],
+        "status": "requirements-defined"
+      },
+      "unresolved_decisions": [],
+      "version": 1
     }
   },
   "method": "quick",
   "outcome": "morize-core exposes one dependency-free non-exhaustive MemoryRelationType enum covering the 11 initial relation types already fixed by docs/DATA_MODEL.md, without defining relation endpoints, edge inference class, evidence thresholds, graph traversal, serialization, persistence, or policy behavior.",
   "parent_id": "SG-000010",
   "rationale": "P1 requires MemoryRelation, and docs/DATA_MODEL.md already fixes the initial relation vocabulary. This Grain adds only the typed in-memory relation-type vocabulary so later edge-class, relation-structure, evidence, policy, and graph contracts can build on one definition without inventing inference or graph semantics.",
-  "risk": {},
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the memory-relation-type implementation commits; no persisted format, graph state, inference policy, authorization rule, or user data has been written by this Grain."
+  },
   "schema_version": 1,
-  "scope_in": [],
-  "scope_out": [],
-  "state": "DRAFT",
+  "scope_in": [
+    "Define public non-exhaustive MemoryRelationType with exactly the 11 initial relation types fixed by docs/DATA_MODEL.md: Supports, Contradicts, Supersedes, DerivedFrom, DependsOn, CausedBy, LedTo, MemberOf, About, RelatedTo, and SourceOf.",
+    "Keep every current relation type fieldless and derive only Clone, Copy, Debug, PartialEq, Eq, and Hash so the vocabulary is typed without defining ordering, endpoints, edge class, evidence sufficiency, graph, authority, textual/numeric encoding, transport, or persistence semantics.",
+    "Treat every MemoryRelationType value as descriptive classification only; no variant, including Contradicts, Supersedes, or DerivedFrom, itself establishes truth, authority, inferred-vs-explicit status, evidence sufficiency, graph mutation, or memory mutation.",
+    "Add standard-library-only focused tests that exercise all 11 current relation types, prove they are distinct hashable values, and prove Copy behavior without textual or numeric encoding."
+  ],
+  "scope_out": [
+    "A MemoryRelation struct, RelationId composition, from_ref/to_ref endpoints, explicit/inferred edge class, evidence references, engine identity, confidence, policy revision binding, or inference/evidence thresholds.",
+    "Graph traversal or mutation, conflict detection, duplicate/update/supersession policy, temporal semantics, authorization, source authority, or any behavior inferred merely from a relation-type value.",
+    "Display/FromStr, parsers, serde or other serialization integration, numeric repr/discriminants, persisted or wire encoding, configuration formats, migrations, storage, retrieval, or domain-record integration.",
+    "Any third-party runtime, build, or test dependency."
+  ],
+  "state": "SHAPED",
   "title": "Add baseline memory relation type vocabulary"
 }
