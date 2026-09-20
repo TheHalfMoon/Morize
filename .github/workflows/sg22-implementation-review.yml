@@ -57,11 +57,12 @@ jobs:
           assert check['valid'] is True and check['issues']==[]
           assert proof['verified'] is True
           assert proof['latest_record_digest']=='sha256:1239df705eb00068720cd5c765f2566bb7a8519afe638a1ded4ddc3eee4e70b9'
-          assert proof['spec_revision']=='sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d'
-          assert proof['implementation_revision']=='b54879d7c04ba914997f14034c3c1b262b9629f6'
+          latest=proof['records'][-1]['report']
+          assert latest['spec_revision']=='sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d'
+          assert latest['implementation_revision']=='b54879d7c04ba914997f14034c3c1b262b9629f6'
           subprocess.run([
               'git','merge-base','--is-ancestor',
-              proof['implementation_revision'],
+              latest['implementation_revision'],
               os.environ['BASE_MAIN']
           ],check=True)
           print('SG-000011 prerequisite: PASS')
