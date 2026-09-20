@@ -1,0 +1,210 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:14dc204de67286a282a2b4e1d8d65fc8d9837b140ced660aa230745ddb82f68c",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisites SG-000012, SG-000013, and SG-000014 revalidate against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000012, SG-000013, and SG-000014 proof prerequisites matched exact record/spec/implementation identities and ancestry at the WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000012:sha256:13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079;SG-000013:sha256:ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c;SG-000014:sha256:95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977;packet-baseline=76aaefc1dfe7d45cf40465dbd63c70cbe326790c",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for deterministic property coverage, preservation of production code, prerequisite identity, scope containment, absence of fuzz-engine/randomness/dependency claims, and required evidence.",
+        "detail": "Independent North Mini exact-head semantic implementation review returned PASS with CRITICAL/HIGH/MEDIUM/LOW NONE and findings NONE.",
+        "evidence_ref": "independent-review:sha256:780b4bf1671c9a0e68cbdd59fea0f2d9799085f5406c002f7775ed5b1c4dd0af;head=2b51846043b83fe1877eaa88959f711ab7d4ab0b",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; no runtime, build, dev, or test dependency is added.",
+        "detail": "Cargo manifests and Cargo.lock are unchanged; no runtime, build, dev, or test dependency was added.",
+        "evidence_ref": "git-diff:76aaefc1dfe7d45cf40465dbd63c70cbe326790c...2b51846043b83fe1877eaa88959f711ab7d4ab0b;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "For each changed file, all production source before its existing #[cfg(test)] module is byte-for-byte identical to the exact WorkPacket baseline.",
+        "detail": "For all three changed files, source before the pre-existing #[cfg(test)] marker is byte-for-byte identical to the WorkPacket baseline.",
+        "evidence_ref": "git:4620805a440fe1ef5d29c9015b781014a5c109d2:identity.rs,bounded.rs,bounded_collection.rs;production-prefixes-identical=3/3",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact implementation-head and canonical-main CI completed successfully on Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35520110864;main=35520345956;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "The BoundedUtf8 property matrix covers multiple const byte limits and a fixed corpus containing empty, ASCII, multibyte, and decomposed Unicode values, proving acceptance iff byte length is within the limit, exact byte preservation on success, and exact TooLong counts on rejection.",
+        "detail": "The BoundedUtf8 matrix covers the declared fixed corpus and const byte limits, proving iff acceptance, exact byte preservation, and exact TooLong counts.",
+        "evidence_ref": "git:4620805a440fe1ef5d29c9015b781014a5c109d2:crates/morize-core/src/bounded.rs;matrix=limits-0,1,2,3,4,5,8,16;tests=33/33",
+        "passed": true
+      },
+      {
+        "check_id": "The BoundedVec property matrix covers multiple const item limits and deterministic vector lengths, proving acceptance iff item count is within the limit, order/value preservation on success, and lossless rejected-value recovery on failed construction and push.",
+        "detail": "The BoundedVec matrix covers declared item limits and deterministic lengths, proving iff acceptance, order/value preservation, lossless failed construction/push recovery, and no mutation after rejected push.",
+        "evidence_ref": "git:4620805a440fe1ef5d29c9015b781014a5c109d2:crates/morize-core/src/bounded_collection.rs;matrix=limits-0,1,2,4,8;tests=33/33",
+        "passed": true
+      },
+      {
+        "check_id": "The durable-ID parser matrix deterministically verifies that representative non-canonical ASCII bytes are rejected at every text byte position without changing the existing error taxonomy or canonical-length contract.",
+        "detail": "The durable-ID parser matrix injects representative non-canonical ASCII at every canonical text position for every durable ID type and verifies exact NonCanonicalHex index/byte rejection.",
+        "evidence_ref": "git:4620805a440fe1ef5d29c9015b781014a5c109d2:crates/morize-core/src/identity.rs;matrix=noncanonical-ascii-every-text-position;tests=33/33",
+        "passed": true
+      },
+      {
+        "check_id": "The durable-ID property matrix deterministically exercises canonical from-bytes -> text -> parse round trips across all 256 repeated-byte patterns for every durable ID type, with lowercase canonical text preserved.",
+        "detail": "The durable-ID matrix exercises every repeated byte value 0..=255 for every durable ID type and proves bytes -> lowercase canonical text -> parse -> identical bytes.",
+        "evidence_ref": "git:4620805a440fe1ef5d29c9015b781014a5c109d2:crates/morize-core/src/identity.rs;matrix=all-256-repeated-byte-patterns-all-durable-id-types;tests=33/33",
+        "passed": true
+      },
+      {
+        "check_id": "The exact implementation changes only crates/morize-core/src/identity.rs, crates/morize-core/src/bounded.rs, and crates/morize-core/src/bounded_collection.rs.",
+        "detail": "Observed implementation diff changes exactly identity.rs, bounded.rs, and bounded_collection.rs, all within the authorized change surface.",
+        "evidence_ref": "git-diff:76aaefc1dfe7d45cf40465dbd63c70cbe326790c...2b51846043b83fe1877eaa88959f711ab7d4ab0b;sha256=79cf3e448170edba97540eadb172eab30e6cd302d4c32c056dd4430e6878f924;paths=identity.rs,bounded.rs,bounded_collection.rs",
+        "passed": true
+      },
+      {
+        "check_id": "The property matrices use no randomness, wall clock, network, model, filesystem fixture, environment-dependent input, or third-party test framework.",
+        "detail": "Exact diff plus independent review confirm deterministic finite standard-library-only tests with no randomness, wall clock, environment/network/model/filesystem input, property-test framework, or fuzz engine.",
+        "evidence_ref": "git-diff:76aaefc1dfe7d45cf40465dbd63c70cbe326790c...2b51846043b83fe1877eaa88959f711ab7d4ab0b;independent-review:sha256:780b4bf1671c9a0e68cbdd59fea0f2d9799085f5406c002f7775ed5b1c4dd0af;randomness=false;fuzz-engine=false;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passed on the exact implementation head and canonical main.",
+        "evidence_ref": "github-actions:pr=35520110864;main=35520345956;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passed on the exact implementation head and canonical main.",
+        "evidence_ref": "github-actions:pr=35520110864;main=35520345956;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "cargo fmt --all -- --check passed on the exact implementation head and canonical main.",
+        "evidence_ref": "github-actions:pr=35520110864;main=35520345956;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes on the exact implementation head and executes the new deterministic property matrices.",
+        "detail": "Offline workspace tests passed with 33/33 tests, including all four new deterministic matrices.",
+        "evidence_ref": "github-actions:pr=35520110864;main=35520345956;tests=33/33",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-COLLECTION-PROPERTY-MATRIX",
+        "detail": "BoundedVec deterministic item-limit matrix verifies lossless construction/push failure semantics and order preservation.",
+        "evidence_ref": "git:4620805a440fe1ef5d29c9015b781014a5c109d2:crates/morize-core/src/bounded_collection.rs;github-actions:pr=35520110864;main=35520345956;tests=33/33",
+        "passed": true
+      },
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and canonical-main CI both passed Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35520110864;main=35520345956;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-ID-PROPERTY-MATRIX",
+        "detail": "Durable-ID round-trip and non-canonical parser matrices execute deterministically across all durable ID types.",
+        "evidence_ref": "git:4620805a440fe1ef5d29c9015b781014a5c109d2:crates/morize-core/src/identity.rs;github-actions:pr=35520110864;main=35520345956;tests=33/33",
+        "passed": true
+      },
+      {
+        "check_id": "E-NO-DEPENDENCIES",
+        "detail": "No Cargo manifest or lockfile change; no runtime, build, dev, or test dependency was added.",
+        "evidence_ref": "git-diff:76aaefc1dfe7d45cf40465dbd63c70cbe326790c...2b51846043b83fe1877eaa88959f711ab7d4ab0b;manifest-lock=unchanged;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-NO-RANDOMNESS-OR-FUZZ-ENGINE",
+        "detail": "No randomness, nondeterministic seed, property-testing framework, fuzz engine, environment/network/model/filesystem input, or claim of true fuzz completion is introduced.",
+        "evidence_ref": "git-diff:76aaefc1dfe7d45cf40465dbd63c70cbe326790c...2b51846043b83fe1877eaa88959f711ab7d4ab0b;independent-review:sha256:780b4bf1671c9a0e68cbdd59fea0f2d9799085f5406c002f7775ed5b1c4dd0af;randomness=false;fuzz-engine=false",
+        "passed": true
+      },
+      {
+        "check_id": "E-PRODUCTION-PREFIX-UNCHANGED",
+        "detail": "Production source before existing test modules is byte-for-byte unchanged in all three files.",
+        "evidence_ref": "git:4620805a440fe1ef5d29c9015b781014a5c109d2:identity.rs,bounded.rs,bounded_collection.rs;production-prefixes-identical=3/3",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000012",
+        "detail": "Canonical SG-000012 verified proof and implementation ancestry revalidated at the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000012:sha256:13fc136a4f74bf67a2928642d50b750cd729bb7811bfc3dd8f7369ed4a034079;packet-baseline=76aaefc1dfe7d45cf40465dbd63c70cbe326790c",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000013",
+        "detail": "Canonical SG-000013 verified proof and implementation ancestry revalidated at the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000013:sha256:ab6bae1410aa8d48f7081aebe7047ffe8d5420b497b9f3d744639de9109cd62c;packet-baseline=76aaefc1dfe7d45cf40465dbd63c70cbe326790c",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000014",
+        "detail": "Canonical SG-000014 verified proof and implementation ancestry revalidated at the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000014:sha256:95a31438e65a266dfd513b8ed15af56f35fe1184d725672359b567008d67a977;packet-baseline=76aaefc1dfe7d45cf40465dbd63c70cbe326790c",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35520110864;main=35520345956;check=cargo-check",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with -D warnings passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35520110864;main=35520345956;check=clippy",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt --all -- --check passed on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35520110864;main=35520345956;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline workspace tests passed with 33/33 tests on the canonical implementation tree.",
+        "evidence_ref": "github-actions:pr=35520110864;main=35520345956;tests=33/33",
+        "passed": true
+      },
+      {
+        "check_id": "E-UTF8-PROPERTY-MATRIX",
+        "detail": "BoundedUtf8 deterministic corpus/limit matrix verifies exact byte-limit semantics and preservation.",
+        "evidence_ref": "git:4620805a440fe1ef5d29c9015b781014a5c109d2:crates/morize-core/src/bounded.rs;github-actions:pr=35520110864;main=35520345956;tests=33/33",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Exact-head independent semantic implementation review returned PASS with C/H/M/L NONE and no findings.",
+        "evidence_ref": "independent-review:sha256:780b4bf1671c9a0e68cbdd59fea0f2d9799085f5406c002f7775ed5b1c4dd0af;head=2b51846043b83fe1877eaa88959f711ab7d4ab0b",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "A normal forward revert removes only the added test matrices; production behavior and persisted/user data are unaffected.",
+        "evidence_ref": "git-history:base=76aaefc1dfe7d45cf40465dbd63c70cbe326790c;merge=4620805a440fe1ef5d29c9015b781014a5c109d2;test-only-no-production-or-persisted-data-change",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "4620805a440fe1ef5d29c9015b781014a5c109d2",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/bounded.rs",
+      "crates/morize-core/src/bounded_collection.rs",
+      "crates/morize-core/src/identity.rs"
+    ],
+    "packet_digest": "sha256:bf2de66336b0f1d02d2b5633e267d432e0e55e62563ffa04f53a8098f3a6c94c",
+    "result_digest": "sha256:3ab0193dae19b6d4768620bfdeaaced2899995722d4f654abc8da7b32ed78269",
+    "spec_id": "SG-000023",
+    "spec_revision": "sha256:9e5cba94eec7f7488cdb02605db5cd7f4d1b41200282ca4efc0c68f058d0a779",
+    "verification_version": 1,
+    "verified": true
+  }
+}
