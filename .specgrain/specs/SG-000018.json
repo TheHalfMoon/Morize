@@ -1,10 +1,48 @@
 {
-  "acceptance": [],
-  "change_surface": [],
+  "acceptance": [
+    "morize-core exports MemoryAction from one new decision module with exactly Store, Update, Merge, Supersede, Contradict, Expire, Forget, Redact, Quarantine, Ignore, and RequireReview and no additional current action.",
+    "MemoryAction is a closed vocabulary for this Grain: it is not marked non_exhaustive and defines no additional variant; future action-set evolution/version binding is explicitly outside this Grain.",
+    "Every MemoryAction variant is fieldless, and no action value grants authorization, mutation authority, target selection, storage effects, or side effects.",
+    "MemoryAction supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests exercise all 11 variants and confirm distinct value semantics without defining an ordering contract.",
+    "The implementation defines no action-set version mapping, DecisionEnvelope, MutationIntent, reason code, confidence/abstention semantics, thresholds, engine identity, authorization behavior, FORGET/REDACT behavior, Display, FromStr, parser, serde, numeric repr/discriminants, or wire/persistence format.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and includes focused tests for all 11 memory actions and required value semantics.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain admits no runtime, build, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for exact action fidelity, closed-vocabulary correctness, absence of authority/side-effect/version/wire semantics, scope containment, and required evidence.",
+    "ADR-0004 proof prerequisite for SG-000011 revalidates against the exact WorkPacket baseline before execution.",
+    "The implementation changes no path outside crates/morize-core/src/decision.rs and crates/morize-core/src/lib.rs."
+  ],
+  "change_surface": [
+    "crates/morize-core/src/decision.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
   "children": [],
-  "context": {},
+  "context": {
+    "budget_tokens": 12000,
+    "estimated_tokens": 7000
+  },
   "dependencies": [],
-  "evidence": {},
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000011",
+      "E-ACTION-BASELINE-VOCABULARY",
+      "E-ACTION-CLOSED",
+      "E-ACTION-NO-AUTHORITY",
+      "E-ACTION-VALUE-SEMANTICS",
+      "E-ACTION-NO-VERSION-WIRE",
+      "E-ACTION-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
   "id": "SG-000018",
   "labels": [],
   "metadata": {
@@ -22,16 +60,43 @@
           "spec_revision": "sha256:0c609888d253ab94487f9e1bdd2e5370f991321d57269f0b237d778ac30f129d"
         }
       ]
+    },
+    "readiness": {
+      "minimality": {
+        "choice": "native",
+        "rationale": "A single standard-library-only closed enum inside existing morize-core is the narrowest implementation of the repository-fixed initial durable-memory action vocabulary. It defers action-set version binding, envelopes, authority, execution, serialization, and persistence."
+      },
+      "safety": {
+        "requirements": [
+          "MemoryAction values, including Forget and Redact, are descriptive typed decision vocabulary only in this Grain and must not confer authorization, select a target, or execute any mutation or side effect."
+        ],
+        "status": "requirements-defined"
+      },
+      "unresolved_decisions": [],
+      "version": 1
     }
   },
   "method": "controlled",
   "outcome": "morize-core exposes one dependency-free closed MemoryAction enum for the 11 initial durable-memory actions already fixed by docs/TYPED_DECISION_MODEL.md and docs/DATA_MODEL.md, without defining action-set version identifiers, decision envelopes, mutation authority, authorization, serialization, persistence, or side effects.",
   "parent_id": "SG-000010",
   "rationale": "P1 requires a typed decision envelope, and the repository already fixes a closed initial durable-memory action vocabulary. This Grain adds only the typed in-memory action vocabulary so later versioned action-set and DecisionEnvelope contracts can reuse one bounded definition without inventing authority or wire semantics.",
-  "risk": {},
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the memory-action implementation commits; no persisted format, action-set version binding, authorization rule, mutation side effect, or user data has been written by this Grain."
+  },
   "schema_version": 1,
-  "scope_in": [],
-  "scope_out": [],
-  "state": "DRAFT",
+  "scope_in": [
+    "Define public MemoryAction with exactly the 11 initial durable-memory actions fixed by docs/TYPED_DECISION_MODEL.md and docs/DATA_MODEL.md: Store, Update, Merge, Supersede, Contradict, Expire, Forget, Redact, Quarantine, Ignore, and RequireReview.",
+    "Keep the current MemoryAction vocabulary closed in this Grain: no non_exhaustive marker and no additional action variant; future action-set evolution/version binding requires a separate compatibility-governed Grain.",
+    "Keep every action fieldless and derive only Clone, Copy, Debug, PartialEq, Eq, and Hash so the vocabulary is typed without defining ordering, authority, side effects, thresholds, textual/numeric encoding, transport, or persistence semantics.",
+    "Add standard-library-only focused tests that exercise all 11 actions, prove they are distinct hashable values, and prove Copy behavior without textual or numeric encoding."
+  ],
+  "scope_out": [
+    "Action-set version identifiers or mappings, DecisionEnvelope/DecisionId composition, candidate references, reason codes, confidence, abstention, thresholds, engine identity, policy revision binding, or decision replay semantics.",
+    "MutationIntent construction, authorization, target selection, mutation execution, storage effects, lifecycle transitions, FORGET/REDACT behavior, or any authority-bearing interpretation of an action value.",
+    "Display/FromStr, parsers, unknown-action wire validation, serde or other serialization integration, numeric repr/discriminants, persisted or wire encoding, configuration formats, migrations, storage, retrieval, or domain-record integration.",
+    "Any third-party runtime, build, or test dependency."
+  ],
+  "state": "SHAPED",
   "title": "Add closed durable memory action vocabulary"
 }
