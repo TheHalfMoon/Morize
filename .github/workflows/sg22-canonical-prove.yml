@@ -1,0 +1,72 @@
+name: sg22-canonical-prove
+
+on:
+  push:
+    branches:
+      - automation/sg-000022-canonical-prove
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout automation branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+
+      - name: Prove canonical SG-000022 and inspect next frontier
+        shell: bash
+        env:
+          CANONICAL_MAIN: 6860e80f1332f3116c19725b0f0032c99e5f1176
+          SPEC_GRAIN_PIN: 5de7d6499bb0a9e3a191fc0934399cf099d1980a
+          EXPECTED_RECORD: sha256:5fa33e452b4b1b75b7342927807c00f4cb4400a99988301712fc09e5ac01edc9
+          EXPECTED_SPEC_REVISION: sha256:caf22aceeb05340b62832819a6aea59b6ed80c67cdbb80f5c77a20c5fea43afd
+          EXPECTED_IMPL_REVISION: c1068f7459ff01816e302031030dfdf60597e404
+        run: |
+          set -euo pipefail
+
+          git fetch origin main --prune
+          test "$(git rev-parse origin/main)" = "$CANONICAL_MAIN"
+          git checkout --detach "$CANONICAL_MAIN"
+
+          python -m pip install --disable-pip-version-check --quiet             "git+https://github.com/TheHalfMoon/SpecGrain.git@$SPEC_GRAIN_PIN"
+
+          specgrain check --json . > /tmp/check.json
+          specgrain prove --json SG-000022 . > /tmp/prove.json
+          specgrain next --json . > /tmp/next.json
+
+          python - <<'PY'
+          import json, os
+
+          check=json.load(open('/tmp/check.json'))
+          prove=json.load(open('/tmp/prove.json'))
+          nxt=json.load(open('/tmp/next.json'))
+
+          assert check['valid'] is True
+          assert check['issues'] == []
+          assert prove['verified'] is True
+          assert prove['latest_record_digest'] == os.environ['EXPECTED_RECORD']
+          assert prove['record_count'] == 1
+          latest=prove['records'][-1]['report']
+          assert latest['spec_revision'] == os.environ['EXPECTED_SPEC_REVISION']
+          assert latest['implementation_revision'] == os.environ['EXPECTED_IMPL_REVISION']
+          assert latest['issues'] == []
+          assert latest['verified'] is True
+
+          print('CANONICAL_MAIN='+os.environ['CANONICAL_MAIN'])
+          print('SPEC_CHECK_VALID=true')
+          print('SG000022_VERIFIED=true')
+          print('SG000022_RECORD_COUNT=1')
+          print('SG000022_RECORD_DIGEST='+prove['latest_record_digest'])
+          print('SG000022_SPEC_REVISION='+latest['spec_revision'])
+          print('SG000022_IMPLEMENTATION_REVISION='+latest['implementation_revision'])
+          print('NEXT_JSON='+json.dumps(nxt,sort_keys=True,separators=(',',':')))
+          PY
