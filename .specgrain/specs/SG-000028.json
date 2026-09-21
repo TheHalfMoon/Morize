@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "id": "SG-000028",
+  "title": "Add decision engine class primitive",
+  "outcome": "morize-core exposes one dependency-free non-exhaustive DecisionEngineClass enum for the four engine classes currently documented by the typed decision model, without defining engine identity payloads, provider/model/configuration semantics, inference execution, calibration, authority, serialization, persistence, or side effects.",
+  "rationale": "P1 requires DecisionEnvelope to bind decision_engine_identity, while docs/TYPED_DECISION_MODEL.md already distinguishes four engine classes: deterministic rule engine, local inference engine, remote inference engine, and ensemble. SG-000027 completed the known reason-code primitive. This Grain captures only the documented engine-class label as future-extensible in-memory metadata so later engine-identity and DecisionEnvelope Grains can compose a typed class without prematurely freezing provider/model/runtime/configuration identity or granting inference authority.",
+  "state": "GRAIN",
+  "parent_id": "SG-000010",
+  "children": [],
+  "dependencies": [],
+  "method": "quick",
+  "labels": [
+    "p1",
+    "rust",
+    "typed-decisions"
+  ],
+  "scope_in": [
+    "Define public non-exhaustive DecisionEngineClass with exactly the four currently documented engine classes as in-memory variants: DeterministicRule, LocalInference, RemoteInference, and Ensemble.",
+    "Treat the class as descriptive decision-engine metadata only; a class value never grants authorization, selects a provider/model/runtime, performs inference, changes thresholds, or causes durable side effects.",
+    "Derive Clone, Copy, Debug, PartialEq, Eq, and Hash and add focused standard-library-only tests proving all four known values are distinct and copy/hash value semantics hold.",
+    "Keep the type future-extensible while leaving exact decision-engine identity payloads and text/numeric/wire encoding to later dedicated Grains."
+  ],
+  "scope_out": [
+    "Any claim that the four documented classes are the complete future engine-class vocabulary, or any guarantee about ordering, numeric discriminants, stable textual spelling, Display/FromStr parsing, serde, wire encoding, persistence, schema field names, migrations, API, or MCP.",
+    "DecisionEngineIdentity composition, model/provider/revision identity, prompt/template/tokenizer/quantization identity, classifier/aggregation identity, configuration digests, calibration mappings, local/remote runtime adapters, network behavior, cost, resource qualification, or model admission.",
+    "DecisionEnvelope construction, candidate references, action scores, confidence, abstention policy, evidence references, relevant memory versions, policy evaluation, replay semantics, threshold behavior, or mutation execution.",
+    "Authorization, scope visibility, principal identity, target selection, policy bypass, durable mutation authority, side effects, or any third-party runtime, build, dev, or test dependency."
+  ],
+  "acceptance": [
+    "The exact implementation changes only crates/morize-core/src/decision.rs and crates/morize-core/src/lib.rs.",
+    "morize-core publicly exports DecisionEngineClass alongside DecisionReasonCode, MemoryAction, and MemoryActionSetVersion without changing those existing types.",
+    "DecisionEngineClass is a non-exhaustive in-memory enum with exactly the four currently documented known variants: DeterministicRule, LocalInference, RemoteInference, and Ensemble.",
+    "The implementation and documentation explicitly avoid claiming that those four known variants exhaust all future decision-engine classes.",
+    "A DecisionEngineClass grants no authorization, provider/model/runtime selection, threshold override, inference execution, policy decision, mutation authority, side effect, or storage behavior.",
+    "DecisionEngineClass supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests prove all four known variants are distinct and preserve copy/hash value semantics without defining ordering.",
+    "The implementation defines no stable textual/numeric representation, Display/FromStr parser, serialization, wire/persistence encoding, DecisionEngineIdentity payload, DecisionEnvelope, confidence/calibration behavior, provider/model/runtime configuration, network behavior, API, MCP, or domain-record integration.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and executes the focused decision-engine-class tests.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain adds no runtime, build, dev, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for fidelity to the four documented engine classes, non-exhaustive future extensibility, absence of identity/provider/runtime/wire/authority semantics, scope containment, prerequisite identity, and required evidence.",
+    "ADR-0004 proof prerequisite SG-000027 revalidates against the exact WorkPacket baseline before execution."
+  ],
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the SG-000028 decision-engine-class implementation commits; no persisted format, serialized decision, model/provider configuration, authorization rule, inference side effect, mutation side effect, or user data has been written by this Grain."
+  },
+  "context": {
+    "budget_tokens": 12000,
+    "estimated_tokens": 6500
+  },
+  "change_surface": [
+    "crates/morize-core/src/decision.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000027",
+      "E-DECISION-ENGINE-CLASS-KNOWN-VOCABULARY",
+      "E-DECISION-ENGINE-CLASS-FUTURE-EXTENSIBLE",
+      "E-DECISION-ENGINE-CLASS-NO-IDENTITY-RUNTIME",
+      "E-DECISION-ENGINE-CLASS-NO-WIRE-TEXT",
+      "E-DECISION-ENGINE-CLASS-NO-AUTHORITY",
+      "E-DECISION-ENGINE-CLASS-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free non-exhaustive in-memory DecisionEngineClass enum in the existing decision module, focused tests, and morize-core re-export. The enum represents only the four currently documented engine classes. No DecisionEngineIdentity payload, provider/model/runtime selection, inference execution, confidence/calibration, text/numeric/wire encoding, DecisionEnvelope, authority, policy, serialization, persistence, networking, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head for fidelity to the four documented engine classes, non-exhaustive future extensibility, absence of identity/provider/runtime/wire and authority semantics, exact prerequisite identity, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the SG-000028 decision-engine-class implementation commits; no persisted format, serialized decision, model/provider configuration, authorization rule, inference or mutation side effect, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "spec_id": "SG-000027",
+          "record_digest": "sha256:762bdd56ba976c5158a5d5be31f510f51caad5410133b33ec7b50f420cd3200b",
+          "spec_revision": "sha256:7256886d9dfaf74c77e21531e51c72bf5e7b8889f40866b5851096eb9a9918ad",
+          "implementation_revision": "0c21cf314be701db56724b4df2de806a027ee58f"
+        }
+      ]
+    },
+    "readiness": {
+      "version": 1,
+      "minimality": {
+        "choice": "native",
+        "rationale": "The typed decision contract already distinguishes four engine classes, while exact DecisionEngineIdentity payloads remain materially broader and depend on future model/provider/runtime/configuration decisions. A non-exhaustive in-memory enum for only the documented classes is the smallest safe typed increment that advances DecisionEnvelope prerequisites without freezing identity, runtime, networking, calibration, or authority semantics."
+      },
+      "safety": {
+        "status": "requirements-defined",
+        "requirements": [
+          "Engine class is descriptive metadata only and must never grant authority, choose a provider/model/runtime, or execute inference.",
+          "The implementation must not reinterpret the four documented classes as an exhaustive future vocabulary or freeze textual, numeric, wire, persistence, provider, model, or runtime semantics."
+        ]
+      },
+      "unresolved_decisions": []
+    }
+  }
+}
