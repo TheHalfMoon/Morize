@@ -4,7 +4,7 @@
   "title": "Add known decision reason-code primitive",
   "outcome": "morize-core exposes one dependency-free non-exhaustive DecisionReasonCode enum for the 11 reason-code examples currently documented by the typed decision model, without claiming an exhaustive policy vocabulary or defining text/wire encoding, DecisionEnvelope construction, authority, thresholds, persistence, or side effects.",
   "rationale": "P1 requires a typed DecisionEnvelope with machine-consumable reason_codes. The typed decision model already documents 11 stable reason-code examples while explicitly keeping exact serialized schema refinement in P1/P4. This Grain captures only those currently documented semantic labels as future-extensible in-memory values so later DecisionEnvelope work can reference typed known reasons without inventing parsing, serialization, policy authority, or a claim that the vocabulary is complete.",
-  "state": "REFINING",
+  "state": "GRAIN",
   "parent_id": "SG-000010",
   "children": [],
   "dependencies": [],
