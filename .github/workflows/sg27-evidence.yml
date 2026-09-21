@@ -1,6 +1,9 @@
 name: SG-000027 native evidence generation
 
 on:
+  push:
+    branches:
+      - automation/sg-000027-evidence
   pull_request:
     branches:
       - main
