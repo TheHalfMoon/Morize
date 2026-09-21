@@ -1,0 +1,197 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:00886cf4d320750bfd5da6e47a3eccdfebd09512da364c7737d0b6f103a5316b",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "ADR-0004 proof prerequisite SG-000018 revalidates against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000018 proof identity and implementation ancestry revalidated at the exact WorkPacket baseline before packet export.",
+        "evidence_ref": "specgrain:SG-000018:sha256:6ed74d50664d885d932b0859fa4acded3826a8a67840afc992d277b0027f6053;packet-baseline=404f46f34ab168c0b2b391784c553f58a93ae9df",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for V1-to-current-vocabulary fidelity, future-extensible non-exhaustive version semantics, absence of wire/numeric/authority semantics, scope containment, prerequisite identity, and required evidence.",
+        "detail": "Independent semantic implementation review is bound to the exact accepted head and returned C/H/M/L NONE, findings NONE, final gate PASS.",
+        "evidence_ref": "independent-review:sha256:e59968f7f9e78dbd3d89c79b2ecdd2f16203354bff90eb3674142cd106bcfa48;head=f6f574266518fd9c77abc433de4922be18b660be",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain adds no runtime, build, dev, or test dependency.",
+        "detail": "Cargo manifests and lockfile are byte-identical to the packet baseline and no dependency was added.",
+        "evidence_ref": "git-diff:404f46f34ab168c0b2b391784c553f58a93ae9df...f6f574266518fd9c77abc433de4922be18b660be;sha256=c90ef50c6cf9bc423a37d80d41d620880c853beb267f9392969b9a5b1a023dde;manifest-lock-unchanged=true;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact-head and fresh post-merge standard CI pass Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35559515792;main=35559880747;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "MemoryActionSetVersion is a non-exhaustive in-memory enum with exactly one current variant, V1, and no numeric representation, discriminant contract, textual parser, or wire encoding.",
+        "detail": "MemoryActionSetVersion is non-exhaustive with exactly V1 and introduces no numeric, textual, or wire representation.",
+        "evidence_ref": "git:622016763bad9bfbd54a1cb6d7bcac342f21e95c:crates/morize-core/src/decision.rs;non_exhaustive=true;variants=V1;repr=none;parser=false;wire=false",
+        "passed": true
+      },
+      {
+        "check_id": "MemoryActionSetVersion supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests prove V1 value semantics and exact binding to the current action vocabulary without defining ordering.",
+        "detail": "The exact allowed value traits are present, ordering is absent, and focused V1 tests execute within the 41/41 workspace pass.",
+        "evidence_ref": "git:622016763bad9bfbd54a1cb6d7bcac342f21e95c:crates/morize-core/src/decision.rs;traits=Clone,Copy,Debug,PartialEq,Eq,Hash;ordering=false;tests=41/41",
+        "passed": true
+      },
+      {
+        "check_id": "The exact implementation changes only crates/morize-core/src/decision.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Observed implementation diff changes exactly decision.rs and lib.rs, the two authorized paths.",
+        "evidence_ref": "git-diff:404f46f34ab168c0b2b391784c553f58a93ae9df...f6f574266518fd9c77abc433de4922be18b660be;sha256=c90ef50c6cf9bc423a37d80d41d620880c853beb267f9392969b9a5b1a023dde;paths=decision.rs,lib.rs",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation defines no DecisionEnvelope, candidate reference, action scores, confidence, abstention, reason codes, evidence references, engine identity, policy revision binding, replay semantics, serialization, persistence, API, MCP, or domain-record integration.",
+        "detail": "The implementation remains limited to the in-memory action-set version primitive and export.",
+        "evidence_ref": "git-diff:404f46f34ab168c0b2b391784c553f58a93ae9df...f6f574266518fd9c77abc433de4922be18b660be;sha256=c90ef50c6cf9bc423a37d80d41d620880c853beb267f9392969b9a5b1a023dde;decision-envelope=false;serialization=false;persistence=false;api=false;mcp=false;domain-integration=false",
+        "passed": true
+      },
+      {
+        "check_id": "The version value grants no authorization, target selection, threshold, policy decision, mutation authority, execution, side effect, or storage behavior.",
+        "detail": "The compatibility version is descriptive metadata only and carries no authority or execution behavior.",
+        "evidence_ref": "git:622016763bad9bfbd54a1cb6d7bcac342f21e95c:crates/morize-core/src/decision.rs;authority=false;target-selection=false;execution=false;side-effects=false;storage=false",
+        "passed": true
+      },
+      {
+        "check_id": "V1 is documented and tested as the version identifier for exactly the existing Store, Update, Merge, Supersede, Contradict, Expire, Forget, Redact, Quarantine, Ignore, and RequireReview MemoryAction vocabulary; no additional action is introduced.",
+        "detail": "Focused tests bind V1 to exactly the existing 11 MemoryAction values and add no action.",
+        "evidence_ref": "git:622016763bad9bfbd54a1cb6d7bcac342f21e95c:crates/morize-core/src/decision.rs;v1-actions=Store,Update,Merge,Supersede,Contradict,Expire,Forget,Redact,Quarantine,Ignore,RequireReview",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35559515792;main=35559880747;ubuntu=success;macos=success;windows=success;check=cargo-check-offline",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35559515792;main=35559880747;ubuntu=success;macos=success;windows=success;check=clippy-offline",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "cargo fmt passes on the exact implementation head and canonical merge.",
+        "evidence_ref": "github-actions:pr=35559515792;main=35559880747;ubuntu=success;macos=success;windows=success;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and executes the focused action-set-version tests.",
+        "detail": "Offline workspace tests pass 41/41 and include both focused action-set-version tests.",
+        "evidence_ref": "github-actions:pr=35559515792;main=35559880747;ubuntu=success;macos=success;windows=success;tests=41/41",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core publicly exports MemoryActionSetVersion alongside the existing MemoryAction without changing the existing 11-action vocabulary.",
+        "detail": "morize-core publicly exports MemoryActionSetVersion alongside the unchanged MemoryAction vocabulary.",
+        "evidence_ref": "git:622016763bad9bfbd54a1cb6d7bcac342f21e95c:crates/morize-core/src/lib.rs;exports=MemoryAction,MemoryActionSetVersion",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-ACTION-SET-FUTURE-EXTENSIBLE",
+        "detail": "The enum is non-exhaustive and therefore preserves future action-set-version extensibility without adding a second current version.",
+        "evidence_ref": "git:622016763bad9bfbd54a1cb6d7bcac342f21e95c:crates/morize-core/src/decision.rs;non_exhaustive=true;current-variant-count=1",
+        "passed": true
+      },
+      {
+        "check_id": "E-ACTION-SET-NO-AUTHORITY",
+        "detail": "The version value is compatibility metadata only and grants no policy, mutation, or execution authority.",
+        "evidence_ref": "git:622016763bad9bfbd54a1cb6d7bcac342f21e95c:crates/morize-core/src/decision.rs;authority=false;policy=false;mutation=false;execution=false;side-effects=false",
+        "passed": true
+      },
+      {
+        "check_id": "E-ACTION-SET-NO-DEPENDENCIES",
+        "detail": "No Cargo manifest/lock change or runtime/build/dev/test dependency was introduced.",
+        "evidence_ref": "git-diff:404f46f34ab168c0b2b391784c553f58a93ae9df...f6f574266518fd9c77abc433de4922be18b660be;sha256=c90ef50c6cf9bc423a37d80d41d620880c853beb267f9392969b9a5b1a023dde;manifest-lock-unchanged=true;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-ACTION-SET-NO-WIRE-NUMERIC",
+        "detail": "No numeric discriminant contract, parser, text representation, serialization, or wire encoding is introduced.",
+        "evidence_ref": "git:622016763bad9bfbd54a1cb6d7bcac342f21e95c:crates/morize-core/src/decision.rs;repr=none;display=false;fromstr=false;serialization=false;wire=false",
+        "passed": true
+      },
+      {
+        "check_id": "E-ACTION-SET-V1",
+        "detail": "MemoryActionSetVersion exists as a public in-memory enum with sole current variant V1.",
+        "evidence_ref": "git:622016763bad9bfbd54a1cb6d7bcac342f21e95c:crates/morize-core/src/decision.rs;type=MemoryActionSetVersion;variant=V1",
+        "passed": true
+      },
+      {
+        "check_id": "E-ACTION-SET-V1-VOCABULARY-BINDING",
+        "detail": "V1 is documented and tested against exactly the existing 11-action MemoryAction vocabulary.",
+        "evidence_ref": "git:622016763bad9bfbd54a1cb6d7bcac342f21e95c:crates/morize-core/src/decision.rs;v1-action-count=11;tests=41/41",
+        "passed": true
+      },
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and fresh post-merge standard CI pass Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35559515792;main=35559880747;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000018",
+        "detail": "Canonical SG-000018 proof identity and implementation ancestry were revalidated against the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000018:sha256:6ed74d50664d885d932b0859fa4acded3826a8a67840afc992d277b0027f6053;packet-baseline=404f46f34ab168c0b2b391784c553f58a93ae9df",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35559515792;main=35559880747;ubuntu=success;macos=success;windows=success;check=cargo-check-offline",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with -D warnings passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35559515792;main=35559880747;ubuntu=success;macos=success;windows=success;check=clippy-offline",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35559515792;main=35559880747;ubuntu=success;macos=success;windows=success;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline workspace tests pass 41/41 on canonical main, including the two focused SG-000026 tests.",
+        "evidence_ref": "github-actions:pr=35559515792;main=35559880747;ubuntu=success;macos=success;windows=success;tests=41/41",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Exact-head independent semantic implementation review returned PASS with C/H/M/L NONE and no findings.",
+        "evidence_ref": "independent-review:sha256:e59968f7f9e78dbd3d89c79b2ecdd2f16203354bff90eb3674142cd106bcfa48;head=f6f574266518fd9c77abc433de4922be18b660be",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "A normal forward revert removes the SG-000026 enum/export implementation; no persisted format, serialized decision, authority rule, or user data depends on it.",
+        "evidence_ref": "git-history:base=404f46f34ab168c0b2b391784c553f58a93ae9df;merge=622016763bad9bfbd54a1cb6d7bcac342f21e95c;forward-revert-safe=true",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "622016763bad9bfbd54a1cb6d7bcac342f21e95c",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/decision.rs",
+      "crates/morize-core/src/lib.rs"
+    ],
+    "packet_digest": "sha256:8e51c05fde9d22dd024745a7d482850727dca22f7fcd64b283b97a2656717d3d",
+    "result_digest": "sha256:3830a45dccc883df9d2a54449d563ad318023d1321d9e037d9136b4cf9e8656c",
+    "spec_id": "SG-000026",
+    "spec_revision": "sha256:af72b5d0c6757c4051f3cb7dc7c2e3de49cdcda77b6c863d1ad1e07a2d1acc1d",
+    "verification_version": 1,
+    "verified": true
+  }
+}
