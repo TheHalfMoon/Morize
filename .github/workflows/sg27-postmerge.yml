@@ -11,6 +11,7 @@ on:
 permissions:
   contents: read
   actions: read
+  issues: write
 
 jobs:
   prove-main:
@@ -33,6 +34,7 @@ jobs:
           persist-credentials: false
 
       - name: Verify canonical identity and merge tree
+        id: identity
         shell: bash
         run: |
           set -euo pipefail
@@ -44,6 +46,7 @@ jobs:
           echo "MERGE_TREE_IDENTITY=PASS"
 
       - name: Wait for exact-main standard CI and prove all platforms
+        id: mainci
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -100,8 +103,10 @@ jobs:
           print("MAIN_CI_MACOS=PASS")
           print("MAIN_CI_WINDOWS=PASS")
           PY
+          echo "MAIN_CI_RUN=$RUN_ID" >> "$GITHUB_ENV"
 
       - name: Revalidate accepted pre-merge runs
+        id: premerge
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -122,4 +127,36 @@ jobs:
           test "$ARTIFACT_DIGEST" = "$QUALIFICATION_ARTIFACT_DIGEST"
           echo "PREMERGE_BINDINGS=PASS"
 
-# Forward-only synchronization marker after the initial pull-request event registered no Actions run.
+      - name: Publish structured post-merge proof
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IDENTITY_OUTCOME: ${{ steps.identity.outcome }}
+          MAIN_CI_OUTCOME: ${{ steps.mainci.outcome }}
+          PREMERGE_OUTCOME: ${{ steps.premerge.outcome }}
+        run: |
+          set -euo pipefail
+          GATE="FAIL"
+          if [ "$IDENTITY_OUTCOME" = "success" ] && [ "$MAIN_CI_OUTCOME" = "success" ] && [ "$PREMERGE_OUTCOME" = "success" ]; then
+            GATE="PASS"
+          fi
+
+          BODY="$(cat <<EOF
+SG-000027 post-merge qualification evidence
+
+- POSTMERGE_WORKFLOW_RUN=`$GITHUB_RUN_ID`
+- POSTMERGE_WORKFLOW_HEAD=`$GITHUB_SHA`
+- CANONICAL_MAIN=`$TARGET_MAIN`
+- MAIN_CI_RUN=`${MAIN_CI_RUN:-UNAVAILABLE}`
+- IDENTITY_OUTCOME=`$IDENTITY_OUTCOME`
+- MAIN_CI_OUTCOME=`$MAIN_CI_OUTCOME`
+- PREMERGE_OUTCOME=`$PREMERGE_OUTCOME`
+- POSTMERGE_GATE=`$GATE`
+
+Acceptance requires `POSTMERGE_GATE=PASS`. This comment is emitted by the branch-restricted automation workflow and is not itself canonical product evidence.
+EOF
+)"
+          gh api "repos/$GITHUB_REPOSITORY/issues/65/comments" -f body="$BODY"
+
+          test "$GATE" = "PASS"
