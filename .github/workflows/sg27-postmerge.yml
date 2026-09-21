@@ -1,6 +1,9 @@
 name: SG-000027 post-merge qualification
 
 on:
+  push:
+    branches:
+      - automation/sg-000027-postmerge
   pull_request:
     branches:
       - main
