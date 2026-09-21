@@ -82,8 +82,8 @@ jobs:
               "crates/morize-core/src/decision.rs",
               "crates/morize-core/src/lib.rs",
           ])), node.change_surface
-          assert node.metadata["readiness"]["unresolved_decisions"]==[], node.metadata
-          prereqs=node.metadata["morize"]["proof_prerequisites"]
+          assert tuple(node.metadata["readiness"]["unresolved_decisions"])==(), node.metadata
+          prereqs=[dict(item) for item in node.metadata["morize"]["proof_prerequisites"]]
           assert prereqs==[{
               "spec_id":"SG-000027",
               "record_digest":os.environ["SG27_RECORD"],
