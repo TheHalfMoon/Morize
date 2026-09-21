@@ -118,3 +118,5 @@ jobs:
           )"
           test "$ARTIFACT_DIGEST" = "$QUALIFICATION_ARTIFACT_DIGEST"
           echo "PREMERGE_BINDINGS=PASS"
+
+# Forward-only synchronization marker after the initial pull-request event registered no Actions run.
