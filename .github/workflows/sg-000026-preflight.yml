@@ -1,0 +1,69 @@
+name: SG-000026 prerequisite preflight
+
+on:
+  push:
+    branches:
+      - automation/sg-000026-preflight
+
+permissions:
+  contents: read
+
+jobs:
+  prove-sg-000018:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact Morize packet baseline
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: TheHalfMoon/Morize
+          ref: 404f46f34ab168c0b2b391784c553f58a93ae9df
+          path: morize
+          persist-credentials: false
+
+      - name: Checkout pinned SpecGrain source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: TheHalfMoon/SpecGrain
+          ref: 5de7d6499bb0a9e3a191fc0934399cf099d1980a
+          path: specgrain-source
+          persist-credentials: false
+
+      - name: Verify exact source identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C morize rev-parse HEAD)" = "404f46f34ab168c0b2b391784c553f58a93ae9df"
+          test "$(git -C specgrain-source rev-parse HEAD)" = "5de7d6499bb0a9e3a191fc0934399cf099d1980a"
+
+      - name: Install pinned SpecGrain source
+        shell: bash
+        run: python3 -m pip install ./specgrain-source --no-deps
+
+      - name: Prove SG-000018 and bind exact prerequisite identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          specgrain prove SG-000018 morize --json | tee proof.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          proof = json.loads(Path("proof.json").read_text(encoding="utf-8"))
+          assert proof["spec_id"] == "SG-000018", proof
+          assert proof["verified"] is True, proof
+          assert proof["latest_record_digest"] == "sha256:6ed74d50664d885d932b0859fa4acded3826a8a67840afc992d277b0027f6053", proof
+          assert proof["record_count"] >= 1, proof
+          latest = proof["records"][-1]
+          report = latest["report"]
+          assert report["spec_revision"] == "sha256:9a8926e557a54ae9f3eed4218a43fd4e14c8aac5f9320f70a1a9b008d4c45e7b", report
+          assert report["implementation_revision"] == "78c6bda86906a84e9511edd7e19e303cfeb53f4a", report
+          assert report["issues"] == [], report
+          print("SG-000018_PREREQUISITE=PASS")
+          PY
+
+      - name: Prove implementation ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -C morize merge-base --is-ancestor             78c6bda86906a84e9511edd7e19e303cfeb53f4a             404f46f34ab168c0b2b391784c553f58a93ae9df
+          echo "SG-000018_ANCESTRY=PASS"
