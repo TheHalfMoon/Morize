@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "id": "SG-000027",
+  "title": "Add known decision reason-code primitive",
+  "outcome": "morize-core exposes one dependency-free non-exhaustive DecisionReasonCode enum for the 11 reason-code examples currently documented by the typed decision model, without claiming an exhaustive policy vocabulary or defining text/wire encoding, DecisionEnvelope construction, authority, thresholds, persistence, or side effects.",
+  "rationale": "P1 requires a typed DecisionEnvelope with machine-consumable reason_codes. The typed decision model already documents 11 stable reason-code examples while explicitly keeping exact serialized schema refinement in P1/P4. This Grain captures only those currently documented semantic labels as future-extensible in-memory values so later DecisionEnvelope work can reference typed known reasons without inventing parsing, serialization, policy authority, or a claim that the vocabulary is complete.",
+  "state": "GRAIN",
+  "parent_id": "SG-000010",
+  "children": [],
+  "dependencies": [],
+  "method": "quick",
+  "labels": [
+    "p1",
+    "rust",
+    "typed-decisions"
+  ],
+  "scope_in": [
+    "Define public non-exhaustive DecisionReasonCode with exactly the 11 currently documented reason-code examples as known in-memory variants: ExactDuplicate, NewerSource, ValidTimeChanged, SourceConflict, LowSourceAuthority, CrossScopeConflict, StaleSource, ExplicitUserOperation, InsufficientEvidence, AmbiguousEntity, and PolicyReviewRequired.",
+    "Treat the variants as descriptive decision-analysis evidence only; a reason code never grants authorization, target selection, mutation authority, threshold bypass, execution, or side effects.",
+    "Derive Clone, Copy, Debug, PartialEq, Eq, and Hash and add focused standard-library-only tests proving all 11 known values are distinct and copy/hash value semantics hold.",
+    "Keep the type future-extensible while leaving textual/numeric/wire encoding and any exhaustive policy vocabulary to later dedicated Grains."
+  ],
+  "scope_out": [
+    "Any claim that the 11 documented examples are the complete future reason-code vocabulary, or any guarantee about ordering, numeric discriminants, stable textual spelling, Display/FromStr parsing, serde, wire encoding, persistence, schema field names, migrations, API, or MCP.",
+    "DecisionEnvelope construction, candidate references, action scores, confidence, abstention behavior, evidence references, relevant memory versions, engine identity, policy revision binding, replay semantics, or threshold behavior.",
+    "Authorization, target selection, policy evaluation, mutation execution, side effects, FORGET/REDACT behavior, or parsing free-form model prose into authority.",
+    "Any third-party runtime, build, dev, or test dependency."
+  ],
+  "acceptance": [
+    "The exact implementation changes only crates/morize-core/src/decision.rs and crates/morize-core/src/lib.rs.",
+    "morize-core publicly exports DecisionReasonCode alongside MemoryAction and MemoryActionSetVersion without changing either existing type.",
+    "DecisionReasonCode is a non-exhaustive in-memory enum with exactly the 11 currently documented known variants: ExactDuplicate, NewerSource, ValidTimeChanged, SourceConflict, LowSourceAuthority, CrossScopeConflict, StaleSource, ExplicitUserOperation, InsufficientEvidence, AmbiguousEntity, and PolicyReviewRequired.",
+    "The implementation and documentation explicitly avoid claiming that those 11 known variants exhaust all future reason codes.",
+    "A DecisionReasonCode grants no authorization, target selection, threshold override, policy decision, mutation authority, execution, side effect, or storage behavior.",
+    "DecisionReasonCode supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests prove all 11 known variants are distinct and preserve copy/hash value semantics without defining ordering.",
+    "The implementation defines no stable textual/numeric representation, Display/FromStr parser, serialization, wire/persistence encoding, DecisionEnvelope, confidence, abstention policy, evidence binding, engine identity, policy revision binding, replay semantics, API, MCP, or domain-record integration.",
+    "cargo fmt --all -- --check passes on the exact implementation head.",
+    "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+    "cargo test --workspace --all-targets --offline passes and executes the focused decision-reason-code tests.",
+    "Cargo manifests and Cargo.lock are unchanged; the Grain adds no runtime, build, dev, or test dependency.",
+    "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+    "An independent semantic reviewer reviews the exact implementation head for fidelity to the currently documented 11 reason examples, non-exhaustive future extensibility, absence of textual/wire/authority semantics, scope containment, prerequisite identity, and required evidence.",
+    "ADR-0004 proof prerequisite SG-000026 revalidates against the exact WorkPacket baseline before execution."
+  ],
+  "risk": {
+    "level": "medium",
+    "recovery": "Revert the SG-000027 decision-reason-code implementation commits; no persisted format, serialized decision, authorization rule, mutation side effect, or user data has been written by this Grain."
+  },
+  "context": {
+    "budget_tokens": 12000,
+    "estimated_tokens": 6500
+  },
+  "change_surface": [
+    "crates/morize-core/src/decision.rs",
+    "crates/morize-core/src/lib.rs"
+  ],
+  "evidence": {
+    "required": [
+      "rollback",
+      "independent-review",
+      "E-PROOF-PREREQUISITE-SG000026",
+      "E-DECISION-REASON-KNOWN-VOCABULARY",
+      "E-DECISION-REASON-FUTURE-EXTENSIBLE",
+      "E-DECISION-REASON-NO-WIRE-TEXT",
+      "E-DECISION-REASON-NO-AUTHORITY",
+      "E-DECISION-REASON-NO-DEPENDENCIES",
+      "E-RUST-FMT",
+      "E-RUST-CHECK-OFFLINE",
+      "E-RUST-CLIPPY-OFFLINE",
+      "E-RUST-TEST-OFFLINE",
+      "E-CROSS-PLATFORM-CI"
+    ]
+  },
+  "metadata": {
+    "method": {
+      "control": "Implementation is limited to one dependency-free in-memory DecisionReasonCode enum in the existing decision module, focused tests, and morize-core re-export. The enum represents only the 11 currently documented known reason examples and remains non-exhaustive. No text/numeric/wire encoding, DecisionEnvelope, authority, execution, policy, serialization, persistence, or third-party dependency is authorized.",
+      "review_separation": "An independent semantic reviewer must review the exact implementation head for fidelity to the 11 currently documented known reason examples, non-exhaustive future extensibility, absence of textual/numeric/wire and authority semantics, exact prerequisite identity, scope containment, and required evidence separately from the implementing agent before acceptance.",
+      "rollback": "Revert the SG-000027 decision-reason-code implementation commits; no persisted format, serialized decision, authorization rule, mutation side effect, or user data depends on this Grain."
+    },
+    "morize": {
+      "proof_prerequisites": [
+        {
+          "spec_id": "SG-000026",
+          "record_digest": "sha256:00886cf4d320750bfd5da6e47a3eccdfebd09512da364c7737d0b6f103a5316b",
+          "spec_revision": "sha256:af72b5d0c6757c4051f3cb7dc7c2e3de49cdcda77b6c863d1ad1e07a2d1acc1d",
+          "implementation_revision": "622016763bad9bfbd54a1cb6d7bcac342f21e95c"
+        }
+      ]
+    },
+    "readiness": {
+      "version": 1,
+      "minimality": {
+        "choice": "native",
+        "rationale": "The typed DecisionEnvelope already requires machine-consumable reason_codes, while the repository currently documents 11 reason examples but does not freeze an exhaustive or serialized vocabulary. A non-exhaustive in-memory enum for only those known examples is the smallest safe typed increment: it avoids free-form strings in later envelope code without inventing textual encoding, parser behavior, policy authority, thresholds, or persistence."
+      },
+      "safety": {
+        "status": "requirements-defined",
+        "requirements": [
+          "Reason codes are descriptive evidence only and must never grant authorization or cause durable side effects by themselves.",
+          "The implementation must not reinterpret the documentation's examples as an exhaustive future policy vocabulary or freeze their textual/wire representation."
+        ]
+      },
+      "unresolved_decisions": []
+    }
+  }
+}
