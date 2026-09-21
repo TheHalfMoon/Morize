@@ -1,0 +1,191 @@
+{
+  "previous_record_digest": null,
+  "record_digest": "sha256:762bdd56ba976c5158a5d5be31f510f51caad5410133b33ec7b50f420cd3200b",
+  "record_version": 1,
+  "report": {
+    "acceptance_checks": [
+      {
+        "check_id": "A DecisionReasonCode grants no authorization, target selection, threshold override, policy decision, mutation authority, execution, side effect, or storage behavior.",
+        "detail": "Reason codes are descriptive in-memory evidence only and carry no authority or execution behavior.",
+        "evidence_ref": "git:0c21cf314be701db56724b4df2de806a027ee58f:crates/morize-core/src/decision.rs;authority=false;target-selection=false;threshold-override=false;execution=false;side-effects=false;storage=false",
+        "passed": true
+      },
+      {
+        "check_id": "ADR-0004 proof prerequisite SG-000026 revalidates against the exact WorkPacket baseline before execution.",
+        "detail": "Canonical SG-000026 proof identity and implementation ancestry revalidated at the exact WorkPacket baseline before packet export.",
+        "evidence_ref": "specgrain:SG-000026:sha256:00886cf4d320750bfd5da6e47a3eccdfebd09512da364c7737d0b6f103a5316b;packet-baseline=c76496d9b701088d1bd9292df63d16925ce34fce",
+        "passed": true
+      },
+      {
+        "check_id": "An independent semantic reviewer reviews the exact implementation head for fidelity to the currently documented 11 reason examples, non-exhaustive future extensibility, absence of textual/wire/authority semantics, scope containment, prerequisite identity, and required evidence.",
+        "detail": "Independent semantic implementation review is bound to the accepted exact head and returned C/H/M/L NONE, findings NONE, final gate PASS.",
+        "evidence_ref": "independent-review:sha256:eba00a8ac01a8cf093a84791424f1f197b4e5d3a5fca124d39ae0a678e23f38b;head=b20503493b693a96a0a97c120d5605a304874630",
+        "passed": true
+      },
+      {
+        "check_id": "Cargo manifests and Cargo.lock are unchanged; the Grain adds no runtime, build, dev, or test dependency.",
+        "detail": "Cargo manifests and lockfile are byte-identical to the packet baseline and no dependency was added.",
+        "evidence_ref": "git-diff:c76496d9b701088d1bd9292df63d16925ce34fce...b20503493b693a96a0a97c120d5605a304874630;sha256=c6c4c7e45765e5e5e2ea292c344749a2588ffd192fd4cee64b2f2d4483537068;manifest-lock-unchanged=true;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "DecisionReasonCode is a non-exhaustive in-memory enum with exactly the 11 currently documented known variants: ExactDuplicate, NewerSource, ValidTimeChanged, SourceConflict, LowSourceAuthority, CrossScopeConflict, StaleSource, ExplicitUserOperation, InsufficientEvidence, AmbiguousEntity, and PolicyReviewRequired.",
+        "detail": "DecisionReasonCode is non-exhaustive and defines exactly the 11 currently documented known variants.",
+        "evidence_ref": "git:0c21cf314be701db56724b4df2de806a027ee58f:crates/morize-core/src/decision.rs;non_exhaustive=true;known-variant-count=11",
+        "passed": true
+      },
+      {
+        "check_id": "DecisionReasonCode supports Clone, Copy, Debug, PartialEq, Eq, and Hash; focused tests prove all 11 known variants are distinct and preserve copy/hash value semantics without defining ordering.",
+        "detail": "The exact allowed value traits are present, ordering is absent, and focused tests execute in the 43/43 workspace pass.",
+        "evidence_ref": "git:0c21cf314be701db56724b4df2de806a027ee58f:crates/morize-core/src/decision.rs;traits=Clone,Copy,Debug,PartialEq,Eq,Hash;ordering=false;tests=43/43",
+        "passed": true
+      },
+      {
+        "check_id": "GitHub Actions passes Ubuntu, macOS, and Windows on the exact implementation head before acceptance.",
+        "detail": "Exact-head and fresh post-merge standard CI pass Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35563702723;main=35563952479;postmerge=35564229089;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "The exact implementation changes only crates/morize-core/src/decision.rs and crates/morize-core/src/lib.rs.",
+        "detail": "Observed implementation diff changes exactly decision.rs and lib.rs, the two authorized paths.",
+        "evidence_ref": "git-diff:c76496d9b701088d1bd9292df63d16925ce34fce...b20503493b693a96a0a97c120d5605a304874630;sha256=c6c4c7e45765e5e5e2ea292c344749a2588ffd192fd4cee64b2f2d4483537068;paths=decision.rs,lib.rs",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation and documentation explicitly avoid claiming that those 11 known variants exhaust all future reason codes.",
+        "detail": "Documentation states that the known labels do not freeze the complete future reason-code vocabulary.",
+        "evidence_ref": "git:0c21cf314be701db56724b4df2de806a027ee58f:crates/morize-core/src/decision.rs;future-extensible=true;exhaustive-future-vocabulary=false",
+        "passed": true
+      },
+      {
+        "check_id": "The implementation defines no stable textual/numeric representation, Display/FromStr parser, serialization, wire/persistence encoding, DecisionEnvelope, confidence, abstention policy, evidence binding, engine identity, policy revision binding, replay semantics, API, MCP, or domain-record integration.",
+        "detail": "The implementation remains limited to the in-memory known reason primitive and export.",
+        "evidence_ref": "git-diff:c76496d9b701088d1bd9292df63d16925ce34fce...b20503493b693a96a0a97c120d5605a304874630;sha256=c6c4c7e45765e5e5e2ea292c344749a2588ffd192fd4cee64b2f2d4483537068;text=false;numeric=false;parser=false;serialization=false;wire=false;persistence=false;decision-envelope=false;api=false;mcp=false",
+        "passed": true
+      },
+      {
+        "check_id": "cargo check --workspace --all-targets --offline passes on the exact implementation head.",
+        "detail": "Offline cargo check passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35563702723;main=35563952479;postmerge=35564229089;ubuntu=success;macos=success;windows=success;check=cargo-check-offline",
+        "passed": true
+      },
+      {
+        "check_id": "cargo clippy --workspace --all-targets --offline -- -D warnings passes on the exact implementation head.",
+        "detail": "Offline clippy with warnings denied passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35563702723;main=35563952479;postmerge=35564229089;ubuntu=success;macos=success;windows=success;check=clippy-offline",
+        "passed": true
+      },
+      {
+        "check_id": "cargo fmt --all -- --check passes on the exact implementation head.",
+        "detail": "cargo fmt passes on the exact implementation head and canonical merge.",
+        "evidence_ref": "github-actions:pr=35563702723;main=35563952479;postmerge=35564229089;ubuntu=success;macos=success;windows=success;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "cargo test --workspace --all-targets --offline passes and executes the focused decision-reason-code tests.",
+        "detail": "Offline workspace tests pass 43/43 and include the focused decision-reason-code tests.",
+        "evidence_ref": "github-actions:pr=35563702723;main=35563952479;postmerge=35564229089;ubuntu=success;macos=success;windows=success;tests=43/43",
+        "passed": true
+      },
+      {
+        "check_id": "morize-core publicly exports DecisionReasonCode alongside MemoryAction and MemoryActionSetVersion without changing either existing type.",
+        "detail": "morize-core publicly exports DecisionReasonCode alongside the unchanged existing decision primitives.",
+        "evidence_ref": "git:0c21cf314be701db56724b4df2de806a027ee58f:crates/morize-core/src/lib.rs;exports=DecisionReasonCode,MemoryAction,MemoryActionSetVersion",
+        "passed": true
+      }
+    ],
+    "evidence_checks": [
+      {
+        "check_id": "E-CROSS-PLATFORM-CI",
+        "detail": "Exact-head and fresh post-merge standard CI pass Ubuntu, macOS, and Windows.",
+        "evidence_ref": "github-actions:pr=35563702723;main=35563952479;postmerge=35564229089;ubuntu=success;macos=success;windows=success",
+        "passed": true
+      },
+      {
+        "check_id": "E-DECISION-REASON-FUTURE-EXTENSIBLE",
+        "detail": "The enum is non-exhaustive and explicitly avoids claiming a complete future reason-code vocabulary.",
+        "evidence_ref": "git:0c21cf314be701db56724b4df2de806a027ee58f:crates/morize-core/src/decision.rs;non_exhaustive=true;future-vocabulary-open=true",
+        "passed": true
+      },
+      {
+        "check_id": "E-DECISION-REASON-KNOWN-VOCABULARY",
+        "detail": "DecisionReasonCode defines and tests exactly the 11 currently documented known reason labels.",
+        "evidence_ref": "git:0c21cf314be701db56724b4df2de806a027ee58f:crates/morize-core/src/decision.rs;type=DecisionReasonCode;known-variant-count=11;tests=43/43",
+        "passed": true
+      },
+      {
+        "check_id": "E-DECISION-REASON-NO-AUTHORITY",
+        "detail": "Reason codes are descriptive evidence only and grant no policy, mutation, threshold, or execution authority.",
+        "evidence_ref": "git:0c21cf314be701db56724b4df2de806a027ee58f:crates/morize-core/src/decision.rs;authority=false;policy=false;threshold-override=false;mutation=false;execution=false;side-effects=false",
+        "passed": true
+      },
+      {
+        "check_id": "E-DECISION-REASON-NO-DEPENDENCIES",
+        "detail": "No Cargo manifest/lock change or runtime/build/dev/test dependency was introduced.",
+        "evidence_ref": "git-diff:c76496d9b701088d1bd9292df63d16925ce34fce...b20503493b693a96a0a97c120d5605a304874630;sha256=c6c4c7e45765e5e5e2ea292c344749a2588ffd192fd4cee64b2f2d4483537068;manifest-lock-unchanged=true;dependencies=0",
+        "passed": true
+      },
+      {
+        "check_id": "E-DECISION-REASON-NO-WIRE-TEXT",
+        "detail": "No stable text, numeric discriminant contract, parser, serialization, wire, or persistence encoding is introduced.",
+        "evidence_ref": "git:0c21cf314be701db56724b4df2de806a027ee58f:crates/morize-core/src/decision.rs;repr=none;display=false;fromstr=false;serialization=false;wire=false;persistence=false",
+        "passed": true
+      },
+      {
+        "check_id": "E-PROOF-PREREQUISITE-SG000026",
+        "detail": "Canonical SG-000026 proof identity and implementation ancestry were revalidated against the exact WorkPacket baseline.",
+        "evidence_ref": "specgrain:SG-000026:sha256:00886cf4d320750bfd5da6e47a3eccdfebd09512da364c7737d0b6f103a5316b;packet-baseline=c76496d9b701088d1bd9292df63d16925ce34fce",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CHECK-OFFLINE",
+        "detail": "Offline cargo check passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35563702723;main=35563952479;postmerge=35564229089;ubuntu=success;macos=success;windows=success;check=cargo-check-offline",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-CLIPPY-OFFLINE",
+        "detail": "Offline clippy with -D warnings passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35563702723;main=35563952479;postmerge=35564229089;ubuntu=success;macos=success;windows=success;check=clippy-offline",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-FMT",
+        "detail": "cargo fmt passes on exact head and canonical main.",
+        "evidence_ref": "github-actions:pr=35563702723;main=35563952479;postmerge=35564229089;ubuntu=success;macos=success;windows=success;check=fmt",
+        "passed": true
+      },
+      {
+        "check_id": "E-RUST-TEST-OFFLINE",
+        "detail": "Offline workspace tests pass 43/43 on canonical main, including the focused SG-000027 tests.",
+        "evidence_ref": "github-actions:pr=35563702723;main=35563952479;postmerge=35564229089;ubuntu=success;macos=success;windows=success;tests=43/43",
+        "passed": true
+      },
+      {
+        "check_id": "independent-review",
+        "detail": "Exact-head independent semantic implementation review returned PASS with C/H/M/L NONE and no findings.",
+        "evidence_ref": "independent-review:sha256:eba00a8ac01a8cf093a84791424f1f197b4e5d3a5fca124d39ae0a678e23f38b;head=b20503493b693a96a0a97c120d5605a304874630",
+        "passed": true
+      },
+      {
+        "check_id": "rollback",
+        "detail": "A normal forward revert removes the SG-000027 enum/export implementation; no persisted format, serialized decision, authority rule, or user data depends on it.",
+        "evidence_ref": "git-history:base=c76496d9b701088d1bd9292df63d16925ce34fce;merge=0c21cf314be701db56724b4df2de806a027ee58f;forward-revert-safe=true",
+        "passed": true
+      }
+    ],
+    "implementation_revision": "0c21cf314be701db56724b4df2de806a027ee58f",
+    "issues": [],
+    "observed_changed_paths": [
+      "crates/morize-core/src/decision.rs",
+      "crates/morize-core/src/lib.rs"
+    ],
+    "packet_digest": "sha256:33323089ff7a003f3fe9a4e144f3636b70f25b26ab233fef818a69026c0826ec",
+    "result_digest": "sha256:ee543f10ea63a0c1ad583de30e66283ef122a75391496038c81271edc46e6004",
+    "spec_id": "SG-000027",
+    "spec_revision": "sha256:7256886d9dfaf74c77e21531e51c72bf5e7b8889f40866b5851096eb9a9918ad",
+    "verification_version": 1,
+    "verified": true
+  }
+}
