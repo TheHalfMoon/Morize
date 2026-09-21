@@ -77,3 +77,5 @@ jobs:
             .specgrain/evidence/SG-000027/*.json
           if-no-files-found: error
           retention-days: 30
+
+# Forward-only synchronization marker after PR registration.
