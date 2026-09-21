@@ -1,0 +1,120 @@
+name: SG-000027 post-merge qualification
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prove-main:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TARGET_MAIN: 0c21cf314be701db56724b4df2de806a027ee58f
+      IMPL_HEAD: b20503493b693a96a0a97c120d5605a304874630
+      PR_CI_RUN: "35563702723"
+      QUALIFICATION_RUN: "35563762612"
+      QUALIFICATION_HEAD: 0555560ba6e7e7c6750b253390020483edad9db9
+      QUALIFICATION_ARTIFACT_DIGEST: sha256:3c8b7d8e4ac82e75b38aa3bcd80ddaebecf2cbf117cd6e0ea4f7237c72d7fcf1
+    steps:
+      - name: Checkout exact canonical main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: TheHalfMoon/Morize
+          ref: 0c21cf314be701db56724b4df2de806a027ee58f
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify canonical identity and merge tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_MAIN"
+          git fetch origin main --prune
+          test "$(git rev-parse origin/main)" = "$TARGET_MAIN"
+          test "$(git rev-parse "$TARGET_MAIN^{tree}")" = "$(git rev-parse "$IMPL_HEAD^{tree}")"
+          echo "CANONICAL_MAIN=$TARGET_MAIN"
+          echo "MERGE_TREE_IDENTITY=PASS"
+
+      - name: Wait for exact-main standard CI and prove all platforms
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RUN_ID=""
+          for attempt in $(seq 1 60); do
+            RUN_ID="$(
+              gh api "repos/$GITHUB_REPOSITORY/actions/runs?event=push&branch=main&per_page=50" \
+                --jq ".workflow_runs[] | select(.name == \"ci\" and .head_sha == \"$TARGET_MAIN\") | .id" \
+                | head -n 1
+            )"
+            if [ -n "$RUN_ID" ]; then
+              STATUS="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .status)"
+              CONCLUSION="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.conclusion // ""')"
+              echo "MAIN_CI_ATTEMPT=$attempt RUN_ID=$RUN_ID STATUS=$STATUS CONCLUSION=$CONCLUSION"
+              if [ "$STATUS" = "completed" ]; then
+                test "$CONCLUSION" = "success"
+                break
+              fi
+            else
+              echo "MAIN_CI_ATTEMPT=$attempt RUN_ID=NOT_FOUND"
+            fi
+            sleep 5
+          done
+
+          test -n "$RUN_ID"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .head_sha)" = "$TARGET_MAIN"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .event)" = "push"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .status)" = "completed"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .conclusion)" = "success"
+
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs?per_page=100" > /tmp/main-ci-jobs.json
+          python3 - "$RUN_ID" <<'PY'
+          import json
+          import sys
+
+          run_id = sys.argv[1]
+          data = json.load(open("/tmp/main-ci-jobs.json", encoding="utf-8"))
+          required = {
+              "verify (ubuntu-latest)",
+              "verify (macos-latest)",
+              "verify (windows-latest)",
+          }
+          observed = {
+              job["name"]: job["conclusion"]
+              for job in data["jobs"]
+              if job["name"] in required
+          }
+          assert set(observed) == required, observed
+          assert all(value == "success" for value in observed.values()), observed
+          print(f"MAIN_CI_RUN={run_id}")
+          print("MAIN_CI_UBUNTU=PASS")
+          print("MAIN_CI_MACOS=PASS")
+          print("MAIN_CI_WINDOWS=PASS")
+          PY
+
+      - name: Revalidate accepted pre-merge runs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PR_CI_RUN" --jq .head_sha)" = "$IMPL_HEAD"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PR_CI_RUN" --jq .event)" = "pull_request"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PR_CI_RUN" --jq .conclusion)" = "success"
+
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$QUALIFICATION_RUN" --jq .head_sha)" = "$QUALIFICATION_HEAD"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$QUALIFICATION_RUN" --jq .name)" = "SG-000027 implementation qualification"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$QUALIFICATION_RUN" --jq .conclusion)" = "success"
+
+          ARTIFACT_DIGEST="$(
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$QUALIFICATION_RUN/artifacts" \
+              --jq '.artifacts[] | select(.name == "sg-000027-implementation-qualification") | .digest'
+          )"
+          test "$ARTIFACT_DIGEST" = "$QUALIFICATION_ARTIFACT_DIGEST"
+          echo "PREMERGE_BINDINGS=PASS"
