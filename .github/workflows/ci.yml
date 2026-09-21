@@ -60,3 +60,90 @@ jobs:
           base: ${{ github.event.pull_request.base.sha || github.event.before }}
           risk: R2
           run-verification: "true"
+
+
+  prove-sg26-evidence-main:
+    name: prove SG-000026 evidence main
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    env:
+      TARGET_MAIN: 19603b07bc0313b0a29676f6f41c95045b5720eb
+      EVIDENCE_HEAD: 86dc3cdd84cc81cc014a81314092cd07b29f3763
+      EVIDENCE_PR_CI_RUN: "35562039794"
+      EVIDENCE_PATH: .specgrain/evidence/SG-000026/00886cf4d320750bfd5da6e47a3eccdfebd09512da364c7737d0b6f103a5316b.json
+    steps:
+      - name: Checkout exact canonical main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: TheHalfMoon/Morize
+          ref: 19603b07bc0313b0a29676f6f41c95045b5720eb
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify canonical evidence and exact-main push CI
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_MAIN"
+          git fetch origin main --prune
+          test "$(git rev-parse origin/main)" = "$TARGET_MAIN"
+          test -f "$EVIDENCE_PATH"
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          record = json.loads(Path(".specgrain/evidence/SG-000026/00886cf4d320750bfd5da6e47a3eccdfebd09512da364c7737d0b6f103a5316b.json").read_text(encoding="utf-8"))
+          assert record["record_digest"] == "sha256:00886cf4d320750bfd5da6e47a3eccdfebd09512da364c7737d0b6f103a5316b"
+          assert record["report"]["spec_id"] == "SG-000026"
+          assert record["report"]["verified"] is True
+          assert record["report"]["issues"] == []
+          print("CANONICAL_EVIDENCE_RECORD=PASS")
+          PY
+
+          RUN_ID="$(
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs?event=push&branch=main&per_page=50" \
+              --jq ".workflow_runs[] | select(.name == \"ci\" and .head_sha == \"$TARGET_MAIN\") | .id" \
+              | head -n 1
+          )"
+          test -n "$RUN_ID"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .head_sha)" = "$TARGET_MAIN"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .event)" = "push"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .status)" = "completed"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .conclusion)" = "success"
+
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs?per_page=100" > /tmp/main-ci-jobs.json
+          python3 - "$RUN_ID" <<'PY'
+          import json
+          import sys
+
+          run_id = sys.argv[1]
+          data = json.load(open("/tmp/main-ci-jobs.json", encoding="utf-8"))
+          required = {
+              "verify (ubuntu-latest)",
+              "verify (macos-latest)",
+              "verify (windows-latest)",
+          }
+          observed = {
+              job["name"]: job["conclusion"]
+              for job in data["jobs"]
+              if job["name"] in required
+          }
+          assert set(observed) == required, observed
+          assert all(value == "success" for value in observed.values()), observed
+          print(f"MAIN_CI_RUN={run_id}")
+          print("MAIN_CI_UBUNTU=PASS")
+          print("MAIN_CI_MACOS=PASS")
+          print("MAIN_CI_WINDOWS=PASS")
+          PY
+
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_PR_CI_RUN" --jq .head_sha)" = "$EVIDENCE_HEAD"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_PR_CI_RUN" --jq .event)" = "pull_request"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_PR_CI_RUN" --jq .status)" = "completed"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_PR_CI_RUN" --jq .conclusion)" = "success"
+          echo "SG26_CANONICAL_PROOF=PASS"
