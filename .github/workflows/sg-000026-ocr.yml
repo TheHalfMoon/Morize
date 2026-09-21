@@ -1,0 +1,84 @@
+name: SG-000026 Alibaba OCR accounting
+
+on:
+  push:
+    branches:
+      - automation/sg-000026-ocr
+
+permissions:
+  contents: read
+
+jobs:
+  ocr-accounting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact Morize implementation head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: TheHalfMoon/Morize
+          ref: 3562b627227a42c86daa4ee92033b17f085b50ad
+          path: morize
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout pinned Alibaba Open Code Review source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: alibaba/open-code-review
+          ref: 85cecfe5f935da2b2aae8f91ce4fee8ed343a681
+          path: ocr-source
+          persist-credentials: false
+
+      - name: Verify exact identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C morize rev-parse HEAD)" = "3562b627227a42c86daa4ee92033b17f085b50ad"
+          test "$(git -C ocr-source rev-parse HEAD)" = "85cecfe5f935da2b2aae8f91ce4fee8ed343a681"
+          git -C morize merge-base --is-ancestor 404f46f34ab168c0b2b391784c553f58a93ae9df 3562b627227a42c86daa4ee92033b17f085b50ad
+
+      - name: Build pinned OCR delegation CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          go version
+          (cd ocr-source && go build -o ../ocr ./cmd/opencodereview)
+          ./ocr delegate --help
+
+      - name: Preview exact changed-file accounting
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./ocr delegate preview             --repo morize             --from 404f46f34ab168c0b2b391784c553f58a93ae9df             --to 3562b627227a42c86daa4ee92033b17f085b50ad             --format json | tee ocr-preview.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          preview = json.loads(Path("ocr-preview.json").read_text(encoding="utf-8"))
+          expected = {
+              "crates/morize-core/src/decision.rs",
+              "crates/morize-core/src/lib.rs",
+          }
+          reviewable = {entry["path"] for entry in preview["reviewable_files"]}
+          excluded = {entry["path"] for entry in preview["excluded_files"]}
+          assert preview["total_files"] == 2, preview
+          assert preview["reviewable_count"] == 2, preview
+          assert preview["excluded_count"] == 0, preview
+          assert reviewable == expected, preview
+          assert excluded == set(), preview
+          print("OCR_CHANGED_FILE_ACCOUNTING=2/2")
+          PY
+
+      - name: Resolve review rules for every reviewable file
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./ocr delegate rule             --repo morize             --format json             crates/morize-core/src/decision.rs             crates/morize-core/src/lib.rs | tee ocr-rules.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          rules = json.loads(Path("ocr-rules.json").read_text(encoding="utf-8"))
+          print("OCR_RULE_RESOLUTION=PASS")
+          print(json.dumps(rules, sort_keys=True, ensure_ascii=False))
+          PY
