@@ -1,0 +1,178 @@
+name: SG-000027 evidence-main qualification
+
+on:
+  push:
+    branches:
+      - automation/sg-000027-evidence-main-proof
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prove-evidence-main:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      TARGET_MAIN: 7808f06ce75670fdac54b638e229eccec5580e12
+      EVIDENCE_HEAD: beea4f18437f68018654a439dd5e28bc4f6bf06a
+      EVIDENCE_PARENT: 309a807aa1567cd6f673672c6f8b08d88963fea1
+      EVIDENCE_TREE: 83dd7ed430b015174f34ba76fd7fe5261444a0d4
+      EVIDENCE_PR_CI_RUN: "35564921337"
+      EVIDENCE_HEAD_QUALIFICATION_RUN: "35564990942"
+      EVIDENCE_HEAD_QUALIFICATION_ARTIFACT_DIGEST: sha256:c06afb66077349c5a48ed21ba10dbfcd7790ac78bbb33e48f183ac25e939efa2
+      EVIDENCE_GENERATION_RUN: "35564603266"
+      EVIDENCE_GENERATION_ARTIFACT_DIGEST: sha256:47b4a6fed13b2453c98a3e10b5cdea4e25b16852cc05ebacf65bbc54c03e4273
+      EVIDENCE_PATH: .specgrain/evidence/SG-000027/762bdd56ba976c5158a5d5be31f510f51caad5410133b33ec7b50f420cd3200b.json
+      EVIDENCE_RECORD_DIGEST: sha256:762bdd56ba976c5158a5d5be31f510f51caad5410133b33ec7b50f420cd3200b
+      SPEC_REVISION: sha256:7256886d9dfaf74c77e21531e51c72bf5e7b8889f40866b5851096eb9a9918ad
+      IMPLEMENTATION_REVISION: 0c21cf314be701db56724b4df2de806a027ee58f
+      EXPECTED_MAIN_CI_RUN: "35575834133"
+    steps:
+      - name: Checkout exact canonical main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: TheHalfMoon/Morize
+          ref: 7808f06ce75670fdac54b638e229eccec5580e12
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify canonical identity and evidence record
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_MAIN"
+          git fetch origin main --prune
+          test "$(git rev-parse origin/main)" = "$TARGET_MAIN"
+          test -f "$EVIDENCE_PATH"
+          test "$(sha256sum "$EVIDENCE_PATH" | awk '{print $1}')" = "c4b17a3f4dda11deaa78f52555d5b7e2372b518194f88503ae0208be869bf638"
+          python3 - <<'PY'
+          import json, os
+          record=json.load(open(os.environ["EVIDENCE_PATH"], encoding="utf-8"))
+          assert record["record_digest"] == os.environ["EVIDENCE_RECORD_DIGEST"], record
+          report=record["report"]
+          assert report["spec_id"] == "SG-000027", report
+          assert report["spec_revision"] == os.environ["SPEC_REVISION"], report
+          assert report["implementation_revision"] == os.environ["IMPLEMENTATION_REVISION"], report
+          assert report["verified"] is True, report
+          assert report["issues"] == [], report
+          assert len(report["acceptance_checks"]) == 15 and all(x["passed"] for x in report["acceptance_checks"]), report
+          assert len(report["evidence_checks"]) == 13 and all(x["passed"] for x in report["evidence_checks"]), report
+          print("CANONICAL_EVIDENCE_RECORD=PASS")
+          print("CANONICAL_ACCEPTANCE=15/15")
+          print("CANONICAL_REQUIRED_EVIDENCE=13/13")
+          PY
+          echo "CANONICAL_MAIN=$TARGET_MAIN"
+
+      - name: Prove native SpecGrain state on canonical main
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --quiet \
+            "git+https://github.com/TheHalfMoon/SpecGrain.git@5de7d6499bb0a9e3a191fc0934399cf099d1980a"
+          specgrain check --json . | tee /tmp/sg27-main-check.json
+          specgrain prove SG-000027 . --json | tee /tmp/sg27-main-proof.json
+          python3 - <<'PY'
+          import json, os
+          check=json.load(open("/tmp/sg27-main-check.json"))
+          assert check["valid"] is True and check["issues"] == [], check
+          proof=json.load(open("/tmp/sg27-main-proof.json"))
+          assert proof["verified"] is True, proof
+          assert proof["latest_record_digest"] == os.environ["EVIDENCE_RECORD_DIGEST"], proof
+          report=proof["records"][-1]["report"]
+          assert report["spec_revision"] == os.environ["SPEC_REVISION"], report
+          assert report["implementation_revision"] == os.environ["IMPLEMENTATION_REVISION"], report
+          assert report["issues"] == [], report
+          print("SPEC_CHECK=PASS")
+          print("NATIVE_SPEC_GRAIN_PROVE=PASS")
+          PY
+
+      - name: Wait for exact-main standard CI and prove all platforms
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RUN_ID=""
+          for attempt in $(seq 1 90); do
+            RUN_ID="$(
+              gh api "repos/$GITHUB_REPOSITORY/actions/runs?event=push&branch=main&per_page=50" \
+                --jq ".workflow_runs[] | select(.name == \"ci\" and .head_sha == \"$TARGET_MAIN\") | .id" \
+                | head -n 1
+            )"
+            if [ -n "$RUN_ID" ]; then
+              STATUS="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .status)"
+              CONCLUSION="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.conclusion // ""')"
+              echo "MAIN_CI_ATTEMPT=$attempt RUN_ID=$RUN_ID STATUS=$STATUS CONCLUSION=$CONCLUSION"
+              if [ "$STATUS" = "completed" ]; then
+                test "$CONCLUSION" = "success"
+                break
+              fi
+            else
+              echo "MAIN_CI_ATTEMPT=$attempt RUN_ID=NOT_FOUND"
+            fi
+            sleep 5
+          done
+
+          test -n "$RUN_ID"
+          test "$RUN_ID" = "$EXPECTED_MAIN_CI_RUN"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .head_sha)" = "$TARGET_MAIN"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .event)" = "push"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .status)" = "completed"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .conclusion)" = "success"
+
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs?per_page=100" > /tmp/main-ci-jobs.json
+          python3 - "$RUN_ID" <<'PY'
+          import json, sys
+          run_id=sys.argv[1]
+          data=json.load(open("/tmp/main-ci-jobs.json", encoding="utf-8"))
+          required={"verify (ubuntu-latest)","verify (macos-latest)","verify (windows-latest)"}
+          observed={j["name"]:j["conclusion"] for j in data["jobs"] if j["name"] in required}
+          assert set(observed) == required, observed
+          assert all(v == "success" for v in observed.values()), observed
+          print(f"MAIN_CI_RUN={run_id}")
+          print("MAIN_CI_UBUNTU=PASS")
+          print("MAIN_CI_MACOS=PASS")
+          print("MAIN_CI_WINDOWS=PASS")
+          PY
+
+      - name: Revalidate exact evidence-head qualifications
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          test "$(git rev-parse "$EVIDENCE_HEAD^{tree}")" = "$EVIDENCE_TREE"
+          test "$(git rev-parse "$EVIDENCE_PARENT^{tree}")" = "$EVIDENCE_TREE"
+          test -z "$(git diff --name-only "$EVIDENCE_PARENT...$EVIDENCE_HEAD")"
+          echo "EVIDENCE_HEAD_TREE_IDENTITY=PASS"
+
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_PR_CI_RUN" --jq .head_sha)" = "$EVIDENCE_HEAD"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_PR_CI_RUN" --jq .event)" = "pull_request"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_PR_CI_RUN" --jq .status)" = "completed"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_PR_CI_RUN" --jq .conclusion)" = "success"
+
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_HEAD_QUALIFICATION_RUN" --jq .status)" = "completed"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_HEAD_QUALIFICATION_RUN" --jq .conclusion)" = "success"
+          HEAD_ARTIFACT="$(
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_HEAD_QUALIFICATION_RUN/artifacts" \
+              --jq '.artifacts[] | select(.name == "sg-000027-evidence-head-qualification") | .digest'
+          )"
+          test "$HEAD_ARTIFACT" = "$EVIDENCE_HEAD_QUALIFICATION_ARTIFACT_DIGEST"
+
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_GENERATION_RUN" --jq .status)" = "completed"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_GENERATION_RUN" --jq .conclusion)" = "success"
+          GENERATION_ARTIFACT="$(
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_GENERATION_RUN/artifacts" \
+              --jq '.artifacts[] | select(.name == "sg-000027-native-evidence-generation") | .digest'
+          )"
+          test "$GENERATION_ARTIFACT" = "$EVIDENCE_GENERATION_ARTIFACT_DIGEST"
+
+          echo "EVIDENCE_PR_CI=PASS"
+          echo "EVIDENCE_HEAD_QUALIFICATION=PASS"
+          echo "EVIDENCE_GENERATION_BINDING=PASS"
+          echo "SG000027_CANONICAL_EVIDENCE_FRONTIER=PASS"
