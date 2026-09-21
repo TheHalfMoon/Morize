@@ -1,0 +1,187 @@
+name: SG-000027 WorkPacket export
+
+on:
+  push:
+    branches:
+      - automation/sg-000027-workpacket
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  export-workpacket:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact Morize packet baseline
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: TheHalfMoon/Morize
+          ref: c76496d9b701088d1bd9292df63d16925ce34fce
+          path: morize
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout pinned SpecGrain source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: TheHalfMoon/SpecGrain
+          ref: 5de7d6499bb0a9e3a191fc0934399cf099d1980a
+          path: specgrain-source
+          persist-credentials: false
+
+      - name: Verify exact source identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C morize rev-parse HEAD)" = "c76496d9b701088d1bd9292df63d16925ce34fce"
+          test "$(git -C specgrain-source rev-parse HEAD)" = "5de7d6499bb0a9e3a191fc0934399cf099d1980a"
+
+      - name: Install pinned SpecGrain source
+        shell: bash
+        run: python3 -m pip install ./specgrain-source --no-deps
+
+      - name: Revalidate SG-000026 prerequisite immediately before packet export
+        shell: bash
+        run: |
+          set -euo pipefail
+          specgrain prove SG-000026 morize --json | tee sg-000026-proof.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          proof = json.loads(Path("sg-000026-proof.json").read_text(encoding="utf-8"))
+          assert proof["spec_id"] == "SG-000026", proof
+          assert proof["verified"] is True, proof
+          assert proof["latest_record_digest"] == "sha256:00886cf4d320750bfd5da6e47a3eccdfebd09512da364c7737d0b6f103a5316b", proof
+          assert proof["record_count"] >= 1, proof
+          report = proof["records"][-1]["report"]
+          assert report["spec_revision"] == "sha256:af72b5d0c6757c4051f3cb7dc7c2e3de49cdcda77b6c863d1ad1e07a2d1acc1d", report
+          assert report["implementation_revision"] == "622016763bad9bfbd54a1cb6d7bcac342f21e95c", report
+          assert report["issues"] == [], report
+          print("SG-000026_PREREQUISITE=PASS")
+          PY
+          git -C morize merge-base --is-ancestor 622016763bad9bfbd54a1cb6d7bcac342f21e95c c76496d9b701088d1bd9292df63d16925ce34fce
+          echo "SG-000026_ANCESTRY=PASS"
+
+      - name: Build exact bounded context source manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import subprocess
+          from pathlib import Path
+
+          baseline = "c76496d9b701088d1bd9292df63d16925ce34fce"
+          root = Path("morize")
+          definitions = [
+              (
+                  "sg-000026-evidence",
+                  ".specgrain/evidence/SG-000026/00886cf4d320750bfd5da6e47a3eccdfebd09512da364c7737d0b6f103a5316b.json",
+                  "Bind the exact canonical SG-000026 verified evidence record required by SG-000027.",
+                  0,
+              ),
+              (
+                  "adr-0004-proof-prerequisites",
+                  "docs/adr/0004-verified-proof-prerequisites.md",
+                  "Bind the repository rule governing verified-proof prerequisites and packet export.",
+                  1,
+              ),
+              (
+                  "typed-decision-model",
+                  "docs/TYPED_DECISION_MODEL.md",
+                  "Bind the typed decision contract containing the currently documented reason-code examples.",
+                  2,
+              ),
+              (
+                  "decision-baseline",
+                  "crates/morize-core/src/decision.rs",
+                  "Bind the exact pre-execution decision primitive baseline.",
+                  3,
+              ),
+              (
+                  "core-export-baseline",
+                  "crates/morize-core/src/lib.rs",
+                  "Bind the exact pre-execution morize-core public export baseline.",
+                  4,
+              ),
+          ]
+
+          records = []
+          for source_id, relative, reason, priority in definitions:
+              path = root / relative
+              data = path.read_bytes()
+              blob = subprocess.check_output(
+                  ["git", "-C", str(root), "rev-parse", f"HEAD:{relative}"],
+                  text=True,
+              ).strip()
+              records.append(
+                  {
+                      "source_id": source_id,
+                      "provenance": f"repo:{relative}",
+                      "selection_reason": reason,
+                      "revision": f"git:{baseline}:blob:{blob}",
+                      "size_bytes": len(data),
+                      "token_cost": (len(data) + 3) // 4,
+                      "requirement": "required",
+                      "priority": priority,
+                  }
+              )
+
+          total_tokens = sum(record["token_cost"] for record in records)
+          assert total_tokens <= 12000, total_tokens
+          Path("context-sources.json").write_text(
+              json.dumps(records, sort_keys=True, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(f"SG-000027_CONTEXT_SOURCES={len(records)}")
+          print(f"SG-000027_CONTEXT_TOKEN_COST={total_tokens}")
+          PY
+
+      - name: Export deterministic SG-000027 WorkPacket
+        shell: bash
+        run: |
+          set -euo pipefail
+          specgrain packet SG-000027 morize --context-sources context-sources.json --json | tee sg-000027-workpacket.json
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          path = Path("sg-000027-workpacket.json")
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          assert payload["packet_version"] == 1, payload
+          assert payload["spec_id"] == "SG-000027", payload
+          assert payload["authorized_change_surface"] == [
+              "crates/morize-core/src/decision.rs",
+              "crates/morize-core/src/lib.rs",
+          ], payload
+          assert [source["source_id"] for source in payload["context_sources"]] == [
+              "adr-0004-proof-prerequisites",
+              "core-export-baseline",
+              "decision-baseline",
+              "sg-000026-evidence",
+              "typed-decision-model",
+          ], payload
+          required = set(payload["required_evidence"])
+          assert "E-PROOF-PREREQUISITE-SG000026" in required, payload
+          assert "independent-review" in required, payload
+          assert payload["packet_digest"].startswith("sha256:"), payload
+          file_sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+          print(f"SG-000027_PACKET_DIGEST={payload['packet_digest']}")
+          print(f"SG-000027_PACKET_FILE_SHA256={file_sha256}")
+          PY
+
+      - name: Upload immutable packet evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: sg-000027-workpacket
+          path: |
+            context-sources.json
+            sg-000026-proof.json
+            sg-000027-workpacket.json
+          if-no-files-found: error
+          retention-days: 30
