@@ -120,7 +120,7 @@ jobs:
           accounted=[]
           if reviewable:
               with open("/tmp/sg28-ocr-rules.json","w") as out:
-                  subprocess.run(["/tmp/ocr-bin","delegate","rule","--format","json",*reviewable],check=True,stdout=out)
+                  subprocess.run(["/tmp/ocr-bin","delegate","rule","--format","json",*reviewable],check=True,stdout=out,cwd="morize-plan")
               groups=json.load(open("/tmp/sg28-ocr-rules.json"))["groups"]
               accounted=sorted(path for group in groups for path in group["files"])
               assert accounted==sorted(reviewable), accounted
