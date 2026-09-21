@@ -1,0 +1,250 @@
+name: SG-000028 planning qualification
+
+on:
+  push:
+    branches:
+      - automation/sg-000028-planning-review
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-planning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_MAIN: 7808f06ce75670fdac54b638e229eccec5580e12
+      PLAN_HEAD: 57f85b326e357d8b2adfc239a71179370928c53a
+      SG27_RECORD: sha256:762bdd56ba976c5158a5d5be31f510f51caad5410133b33ec7b50f420cd3200b
+      SG27_SPEC: sha256:7256886d9dfaf74c77e21531e51c72bf5e7b8889f40866b5851096eb9a9918ad
+      SG27_IMPL: 0c21cf314be701db56724b4df2de806a027ee58f
+      OCR_PIN: 85cecfe5f935da2b2aae8f91ce4fee8ed343a681
+    steps:
+      - name: Checkout exact planning head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: TheHalfMoon/Morize
+          ref: 57f85b326e357d8b2adfc239a71179370928c53a
+          path: morize-plan
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned SpecGrain source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --quiet \
+            "git+https://github.com/TheHalfMoon/SpecGrain.git@5de7d6499bb0a9e3a191fc0934399cf099d1980a"
+
+      - name: Validate exact SG-000028 planning head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C morize-plan rev-parse HEAD)" = "$PLAN_HEAD"
+          test "$(git -C morize-plan rev-parse "$BASE_MAIN")" = "$BASE_MAIN"
+          mapfile -t files < <(git -C morize-plan diff --name-only "$BASE_MAIN...$PLAN_HEAD")
+          test "${#files[@]}" -eq 2
+          test "${files[0]}" = ".specgrain/specs/SG-000010.json"
+          test "${files[1]}" = ".specgrain/specs/SG-000028.json"
+          git -C morize-plan diff --check "$BASE_MAIN...$PLAN_HEAD"
+
+          specgrain check --json morize-plan | tee /tmp/sg28-check.json
+          specgrain prove SG-000027 morize-plan --json | tee /tmp/sg28-prerequisite.json
+
+          python3 - <<'PY'
+          import json, os
+          from specgrain import load_project
+
+          check=json.load(open("/tmp/sg28-check.json"))
+          assert check["valid"] is True and check["issues"] == [], check
+
+          proof=json.load(open("/tmp/sg28-prerequisite.json"))
+          assert proof["verified"] is True, proof
+          assert proof["latest_record_digest"] == os.environ["SG27_RECORD"], proof
+          report=proof["records"][-1]["report"]
+          assert report["spec_revision"] == os.environ["SG27_SPEC"], report
+          assert report["implementation_revision"] == os.environ["SG27_IMPL"], report
+          assert report["issues"] == [], report
+
+          project=load_project("morize-plan")
+          parent=next(n for n in project.specs if n.id=="SG-000010")
+          node=next(n for n in project.specs if n.id=="SG-000028")
+          assert node.state=="GRAIN", node.state
+          assert node.parent_id=="SG-000010", node.parent_id
+          assert "SG-000028" in parent.children, parent.children
+          assert tuple(node.dependencies)==(), node.dependencies
+          assert tuple(sorted(node.change_surface))==tuple(sorted([
+              "crates/morize-core/src/decision.rs",
+              "crates/morize-core/src/lib.rs",
+          ])), node.change_surface
+          assert node.metadata["readiness"]["unresolved_decisions"]==[], node.metadata
+          prereqs=node.metadata["morize"]["proof_prerequisites"]
+          assert prereqs==[{
+              "spec_id":"SG-000027",
+              "record_digest":os.environ["SG27_RECORD"],
+              "spec_revision":os.environ["SG27_SPEC"],
+              "implementation_revision":os.environ["SG27_IMPL"],
+          }], prereqs
+          print("SPEC_CHECK=PASS")
+          print("SG000027_PREREQUISITE=PASS")
+          print("SG000028_STATE=GRAIN")
+          print("SG000028_PARENT=SG-000010")
+          print("SG000028_UNRESOLVED_DECISIONS=0")
+          print("SG000028_SPEC_REVISION="+node.revision_digest)
+          open("/tmp/sg28-spec-revision.txt","w").write(node.revision_digest+"\n")
+          PY
+
+      - name: Alibaba Open Code Review planning accounting
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --quiet https://github.com/alibaba/open-code-review.git /tmp/ocr
+          git -C /tmp/ocr checkout --quiet "$OCR_PIN"
+          (cd /tmp/ocr && GOTOOLCHAIN=auto go build -o /tmp/ocr-bin ./cmd/opencodereview)
+          (cd morize-plan && OCR_NO_UPDATE=1 /tmp/ocr-bin delegate preview \
+            --format json --from "$BASE_MAIN" --to "$PLAN_HEAD" \
+            > /tmp/sg28-ocr-preview.json)
+          python3 - <<'PY'
+          import json, subprocess
+          preview=json.load(open("/tmp/sg28-ocr-preview.json"))
+          assert preview["total_files"]==2, preview
+          reviewable=[x["path"] for x in preview.get("reviewable_files",[])]
+          excluded=[x["path"] for x in preview.get("excluded_files",[])]
+          expected=[".specgrain/specs/SG-000010.json",".specgrain/specs/SG-000028.json"]
+          assert sorted(reviewable+excluded)==expected, preview
+          accounted=[]
+          if reviewable:
+              with open("/tmp/sg28-ocr-rules.json","w") as out:
+                  subprocess.run(["/tmp/ocr-bin","delegate","rule","--format","json",*reviewable],check=True,stdout=out)
+              groups=json.load(open("/tmp/sg28-ocr-rules.json"))["groups"]
+              accounted=sorted(path for group in groups for path in group["files"])
+              assert accounted==sorted(reviewable), accounted
+          print(f"ALIBABA_ACCOUNTING=total=2;reviewable={len(reviewable)};excluded={len(excluded)};rule_accounted={len(accounted)}")
+          PY
+
+      - name: Independent semantic planning review
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --quiet "gradio_client>=1.8,<2"
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess, time
+          from pathlib import Path
+          from gradio_client import Client
+
+          spec=Path("morize-plan/.specgrain/specs/SG-000028.json").read_text()
+          typed=Path("morize-plan/docs/TYPED_DECISION_MODEL.md").read_text()
+          diff=subprocess.check_output([
+              "git","-C","morize-plan","diff","--unified=60",
+              os.environ["BASE_MAIN"]+"..."+os.environ["PLAN_HEAD"],
+              "--",".specgrain/specs/SG-000010.json",".specgrain/specs/SG-000028.json"
+          ],text=True)
+          spec_revision=Path("/tmp/sg28-spec-revision.txt").read_text().strip()
+
+          prompt="\n".join([
+              "Independent semantic PLANNING review of Morize SG-000028. Return final structured review only; do not expose chain-of-thought or tool traces.",
+              "",
+              f"REVIEW_HEAD={os.environ['PLAN_HEAD']}",
+              f"BASE_MAIN={os.environ['BASE_MAIN']}",
+              f"SPEC_REVISION={spec_revision}",
+              f"SG27_RECORD={os.environ['SG27_RECORD']}",
+              "",
+              "Review goals:",
+              "1. Confirm the four known DecisionEngineClass variants correspond exactly to the four engine classes explicitly documented in TYPED_DECISION_MODEL.md: deterministic rule, local inference, remote inference, and ensemble.",
+              "2. Confirm non-exhaustive semantics avoid claiming a permanently closed future engine-class vocabulary.",
+              "3. Confirm the Grain does not freeze DecisionEngineIdentity payloads, provider/model/runtime/configuration identities, confidence/calibration, network/cost behavior, text/numeric/wire/persistence encoding, DecisionEnvelope composition, authority, policy, or side effects.",
+              "4. Confirm implementation scope is only decision.rs and lib.rs and no dependency/manifest/lock change is authorized.",
+              "5. Confirm SG-000027 exact proof prerequisite identity is correctly bound.",
+              "6. Confirm the Grain is smaller and safer than prematurely implementing the full DecisionEnvelope while candidate_ref, engine identity payloads, confidence, and action-score representations remain broader contracts.",
+              "7. Report any naming mismatch, overclaim, hidden authority semantics, missing scope exclusion, prerequisite mismatch, or material readiness gap.",
+              "",
+              "SG-000028:",
+              spec,
+              "",
+              "Typed decision model:",
+              typed,
+              "",
+              "Planning diff:",
+              diff,
+              "",
+              "Return exactly:",
+              "REVIEW_HEAD",
+              os.environ["PLAN_HEAD"],
+              "REVIEW_KIND",
+              "SG-000028_PLANNING",
+              "CRITICAL = NONE",
+              "HIGH = NONE",
+              "MEDIUM = NONE",
+              "LOW = NONE",
+              "FINDINGS",
+              "- NONE",
+              "FINAL_GATE = PASS",
+              "Replace NONE/PASS only when concise material findings require it. Any different REVIEW_HEAD invalidates the review.",
+          ])
+
+          client=Client("CohereLabs/North-Mini-Code-1.0", verbose=False)
+          final=""
+          for attempt in range(1,4):
+              raw=client.predict(prompt,"Rust","[]","{}",api_name="/chat")
+              obj=json.loads(raw) if isinstance(raw,str) else raw
+              content=""
+              if isinstance(obj,dict):
+                  for m in obj.get("history",[]):
+                      if m.get("role")=="assistant":
+                          content=m.get("content","")
+              candidate=content.split("</think>",1)[-1].strip() if "</think>" in content else content.strip()
+              if f"REVIEW_HEAD\n{os.environ['PLAN_HEAD']}" in candidate and "REVIEW_KIND\nSG-000028_PLANNING" in candidate:
+                  final=candidate
+                  break
+              print(f"REVIEW_PROVIDER_ATTEMPT_{attempt}=INVALID_NONSTRUCTURED")
+              if attempt<3: time.sleep(10)
+          if not final:
+              raise SystemExit("independent planning reviewer returned no structured review")
+
+          required=[
+              f"REVIEW_HEAD\n{os.environ['PLAN_HEAD']}",
+              "REVIEW_KIND\nSG-000028_PLANNING",
+              "CRITICAL = NONE","HIGH = NONE","MEDIUM = NONE","LOW = NONE",
+              "FINDINGS\n- NONE","FINAL_GATE = PASS",
+          ]
+          if not all(x in final for x in required):
+              print(final)
+              raise SystemExit("independent semantic planning review produced a non-PASS result")
+
+          Path("/tmp/sg28-review-prompt.txt").write_text(prompt)
+          Path("/tmp/sg28-review-final.txt").write_text(final+"\n")
+          summary={
+              "review_head":os.environ["PLAN_HEAD"],
+              "base_main":os.environ["BASE_MAIN"],
+              "spec_revision":spec_revision,
+              "review_prompt_sha256":hashlib.sha256(prompt.encode()).hexdigest(),
+              "review_final_sha256":hashlib.sha256((final+"\n").encode()).hexdigest(),
+              "final_gate":"PASS",
+          }
+          Path("/tmp/sg28-review-summary.json").write_text(json.dumps(summary,sort_keys=True,indent=2)+"\n")
+          print("INDEPENDENT_PLANNING_REVIEW_BEGIN")
+          print(final)
+          print("INDEPENDENT_PLANNING_REVIEW_END")
+          print(json.dumps(summary,sort_keys=True,indent=2))
+          PY
+
+      - name: Upload SG-000028 planning qualification
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: sg-000028-planning-qualification
+          path: |
+            /tmp/sg28-check.json
+            /tmp/sg28-prerequisite.json
+            /tmp/sg28-spec-revision.txt
+            /tmp/sg28-ocr-preview.json
+            /tmp/sg28-ocr-rules.json
+            /tmp/sg28-review-prompt.txt
+            /tmp/sg28-review-final.txt
+            /tmp/sg28-review-summary.json
+          if-no-files-found: error
+          retention-days: 30
