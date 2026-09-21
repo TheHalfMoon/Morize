@@ -18,7 +18,7 @@ pub use bounded_collection::{
     BoundedVec, BoundedVecBuildError, BoundedVecPushError, CollectionBoundsError,
 };
 pub use compatibility::CompatibilityClass;
-pub use decision::MemoryAction;
+pub use decision::{MemoryAction, MemoryActionSetVersion};
 pub use digest::{
     DigestParseError, SHA256_DIGEST_BYTE_LENGTH, SHA256_DIGEST_TEXT_LENGTH, Sha256Digest,
 };
