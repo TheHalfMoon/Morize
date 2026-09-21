@@ -18,6 +18,7 @@ jobs:
           repository: TheHalfMoon/Morize
           ref: 404f46f34ab168c0b2b391784c553f58a93ae9df
           path: morize
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Checkout pinned SpecGrain source
