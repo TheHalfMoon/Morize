@@ -1,10 +1,10 @@
-//! Closed durable-memory action vocabulary for deterministic Morize decisions.
+//! Closed durable-memory action vocabulary and known decision-reason labels.
 //!
-//! This module defines the current in-memory action vocabulary and its in-memory
-//! compatibility-version identity fixed by docs/TYPED_DECISION_MODEL.md and
-//! docs/DATA_MODEL.md. Parsing, authorization, mutation execution, side effects,
-//! serialization, persistence, and transport behavior are intentionally outside
-//! this contract.
+//! This module defines the current in-memory action vocabulary, its in-memory
+//! compatibility-version identity, and the currently documented known reason
+//! labels fixed by docs/TYPED_DECISION_MODEL.md and docs/DATA_MODEL.md. Parsing,
+//! authorization, mutation execution, side effects, serialization, persistence,
+//! and transport behavior are intentionally outside this contract.
 
 /// The closed initial durable-memory action vocabulary.
 ///
@@ -50,9 +50,43 @@ pub enum MemoryActionSetVersion {
     V1,
 }
 
+/// A currently documented known reason label for structured decision analysis.
+///
+/// These variants are descriptive in-memory evidence only. The enum is
+/// intentionally non-exhaustive: the known labels below do not freeze a
+/// complete future reason-code vocabulary, stable textual spelling, numeric
+/// representation, parser, serialization, persistence, authorization rule, or
+/// execution behavior.
+#[non_exhaustive]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum DecisionReasonCode {
+    /// The candidate is an exact duplicate of governed memory.
+    ExactDuplicate,
+    /// A candidate originates from a newer source.
+    NewerSource,
+    /// The candidate changes valid-time information.
+    ValidTimeChanged,
+    /// Available sources conflict.
+    SourceConflict,
+    /// Source authority is too low for the contemplated decision.
+    LowSourceAuthority,
+    /// Relevant evidence conflicts across scopes.
+    CrossScopeConflict,
+    /// A source is stale for the contemplated decision.
+    StaleSource,
+    /// The decision reflects an explicit user operation.
+    ExplicitUserOperation,
+    /// Available evidence is insufficient.
+    InsufficientEvidence,
+    /// Entity resolution remains ambiguous.
+    AmbiguousEntity,
+    /// Policy review is required before later authorized action.
+    PolicyReviewRequired,
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{MemoryAction, MemoryActionSetVersion};
+    use super::{DecisionReasonCode, MemoryAction, MemoryActionSetVersion};
     use std::collections::HashSet;
 
     const ALL_ACTIONS: [MemoryAction; 11] = [
@@ -69,7 +103,27 @@ mod tests {
         MemoryAction::RequireReview,
     ];
 
+    const ALL_KNOWN_REASON_CODES: [DecisionReasonCode; 11] = [
+        DecisionReasonCode::ExactDuplicate,
+        DecisionReasonCode::NewerSource,
+        DecisionReasonCode::ValidTimeChanged,
+        DecisionReasonCode::SourceConflict,
+        DecisionReasonCode::LowSourceAuthority,
+        DecisionReasonCode::CrossScopeConflict,
+        DecisionReasonCode::StaleSource,
+        DecisionReasonCode::ExplicitUserOperation,
+        DecisionReasonCode::InsufficientEvidence,
+        DecisionReasonCode::AmbiguousEntity,
+        DecisionReasonCode::PolicyReviewRequired,
+    ];
+
     fn assert_action_set_version_traits<T>()
+    where
+        T: Clone + Copy + std::fmt::Debug + Eq + std::hash::Hash,
+    {
+    }
+
+    fn assert_decision_reason_code_traits<T>()
     where
         T: Clone + Copy + std::fmt::Debug + Eq + std::hash::Hash,
     {
@@ -129,5 +183,29 @@ mod tests {
                 ]
             ),
         }
+    }
+
+    #[test]
+    fn all_eleven_known_reason_codes_are_distinct_hashable_values() {
+        assert_decision_reason_code_traits::<DecisionReasonCode>();
+
+        for (index, reason) in ALL_KNOWN_REASON_CODES.iter().enumerate() {
+            for other in ALL_KNOWN_REASON_CODES.iter().skip(index + 1) {
+                assert_ne!(reason, other);
+            }
+        }
+
+        let unique: HashSet<_> = ALL_KNOWN_REASON_CODES.into_iter().collect();
+        assert_eq!(unique.len(), 11);
+    }
+
+    #[test]
+    fn decision_reason_code_is_copy() {
+        let original = DecisionReasonCode::PolicyReviewRequired;
+        let copied = original;
+        let unique: HashSet<_> = [original, copied].into_iter().collect();
+
+        assert_eq!(original, copied);
+        assert_eq!(unique.len(), 1);
     }
 }
