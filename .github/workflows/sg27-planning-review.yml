@@ -61,7 +61,8 @@ jobs:
           ]))
           assert len(node.acceptance)==15
           assert len(node.evidence['required'])==13
-          assert node.metadata['readiness']['unresolved_decisions']==[]
+          raw=json.load(open('.specgrain/specs/SG-000027.json'))
+          assert raw['metadata']['readiness']['unresolved_decisions']==[]
 
           p=json.load(open('/tmp/p26.json'))
           assert p['verified'] is True
@@ -76,7 +77,6 @@ jobs:
           assert program.state=='DRAFT'
           assert 'SG-000027' in program.children
 
-          raw=json.load(open('.specgrain/specs/SG-000027.json'))
           known=[
               'ExactDuplicate','NewerSource','ValidTimeChanged','SourceConflict',
               'LowSourceAuthority','CrossScopeConflict','StaleSource',
